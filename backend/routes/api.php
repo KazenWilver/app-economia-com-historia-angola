@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ContentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,4 +28,14 @@ Route::middleware(['auth.api:sanctum', 'admin'])->get('/admin/ping', function ()
     return response()->json([
         'status' => 'ok',
     ]);
+});
+
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/contents', [ContentController::class, 'index']);
+Route::get('/contents/{content}', [ContentController::class, 'show']);
+
+Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
+    Route::post('/contents', [ContentController::class, 'store']);
+    Route::put('/contents/{content}', [ContentController::class, 'update']);
+    Route::delete('/contents/{content}', [ContentController::class, 'destroy']);
 });
