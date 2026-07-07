@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -42,9 +43,11 @@ export default function RootLayout({
         className="min-h-full flex flex-col font-sans"
         suppressHydrationWarning
       >
-        <Header />
-        <main className="flex flex-1 flex-col">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main className="flex flex-1 flex-col">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

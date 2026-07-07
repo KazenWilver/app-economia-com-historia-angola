@@ -1,6 +1,12 @@
+"use client";
+
+import { WelcomeBanner } from "@/components/auth/WelcomeBanner";
+
 export default function Home() {
   return (
-    <main className="flex flex-1 items-center justify-center p-8">
+    <div className="flex flex-1 flex-col items-center justify-center p-8">
+      <WelcomeBanner />
+
       <div className="text-center">
         <h1 className="font-display text-3xl font-bold text-bordeaux dark:text-bordeaux-dark">
           Jindungo
@@ -9,6 +15,6 @@ export default function Home() {
           Economia com História — Angola
         </p>
       </div>
-    </main>
+    </div>
   );
 }
