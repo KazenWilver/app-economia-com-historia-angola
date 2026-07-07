@@ -1,0 +1,25 @@
+---
+description: Divisão de tarefas Willfredy vs Sulo e dependências entre fases
+alwaysApply: true
+---
+
+# Divisão da equipa — Jindungo
+
+## Quem pede o quê
+- **Willfredy (W):** backend Laravel, Docker, CI, Design System, layout, auth frontend, landing, admin UI (conteúdos/utilizadores).
+- **Sulo (M):** setup Next.js/Expo (se ainda não feito), `shared/types`, `lib/api.ts`, Quiz, Fórum, Mapa, mobile, docs API/diagramas.
+
+## Regra para o Cursor
+- Implementar **apenas** as tarefas do membro que o utilizador indicar (ex.: "só Willfredy").
+- Se uma tarefa do Willfredy depender de trabalho do Sulo ainda inexistente, **avisar** antes de implementar a parte do Sulo — pedir ao utilizador para o Sulo fazer primeiro.
+
+## Dependências críticas (Sulo primeiro)
+| Sulo | Bloqueia (Willfredy) |
+|------|----------------------|
+| 0.6 Next.js setup | 1.4–1.7 frontend |
+| 0.8 `shared/types` | 1.6+ com tipos partilhados |
+| 1.8 `lib/api.ts` | cliente HTTP central (1.6 pode usar fetch temporário) |
+
+## Git
+- Commits com o autor correcto: `Use-Git willfredy` ou `Use-Git sulo` (ver `scripts/git-profile.ps1`).
+- Não fazer push sem o utilizador pedir explicitamente.
