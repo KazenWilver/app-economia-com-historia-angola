@@ -1,0 +1,376 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { MessageSquare, Reply, Trash2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { Toast } from "@/components/ui/Toast";
+import {
+  API_URL,
+  type CommentItem,
+  type CommentsResponse,
+} from "@/components/content/types";
+import { cn } from "@/lib/utils";
+
+export interface CommentSectionProps {
+  contentSlug: string;
+}
+
+interface CommentFormProps {
+  placeholder: string;
+  submitLabel: string;
+  onSubmit: (body: string) => Promise<void>;
+  onCancel?: () => void;
+}
+
+function formatCommentDate(value: string): string {
+  return new Date(value).toLocaleDateString("pt-PT", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function CommentForm({
+  placeholder,
+  submitLabel,
+  onSubmit,
+  onCancel,
+}: CommentFormProps) {
+  const [body, setBody] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const trimmed = body.trim();
+    if (!trimmed) {
+      setError("Escreve um comentário antes de publicar.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await onSubmit(trimmed);
+      setBody("");
+    } catch {
+      setError("Não foi possível publicar o comentário.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={(event) => void handleSubmit(event)} className="space-y-3">
+      <textarea
+        value={body}
+        onChange={(event) => setBody(event.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        className="min-h-24 w-full rounded-lg border border-border bg-surface-card px-3 py-2 text-sm text-content-primary transition-colors duration-200 placeholder:text-content-tertiary focus:border-bordeaux focus:outline-none focus:ring-2 focus:ring-bordeaux/20 dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary dark:placeholder:text-content-dark-tertiary dark:focus:border-bordeaux-dark dark:focus:ring-bordeaux-dark/20"
+      />
+      {error ? (
+        <p className="text-xs text-error-light dark:text-error-dark" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" isLoading={isSubmitting}>
+          {submitLabel}
+        </Button>
+        {onCancel ? (
+          <Button type="button" variant="ghost" onClick={onCancel}>
+            Cancelar
+          </Button>
+        ) : null}
+      </div>
+    </form>
+  );
+}
+
+interface CommentThreadProps {
+  comment: CommentItem;
+  currentUserId: number | null;
+  depth?: number;
+  onReply: (parentId: number, body: string) => Promise<void>;
+  onDelete: (commentId: number) => Promise<void>;
+}
+
+function CommentThread({
+  comment,
+  currentUserId,
+  depth = 0,
+  onReply,
+  onDelete,
+}: CommentThreadProps) {
+  const [isReplying, setIsReplying] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const canDelete = currentUserId !== null && comment.user.id === currentUserId;
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete(comment.id);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        depth > 0 && "ml-4 border-l-2 border-bordeaux/40 pl-4 dark:border-bordeaux-dark/40 sm:ml-6",
+      )}
+    >
+      <article className="rounded-xl border border-border bg-surface-card p-4 dark:border-border-dark dark:bg-surface-dark-card">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <p className="font-display text-sm font-semibold text-content-primary dark:text-content-dark-primary">
+            {comment.user.name}
+          </p>
+          <time
+            dateTime={comment.created_at}
+            className="text-xs text-content-tertiary dark:text-content-dark-tertiary"
+          >
+            {formatCommentDate(comment.created_at)}
+          </time>
+        </div>
+
+        <p className="whitespace-pre-wrap text-sm text-content-secondary dark:text-content-dark-secondary">
+          {comment.body}
+        </p>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {currentUserId !== null ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="min-h-9 px-3 py-1.5"
+              onClick={() => setIsReplying((value) => !value)}
+            >
+              <Reply className="h-4 w-4" strokeWidth={1.5} />
+              Responder
+            </Button>
+          ) : null}
+
+          {canDelete ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="min-h-9 px-3 py-1.5 text-error-light dark:text-error-dark"
+              isLoading={isDeleting}
+              onClick={() => void handleDelete()}
+            >
+              <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+              Eliminar
+            </Button>
+          ) : null}
+        </div>
+
+        {isReplying ? (
+          <div className="mt-4 border-t border-border pt-4 dark:border-border-dark">
+            <CommentForm
+              placeholder="Escreve a tua resposta..."
+              submitLabel="Publicar resposta"
+              onCancel={() => setIsReplying(false)}
+              onSubmit={async (body) => {
+                await onReply(comment.id, body);
+                setIsReplying(false);
+              }}
+            />
+          </div>
+        ) : null}
+      </article>
+
+      {comment.replies.length > 0 ? (
+        <div className="mt-4 space-y-4">
+          {comment.replies.map((reply) => (
+            <CommentThread
+              key={reply.id}
+              comment={reply}
+              currentUserId={currentUserId}
+              depth={depth + 1}
+              onReply={onReply}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function CommentSection({ contentSlug }: CommentSectionProps) {
+  const { user, token, isAuthenticated } = useAuth();
+  const [comments, setComments] = useState<CommentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const fetchComments = useCallback(async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const headers: HeadersInit = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `${API_URL}/contents/${contentSlug}/comments`,
+        { headers },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to load comments");
+      }
+
+      const data = (await response.json()) as CommentsResponse;
+      setComments(data.data);
+    } catch {
+      setErrorMessage("Não foi possível carregar os comentários.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [contentSlug, token]);
+
+  useEffect(() => {
+    void fetchComments();
+  }, [fetchComments]);
+
+  const createComment = async (body: string, parentId?: number) => {
+    if (!token) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await fetch(`${API_URL}/contents/${contentSlug}/comments`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        body,
+        ...(parentId ? { parent_id: parentId } : {}),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create comment");
+    }
+
+    setSuccessMessage(
+      parentId ? "Resposta publicada com sucesso." : "Comentário publicado com sucesso.",
+    );
+    await fetchComments();
+  };
+
+  const deleteComment = async (commentId: number) => {
+    if (!token) {
+      return;
+    }
+
+    const response = await fetch(
+      `${API_URL}/contents/${contentSlug}/comments/${commentId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to delete comment");
+    }
+
+    setSuccessMessage("Comentário eliminado com sucesso.");
+    await fetchComments();
+  };
+
+  return (
+    <Card hoverLift={false} className="mt-10">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <MessageSquare
+            className="h-5 w-5 text-bordeaux dark:text-bordeaux-dark"
+            strokeWidth={1.5}
+            aria-hidden
+          />
+          <CardTitle>Comentários</CardTitle>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {successMessage ? (
+          <Toast
+            variant="success"
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />
+        ) : null}
+
+        {errorMessage ? (
+          <Toast
+            variant="error"
+            message={errorMessage}
+            onClose={() => setErrorMessage(null)}
+          />
+        ) : null}
+
+        {isAuthenticated ? (
+          <CommentForm
+            placeholder="Partilha a tua opinião sobre este conteúdo..."
+            submitLabel="Publicar comentário"
+            onSubmit={(body) => createComment(body)}
+          />
+        ) : (
+          <div className="rounded-xl border border-dashed border-border p-4 text-center dark:border-border-dark">
+            <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
+              <Link
+                href="/login"
+                className="font-semibold text-bordeaux hover:underline dark:text-bordeaux-dark"
+              >
+                Inicia sessão
+              </Link>{" "}
+              para comentar e responder.
+            </p>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        ) : comments.length === 0 ? (
+          <p className="text-center text-sm text-content-tertiary dark:text-content-dark-tertiary">
+            Ainda não há comentários. Sê o primeiro a participar.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {comments.map((comment) => (
+              <CommentThread
+                key={comment.id}
+                comment={comment}
+                currentUserId={user?.id ?? null}
+                onReply={(parentId, body) => createComment(body, parentId)}
+                onDelete={deleteComment}
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

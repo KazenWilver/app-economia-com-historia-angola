@@ -58,6 +58,20 @@ class Content extends Model
         return $this->hasMany(Comment::class);
     }
 
+    /**
+     * @param  mixed  $value
+     */
+    public function resolveRouteBinding($value, $field = null): Content
+    {
+        $query = static::query();
+
+        if (is_numeric($value)) {
+            return $query->whereKey($value)->firstOrFail();
+        }
+
+        return $query->where('slug', $value)->firstOrFail();
+    }
+
     public function recommendations(): HasMany
     {
         return $this->hasMany(Recommendation::class);

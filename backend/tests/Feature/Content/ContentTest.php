@@ -132,6 +132,21 @@ class ContentTest extends TestCase
         ]);
     }
 
+    public function test_guest_can_view_published_content_by_slug(): void
+    {
+        $content = Content::factory()->ofType('texto')->create([
+            'title' => 'Conteúdo por Slug',
+            'slug' => 'conteudo-por-slug',
+            'status' => 'published',
+        ]);
+
+        $response = $this->getJson("/api/contents/{$content->slug}");
+
+        $response->assertOk()
+            ->assertJsonPath('data.title', 'Conteúdo por Slug')
+            ->assertJsonPath('data.slug', 'conteudo-por-slug');
+    }
+
     public function test_create_content_with_invalid_data_returns_validation_error(): void
     {
         $admin = User::factory()->admin()->create();
