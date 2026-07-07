@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,12 @@ Route::middleware(['auth.api:sanctum', 'admin'])->get('/admin/ping', function ()
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/contents', [ContentController::class, 'index']);
 Route::get('/contents/{content}', [ContentController::class, 'show']);
+Route::get('/contents/{content}/comments', [CommentController::class, 'index']);
+
+Route::middleware('auth.api:sanctum')->group(function () {
+    Route::post('/contents/{content}/comments', [CommentController::class, 'store']);
+    Route::delete('/contents/{content}/comments/{comment}', [CommentController::class, 'destroy']);
+});
 
 Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
     Route::post('/contents', [ContentController::class, 'store']);
