@@ -52,4 +52,11 @@ class ContentFactory extends Factory
             'type' => $type,
         ]);
     }
+
+    public function exclusive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_exclusive' => true,
+        ]);
+    }
 }

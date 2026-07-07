@@ -19,15 +19,27 @@ class ContentController extends Controller
         private readonly ContentMediaService $contentMediaService
     ) {}
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         $request->validate([
             'type' => ['nullable', Rule::in(['texto', 'audio', 'video', 'podcast', 'jindungo'])],
         ]);
 
+        if ($request->string('type')->toString() === 'jindungo' && $request->user('sanctum') === null) {
+            return response()->json([
+                'message' => 'Autenticação necessária para aceder a conteúdos Jindungo.',
+            ], 401);
+        }
+
         $contents = Content::query()
             ->with(['category', 'author'])
             ->where('status', 'published')
+            ->when(
+                $request->user('sanctum') === null,
+                fn ($query) => $query
+                    ->where('is_exclusive', false)
+                    ->where('type', '!=', 'jindungo')
+            )
             ->when(
                 $request->filled('type'),
                 fn ($query) => $query->where('type', $request->string('type')->toString())
@@ -44,6 +56,12 @@ class ContentController extends Controller
             return response()->json([
                 'message' => 'Conteúdo não encontrado.',
             ], 404);
+        }
+
+        if ($this->requiresAuthentication($content) && $request->user('sanctum') === null) {
+            return response()->json([
+                'message' => 'Autenticação necessária para aceder a este conteúdo.',
+            ], 401);
         }
 
         $content->load(['category', 'author']);
@@ -154,5 +172,10 @@ class ContentController extends Controller
         }
 
         return $candidate;
+    }
+
+    private function requiresAuthentication(Content $content): bool
+    {
+        return $content->is_exclusive || $content->type === 'jindungo';
     }
 }
