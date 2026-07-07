@@ -21,3 +21,20 @@
     }
   }
 }
+
+@layer utilities {
+  @keyframes bordeaux-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgb(138 21 56 / 0.45);
+    }
+
+    50% {
+      box-shadow: 0 0 0 14px rgb(138 21 56 / 0);
+    }
+  }
+
+  .animate-bordeaux-pulse {
+    animation: bordeaux-pulse 2.2s ease-in-out infinite;
+  }
+}
