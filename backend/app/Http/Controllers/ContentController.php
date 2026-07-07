@@ -6,6 +6,7 @@ use App\Http\Requests\StoreContentRequest;
 use App\Http\Requests\UpdateContentRequest;
 use App\Http\Resources\ContentResource;
 use App\Models\Content;
+use App\Services\ContentMediaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -14,6 +15,10 @@ use Illuminate\Validation\Rule;
 
 class ContentController extends Controller
 {
+    public function __construct(
+        private readonly ContentMediaService $contentMediaService
+    ) {}
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $request->validate([
@@ -48,11 +53,18 @@ class ContentController extends Controller
 
     public function store(StoreContentRequest $request): JsonResponse
     {
-        $data = $request->safe()->except(['slug']);
+        $data = $request->safe()->except(['slug', 'media']);
         $slug = $this->generateUniqueSlug(
             $request->string('title')->toString(),
             $request->input('slug')
         );
+
+        if ($request->hasFile('media')) {
+            $data['media_url'] = $this->contentMediaService->store(
+                $request->file('media'),
+                $request->string('type')->toString()
+            );
+        }
 
         $content = Content::query()->create([
             ...$data,
@@ -73,7 +85,20 @@ class ContentController extends Controller
 
     public function update(UpdateContentRequest $request, Content $content): JsonResponse
     {
-        $data = $request->safe()->except(['slug']);
+        $data = $request->safe()->except(['slug', 'media']);
+
+        if ($request->hasFile('media')) {
+            $this->contentMediaService->delete($content->media_url);
+
+            $type = $request->filled('type')
+                ? $request->string('type')->toString()
+                : $content->type;
+
+            $data['media_url'] = $this->contentMediaService->store(
+                $request->file('media'),
+                $type
+            );
+        }
 
         if ($request->has('slug')) {
             $data['slug'] = $this->generateUniqueSlug(
@@ -103,6 +128,8 @@ class ContentController extends Controller
 
     public function destroy(Content $content): JsonResponse
     {
+        $this->contentMediaService->delete($content->media_url);
+
         $content->delete();
 
         return response()->json([

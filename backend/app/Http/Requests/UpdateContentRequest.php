@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ValidatesContentMedia;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateContentRequest extends FormRequest
 {
+    use ValidatesContentMedia;
+
     public function authorize(): bool
     {
         return true;
@@ -31,6 +34,7 @@ class UpdateContentRequest extends FormRequest
             ],
             'body' => ['nullable', 'string'],
             'type' => ['sometimes', Rule::in(['texto', 'audio', 'video', 'podcast', 'jindungo'])],
+            ...$this->mediaRules(),
             'media_url' => ['nullable', 'string', 'url', 'max:500'],
             'statistics_data' => ['nullable', 'string'],
             'is_exclusive' => ['sometimes', 'boolean'],
@@ -50,6 +54,7 @@ class UpdateContentRequest extends FormRequest
             'type.in' => 'O tipo de conteúdo é inválido.',
             'slug.unique' => 'Este slug já está em uso.',
             'media_url.url' => 'O URL de media deve ser válido.',
+            ...$this->mediaMessages(),
         ];
     }
 }
