@@ -22,8 +22,14 @@ alwaysApply: true
 
 ## Git
 - **Autor do commit = dono da tarefa:** Willfredy → `Willfredy Vieira Dias <starkeliude90@gmail.com>`; Sulo → `Manuel Sulo <20221465@isptec.co.ao>`.
-- Antes de cada commit: `git config user.name` e `user.email` locais com o perfil correcto (ou `Use-Git willfredy` / `Use-Git sulo`).
+- **Sulo não tem máquina própria** — os commits dele são feitos neste PC, com o perfil correcto.
+- Antes de cada commit: `. .\scripts\git-profile.ps1` e depois `Use-Git willfredy` ou `Use-Git sulo`.
+- Para commit completo (autor + committer iguais): `Commit-Git -Who sulo -Message "feat: ..."` após `git add`.
+- **Nunca** uses `git commit --author=...` sem `Use-Git` — o GitHub mostra dois nomes (autor ≠ committer).
 - Não fazer push sem o utilizador pedir explicitamente.
 
 ## Mobile
 - **Avisar o utilizador** quando a versão **web** estiver totalmente finalizada, **antes** de iniciar desenvolvimento mobile (FASE 5 / Expo).
+
+## Backlog acordado (FASE 6)
+- **Página `/perfil` (Willfredy):** o link já existe no Header/Navigation; a implementação do ecrã de perfil fica para a **FASE 6** (polimento), não antecipar nas fases actuais.
