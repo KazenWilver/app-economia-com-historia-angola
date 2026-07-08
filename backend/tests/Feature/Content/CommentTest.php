@@ -75,6 +75,29 @@ class CommentTest extends TestCase
         ]);
     }
 
+    public function test_authenticated_user_can_reply_to_nested_comment(): void
+    {
+        $user = User::factory()->create();
+        $content = Content::factory()->create(['status' => 'published']);
+        $parent = Comment::factory()->create(['content_id' => $content->id]);
+        $reply = Comment::factory()->reply($parent)->create([
+            'body' => 'Primeira resposta',
+        ]);
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson("/api/contents/{$content->id}/comments", [
+            'body' => 'Resposta à resposta',
+            'parent_id' => $reply->id,
+        ]);
+
+        $response->assertCreated();
+
+        $listResponse = $this->getJson("/api/contents/{$content->id}/comments");
+
+        $listResponse->assertOk()
+            ->assertJsonPath('data.0.replies.0.replies.0.body', 'Resposta à resposta');
+    }
+
     public function test_cannot_reply_with_parent_from_another_content(): void
     {
         $user = User::factory()->create();

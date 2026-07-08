@@ -42,4 +42,41 @@ class Comment extends Model
     {
         return $this->hasMany(self::class, 'parent_id');
     }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, self>
+     */
+    public static function treeForContent(int $contentId): \Illuminate\Support\Collection
+    {
+        $allComments = static::query()
+            ->where('content_id', $contentId)
+            ->with('user')
+            ->get();
+
+        $childrenByParent = $allComments->groupBy(
+            fn (self $comment): string => (string) ($comment->parent_id ?? 'root')
+        );
+
+        $attachReplies = function (self $comment) use ($childrenByParent, &$attachReplies): void {
+            $replies = $childrenByParent
+                ->get((string) $comment->id, collect())
+                ->sortBy('created_at')
+                ->values();
+
+            $replies->each(function (self $reply) use ($attachReplies): void {
+                $attachReplies($reply);
+            });
+
+            $comment->setRelation('replies', $replies);
+        };
+
+        $topLevel = $childrenByParent
+            ->get('root', collect())
+            ->sortByDesc('created_at')
+            ->values();
+
+        $topLevel->each($attachReplies);
+
+        return $topLevel;
+    }
 }

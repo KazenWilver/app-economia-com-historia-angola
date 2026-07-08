@@ -124,6 +124,8 @@ function CommentThread({
     }
   };
 
+  const replies = comment.replies ?? [];
+
   return (
     <div
       className={cn(
@@ -189,9 +191,9 @@ function CommentThread({
         ) : null}
       </article>
 
-      {comment.replies.length > 0 ? (
+      {replies.length > 0 ? (
         <div className="mt-4 space-y-4">
-          {comment.replies.map((reply) => (
+          {replies.map((reply) => (
             <CommentThread
               key={reply.id}
               comment={reply}

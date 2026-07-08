@@ -20,12 +20,7 @@ class CommentController extends Controller
             ], 404);
         }
 
-        $comments = Comment::query()
-            ->where('content_id', $content->id)
-            ->whereNull('parent_id')
-            ->with(['user', 'replies.user'])
-            ->latest()
-            ->get();
+        $comments = Comment::treeForContent($content->id);
 
         return CommentResource::collection($comments);
     }
