@@ -54,3 +54,6 @@ coverage/
 
 # Docker (volumes locais, se aplicável)
 docker/mysql/data/
+
+# Ajudas
+ajudas/

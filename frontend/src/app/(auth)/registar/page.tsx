@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -60,7 +60,7 @@ function validateRegisterForm(values: RegisterForm): RegisterErrors {
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, setWelcomeMessage } = useAuth();
+  const { register, setWelcomeMessage, isAuthenticated, isLoading } = useAuth();
   const [form, setForm] = useState<RegisterForm>({
     name: "",
     email: "",
@@ -70,10 +70,15 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<RegisterErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/explorar");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
   const handleChange = (field: keyof RegisterForm, value: string) => {
-    const nextForm = { ...form, [field]: value };
-    setForm(nextForm);
-    setErrors(validateRegisterForm(nextForm));
+    setForm((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined, form: undefined }));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -97,7 +102,7 @@ export default function RegisterPage() {
         form.passwordConfirmation,
       );
       setWelcomeMessage(user.name);
-      router.push("/");
+      router.replace("/explorar");
     } catch (error) {
       setErrors({
         form:
@@ -109,6 +114,18 @@ export default function RegisterPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="flex flex-1 items-center justify-center px-4 py-12">
+        <Card hoverLift={false} className="w-full max-w-md">
+          <CardContent className="py-10 text-center text-sm text-content-secondary">
+            A redirecionar…
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-12">

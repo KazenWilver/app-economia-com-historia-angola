@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { WelcomeBanner } from "@/components/auth/WelcomeBanner";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/hooks/useAuth";
 
 gsap.registerPlugin(useGSAP);
 
@@ -62,6 +63,7 @@ function AngolaMap() {
 }
 
 export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth();
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
@@ -141,14 +143,25 @@ export default function Home() {
         </p>
 
         <div ref={ctaRef} className="mt-10">
-          <Link href="/login" aria-label="Entrar na plataforma Jindungo">
-            <Button
-              variant="primary"
-              className="animate-bordeaux-pulse min-h-12 px-8 text-base uppercase tracking-wide"
-            >
-              🌶️ ENTRAR
-            </Button>
-          </Link>
+          {!isLoading && isAuthenticated ? (
+            <Link href="/explorar" aria-label="Explorar conteúdos Jindungo">
+              <Button
+                variant="primary"
+                className="animate-bordeaux-pulse min-h-12 px-8 text-base uppercase tracking-wide"
+              >
+                🌶️ EXPLORAR
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/login" aria-label="Entrar na plataforma Jindungo">
+              <Button
+                variant="primary"
+                className="animate-bordeaux-pulse min-h-12 px-8 text-base uppercase tracking-wide"
+              >
+                🌶️ ENTRAR
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </section>

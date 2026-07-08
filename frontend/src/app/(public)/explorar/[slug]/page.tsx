@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { buildAuthHeaders, getStoredToken } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { AudioPlayer } from "@/components/content/AudioPlayer";
 import { CommentSection } from "@/components/content/CommentSection";
@@ -55,6 +56,7 @@ export default function ContentDetailPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const { token } = useAuth();
+  const authToken = token ?? getStoredToken();
   const [content, setContent] = useState<ContentDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [requiresAuth, setRequiresAuth] = useState(false);
@@ -72,12 +74,9 @@ export default function ContentDetailPage() {
     setErrorMessage(null);
 
     try {
-      const headers: HeadersInit = {};
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`${API_URL}/contents/${slug}`, { headers });
+      const response = await fetch(`${API_URL}/contents/${slug}`, {
+        headers: buildAuthHeaders(authToken),
+      });
 
       if (response.status === 401) {
         setRequiresAuth(true);
@@ -103,7 +102,7 @@ export default function ContentDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [slug, token]);
+  }, [slug, authToken]);
 
   useEffect(() => {
     void fetchContent();

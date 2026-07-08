@@ -13,7 +13,20 @@ import {
   type CommentItem,
   type CommentsResponse,
 } from "@/components/content/types";
+import { buildAuthHeaders, getStoredToken } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+function removeCommentFromTree(
+  comments: CommentItem[],
+  commentId: number,
+): CommentItem[] {
+  return comments
+    .filter((comment) => comment.id !== commentId)
+    .map((comment) => ({
+      ...comment,
+      replies: removeCommentFromTree(comment.replies ?? [], commentId),
+    }));
+}
 
 export interface CommentSectionProps {
   contentSlug: string;
@@ -211,24 +224,22 @@ function CommentThread({
 
 export function CommentSection({ contentSlug }: CommentSectionProps) {
   const { user, token, isAuthenticated } = useAuth();
+  const authToken = token ?? getStoredToken();
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const fetchComments = useCallback(async () => {
-    setIsLoading(true);
+  const fetchComments = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setIsLoading(true);
+    }
     setErrorMessage(null);
 
     try {
-      const headers: HeadersInit = {};
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-
       const response = await fetch(
         `${API_URL}/contents/${contentSlug}/comments`,
-        { headers },
+        { headers: buildAuthHeaders(authToken) },
       );
 
       if (!response.ok) {
@@ -238,27 +249,31 @@ export function CommentSection({ contentSlug }: CommentSectionProps) {
       const data = (await response.json()) as CommentsResponse;
       setComments(data.data);
     } catch {
-      setErrorMessage("Não foi possível carregar os comentários.");
+      if (!options?.silent) {
+        setErrorMessage("Não foi possível carregar os comentários.");
+      }
     } finally {
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
     }
-  }, [contentSlug, token]);
+  }, [contentSlug, authToken]);
 
   useEffect(() => {
     void fetchComments();
   }, [fetchComments]);
 
   const createComment = async (body: string, parentId?: number) => {
-    if (!token) {
+    const activeToken = authToken;
+    if (!activeToken) {
       throw new Error("Authentication required");
     }
 
     const response = await fetch(`${API_URL}/contents/${contentSlug}/comments`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        ...buildAuthHeaders(activeToken),
         "Content-Type": "application/json",
-        Accept: "application/json",
       },
       body: JSON.stringify({
         body,
@@ -270,34 +285,49 @@ export function CommentSection({ contentSlug }: CommentSectionProps) {
       throw new Error("Failed to create comment");
     }
 
+    const data = (await response.json()) as {
+      comment?: CommentItem;
+    };
+
+    if (!parentId && data.comment && user) {
+      setComments((current) => [
+        {
+          ...data.comment!,
+          replies: data.comment?.replies ?? [],
+        },
+        ...current,
+      ]);
+    } else {
+      await fetchComments({ silent: true });
+    }
+
     setSuccessMessage(
       parentId ? "Resposta publicada com sucesso." : "Comentário publicado com sucesso.",
     );
-    await fetchComments();
   };
 
   const deleteComment = async (commentId: number) => {
-    if (!token) {
+    const activeToken = authToken;
+    if (!activeToken) {
       return;
     }
+
+    setComments((current) => removeCommentFromTree(current, commentId));
 
     const response = await fetch(
       `${API_URL}/contents/${contentSlug}/comments/${commentId}`,
       {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
+        headers: buildAuthHeaders(activeToken),
       },
     );
 
     if (!response.ok) {
+      await fetchComments({ silent: true });
       throw new Error("Failed to delete comment");
     }
 
     setSuccessMessage("Comentário eliminado com sucesso.");
-    await fetchComments();
   };
 
   return (

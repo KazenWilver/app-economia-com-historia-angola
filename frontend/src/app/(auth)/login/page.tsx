@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -41,17 +41,54 @@ function validateLoginForm(values: LoginForm): LoginErrors {
   return errors;
 }
 
+function resolvePostLoginRoute(redirect: string | null): string {
+  if (!redirect || !redirect.startsWith("/") || redirect.startsWith("//")) {
+    return "/explorar";
+  }
+
+  if (redirect.startsWith("/admin")) {
+    return "/explorar";
+  }
+
+  return redirect;
+}
+
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-1 items-center justify-center px-4 py-12">
+          <Card hoverLift={false} className="w-full max-w-md">
+            <CardContent className="py-10 text-center text-sm text-content-secondary">
+              A carregar…
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
-  const { login, setWelcomeMessage } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect");
+  const { login, setWelcomeMessage, isAuthenticated, isLoading } = useAuth();
   const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace(resolvePostLoginRoute(redirectTo));
+    }
+  }, [isAuthenticated, isLoading, redirectTo, router]);
+
   const handleChange = (field: keyof LoginForm, value: string) => {
-    const nextForm = { ...form, [field]: value };
-    setForm(nextForm);
-    setErrors(validateLoginForm(nextForm));
+    setForm((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined, form: undefined }));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -70,7 +107,7 @@ export default function LoginPage() {
     try {
       const user = await login(form.email.trim(), form.password);
       setWelcomeMessage(user.name);
-      router.push("/");
+      router.replace(resolvePostLoginRoute(redirectTo));
     } catch (error) {
       setErrors({
         form:
@@ -82,6 +119,18 @@ export default function LoginPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="flex flex-1 items-center justify-center px-4 py-12">
+        <Card hoverLift={false} className="w-full max-w-md">
+          <CardContent className="py-10 text-center text-sm text-content-secondary">
+            A redirecionar…
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-12">

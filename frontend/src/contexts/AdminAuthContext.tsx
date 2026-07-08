@@ -9,13 +9,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  API_URL,
-  TOKEN_STORAGE_KEY,
-  USER_STORAGE_KEY,
-} from "@/lib/api";
+import { API_URL } from "@/lib/api";
 
-export interface User {
+export interface AdminUser {
   id: number;
   name: string;
   email: string;
@@ -25,71 +21,63 @@ export interface User {
 }
 
 interface AuthResponse {
-  user: User;
+  user: AdminUser;
   token: string;
 }
 
 interface MeResponse {
-  user: User;
+  user: AdminUser;
 }
 
-interface AuthContextValue {
-  user: User | null;
+interface AdminAuthContextValue {
+  user: AdminUser | null;
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<User>;
+  isAdmin: boolean;
+  login: (email: string, password: string) => Promise<AdminUser>;
   register: (
     name: string,
     email: string,
     password: string,
     passwordConfirmation: string,
-  ) => Promise<User>;
-  registerAdmin: (
-    name: string,
-    email: string,
-    password: string,
-    passwordConfirmation: string,
     adminKey: string,
-  ) => Promise<User>;
+  ) => Promise<AdminUser>;
   logout: () => Promise<void>;
-  getFirstName: (name: string) => string;
-  setWelcomeMessage: (name: string) => void;
-  consumeWelcomeMessage: () => string | null;
 }
 
-const WELCOME_STORAGE_KEY = "jindungo_welcome";
+/** Storage exclusiva do painel — nunca partilhada com o site público. */
+export const ADMIN_TOKEN_STORAGE_KEY = "jindungo_admin_token";
+export const ADMIN_USER_STORAGE_KEY = "jindungo_admin_user";
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AdminAuthContext = createContext<AdminAuthContextValue | undefined>(
+  undefined,
+);
 
-function getFirstName(name: string): string {
-  return name.trim().split(/\s+/)[0] ?? name;
-}
-
-function readStoredUser(): User | null {
+function readStoredAdminUser(): AdminUser | null {
   if (typeof window === "undefined") {
     return null;
   }
 
-  const raw = localStorage.getItem(USER_STORAGE_KEY);
+  const raw = localStorage.getItem(ADMIN_USER_STORAGE_KEY);
   if (!raw) {
     return null;
   }
 
   try {
-    return JSON.parse(raw) as User;
+    return JSON.parse(raw) as AdminUser;
   } catch {
-    localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(ADMIN_USER_STORAGE_KEY);
     return null;
   }
 }
 
-function readStoredToken(): string | null {
+function readStoredAdminToken(): string | null {
   if (typeof window === "undefined") {
     return null;
   }
 
-  return localStorage.getItem(TOKEN_STORAGE_KEY);
+  return localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY);
 }
 
 async function parseErrorMessage(response: Response): Promise<string> {
@@ -116,53 +104,64 @@ async function parseErrorMessage(response: Response): Promise<string> {
   return "Ocorreu um erro inesperado. Tenta novamente.";
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AdminAuthProvider({ children }: { children: ReactNode }) {
   // Estado inicial idêntico no servidor e no cliente (evita hydration mismatch).
-  const [user, setUser] = useState<User | null>(null);
+  // A sessão só é lida do localStorage depois do mount.
+  const [user, setUser] = useState<AdminUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const persistSession = useCallback((nextUser: User | null, nextToken: string | null) => {
-    if (nextToken && nextUser) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(nextUser));
-    } else {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      localStorage.removeItem(USER_STORAGE_KEY);
-    }
+  const persistSession = useCallback(
+    (nextUser: AdminUser | null, nextToken: string | null) => {
+      if (nextToken && nextUser) {
+        localStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, nextToken);
+        localStorage.setItem(ADMIN_USER_STORAGE_KEY, JSON.stringify(nextUser));
+      } else {
+        localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+        localStorage.removeItem(ADMIN_USER_STORAGE_KEY);
+      }
 
-    setToken(nextToken);
-    setUser(nextUser);
-  }, []);
+      setToken(nextToken);
+      setUser(nextUser);
+    },
+    [],
+  );
 
   const clearSession = useCallback(() => {
     persistSession(null, null);
-    sessionStorage.removeItem(WELCOME_STORAGE_KEY);
   }, [persistSession]);
 
-  const fetchMe = useCallback(async (authToken: string) => {
-    const response = await fetch(`${API_URL}/auth/me`, {
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
+  const fetchMe = useCallback(
+    async (authToken: string) => {
+      const response = await fetch(`${API_URL}/auth/me`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error("Sessão inválida.");
-    }
+      if (!response.ok) {
+        throw new Error("Sessão de administrador inválida.");
+      }
 
-    const data = (await response.json()) as MeResponse;
-    persistSession(data.user, authToken);
-    return data.user;
-  }, [persistSession]);
+      const data = (await response.json()) as MeResponse;
+
+      if (data.user.role !== "admin") {
+        throw new Error("Conta sem permissões de administrador.");
+      }
+
+      persistSession(data.user, authToken);
+      return data.user;
+    },
+    [persistSession],
+  );
 
   useEffect(() => {
     let cancelled = false;
 
     const bootstrap = async () => {
-      const storedToken = readStoredToken();
-      const storedUser = readStoredUser();
+      const storedToken = readStoredAdminToken();
+      const storedUser = readStoredAdminUser();
 
       if (!storedToken) {
         if (!cancelled) {
@@ -171,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (storedUser && !cancelled) {
+      if (storedUser?.role === "admin" && !cancelled) {
         setToken(storedToken);
         setUser(storedUser);
         setIsLoading(false);
@@ -222,6 +221,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = (await response.json()) as AuthResponse;
+
+      if (data.user.role !== "admin") {
+        throw new Error(
+          "Esta conta não tem permissões de administrador. Usa o login público em /login.",
+        );
+      }
+
       persistSession(data.user, data.token);
       return data.user;
     },
@@ -229,38 +235,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const register = useCallback(
-    async (
-      name: string,
-      email: string,
-      password: string,
-      passwordConfirmation: string,
-    ) => {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          password_confirmation: passwordConfirmation,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(await parseErrorMessage(response));
-      }
-
-      const data = (await response.json()) as AuthResponse;
-      persistSession(data.user, data.token);
-      return data.user;
-    },
-    [persistSession],
-  );
-
-  const registerAdmin = useCallback(
     async (
       name: string,
       email: string,
@@ -288,6 +262,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = (await response.json()) as AuthResponse;
+
+      if (data.user.role !== "admin") {
+        throw new Error("O registo não devolveu uma conta de administrador.");
+      }
+
       persistSession(data.user, data.token);
       return data.user;
     },
@@ -295,7 +274,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
-    const activeToken = token ?? readStoredToken();
+    const activeToken = token ?? readStoredAdminToken();
     clearSession();
 
     if (activeToken) {
@@ -306,60 +285,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           Authorization: `Bearer ${activeToken}`,
         },
       }).catch(() => {
-        // A sessão local já foi limpa.
+        // Sessão admin já limpa localmente.
       });
     }
   }, [clearSession, token]);
 
-  const setWelcomeMessage = useCallback((name: string) => {
-    sessionStorage.setItem(WELCOME_STORAGE_KEY, getFirstName(name));
-  }, []);
-
-  const consumeWelcomeMessage = useCallback(() => {
-    const message = sessionStorage.getItem(WELCOME_STORAGE_KEY);
-    if (message) {
-      sessionStorage.removeItem(WELCOME_STORAGE_KEY);
-    }
-    return message;
-  }, []);
-
-  const value = useMemo<AuthContextValue>(
+  const value = useMemo<AdminAuthContextValue>(
     () => ({
       user,
       token,
       isLoading,
       isAuthenticated: Boolean(user && token),
+      isAdmin: Boolean(user && token && user.role === "admin"),
       login,
       register,
-      registerAdmin,
       logout,
-      getFirstName,
-      setWelcomeMessage,
-      consumeWelcomeMessage,
     }),
-    [
-      user,
-      token,
-      isLoading,
-      login,
-      register,
-      registerAdmin,
-      logout,
-      setWelcomeMessage,
-      consumeWelcomeMessage,
-    ],
+    [user, token, isLoading, login, register, logout],
   );
 
   return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    <AdminAuthContext.Provider value={value}>
+      {children}
+    </AdminAuthContext.Provider>
   );
 }
 
-export function useAuthContext(): AuthContextValue {
-  const context = useContext(AuthContext);
+export function useAdminAuth(): AdminAuthContextValue {
+  const context = useContext(AdminAuthContext);
 
   if (!context) {
-    throw new Error("useAuth deve ser usado dentro de AuthProvider.");
+    throw new Error("useAdminAuth deve ser usado dentro de AdminAuthProvider.");
   }
 
   return context;

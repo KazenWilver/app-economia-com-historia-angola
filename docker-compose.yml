@@ -52,7 +52,12 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      # Código da app (bind mount Windows — lento)
       - ./backend:/app
+      # vendor em volume nativo Linux — evita o maior gargalo de I/O no Windows
+      - jindungo_vendor:/app/vendor
+      - jindungo_bootstrap_cache:/app/bootstrap/cache
+      - jindungo_storage_framework:/app/storage/framework
     environment:
       DB_CONNECTION: mysql
       DB_HOST: mysql
@@ -62,11 +67,28 @@ services:
       DB_PASSWORD: jindungo
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      CACHE_STORE: redis
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      BCRYPT_ROUNDS: "10"
+      APP_DEBUG: "false"
+      # artisan serve: vários workers em paralelo
+      PHP_CLI_SERVER_WORKERS: "4"
     depends_on:
       mysql:
         condition: service_healthy
-    command: php artisan serve --host=0.0.0.0 --port=8000
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "if [ ! -f /app/vendor/autoload.php ]; then
+        composer install --no-interaction --prefer-dist --optimize-autoloader;
+      fi &&
+      php artisan config:clear &&
+      php artisan serve --host=0.0.0.0 --port=8000 --no-reload"
 
 volumes:
   mysql_data:
   redis_data:
+  jindungo_vendor:
+  jindungo_bootstrap_cache:
+  jindungo_storage_framework:

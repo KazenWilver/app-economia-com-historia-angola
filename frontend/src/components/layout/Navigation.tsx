@@ -10,9 +10,17 @@ import { cn } from "@/lib/utils";
 
 interface NavigationProps {
   links: NavLinkItem[];
+  isAuthenticated?: boolean;
+  userName?: string | null;
+  onLogout?: () => void;
 }
 
-export function Navigation({ links }: NavigationProps) {
+export function Navigation({
+  links,
+  isAuthenticated = false,
+  userName = null,
+  onLogout,
+}: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const drawerId = useId();
   const titleId = `${drawerId}-title`;
@@ -107,15 +115,53 @@ export function Navigation({ links }: NavigationProps) {
               ))}
             </nav>
 
-            <div className="mt-auto border-t border-border pt-6 dark:border-border-dark">
-              <Link
-                href="/perfil"
-                onClick={closeDrawer}
-                className="inline-flex min-h-11 items-center gap-2 font-display text-sm font-semibold text-content-primary hover:text-bordeaux dark:text-content-dark-primary dark:hover:text-bordeaux-dark"
-              >
-                <User className="h-4 w-4" strokeWidth={1.5} />
-                Perfil
-              </Link>
+            <div className="mt-auto space-y-4 border-t border-border pt-6 dark:border-border-dark">
+              {isAuthenticated ? (
+                <>
+                  {userName ? (
+                    <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
+                      Olá,{" "}
+                      <span className="font-semibold text-content-primary dark:text-content-dark-primary">
+                        {userName}
+                      </span>
+                    </p>
+                  ) : null}
+                  <Link
+                    href="/explorar"
+                    onClick={closeDrawer}
+                    className="inline-flex min-h-11 items-center font-display text-sm font-semibold text-content-primary hover:text-bordeaux dark:text-content-dark-primary dark:hover:text-bordeaux-dark"
+                  >
+                    Explorar
+                  </Link>
+                  <Link
+                    href="/perfil"
+                    onClick={closeDrawer}
+                    className="inline-flex min-h-11 items-center gap-2 font-display text-sm font-semibold text-content-primary hover:text-bordeaux dark:text-content-dark-primary dark:hover:text-bordeaux-dark"
+                  >
+                    <User className="h-4 w-4" strokeWidth={1.5} />
+                    Perfil
+                  </Link>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="min-h-11 w-full justify-start px-0"
+                    onClick={() => {
+                      closeDrawer();
+                      onLogout?.();
+                    }}
+                  >
+                    Sair
+                  </Button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={closeDrawer}
+                  className="inline-flex min-h-11 items-center font-display text-sm font-semibold text-bordeaux dark:text-bordeaux-dark"
+                >
+                  Entrar
+                </Link>
+              )}
             </div>
           </aside>
         </div>

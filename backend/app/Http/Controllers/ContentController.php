@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreContentRequest;
 use App\Http\Requests\UpdateContentRequest;
+use App\Http\Resources\ContentListResource;
 use App\Http\Resources\ContentResource;
 use App\Models\Content;
 use App\Services\ContentMediaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ContentController extends Controller
 {
+    private const CACHE_TTL_SECONDS = 60;
+
     public function __construct(
         private readonly ContentMediaService $contentMediaService
     ) {}
@@ -31,23 +35,43 @@ class ContentController extends Controller
             ], 401);
         }
 
-        $contents = Content::query()
-            ->with(['category', 'author'])
-            ->where('status', 'published')
-            ->when(
-                $request->user('sanctum') === null,
-                fn ($query) => $query
-                    ->where('is_exclusive', false)
-                    ->where('type', '!=', 'jindungo')
-            )
-            ->when(
-                $request->filled('type'),
-                fn ($query) => $query->where('type', $request->string('type')->toString())
-            )
-            ->latest('published_at')
-            ->get();
+        $userId = $request->user('sanctum')?->id ?? 'guest';
+        $type = $request->string('type')->toString() ?: 'all';
+        $cacheVersion = (int) Cache::get('contents:version', 1);
+        $cacheKey = "contents:index:v{$cacheVersion}:{$userId}:{$type}";
 
-        return ContentResource::collection($contents);
+        $contents = Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($request) {
+            return Content::query()
+                ->select([
+                    'id',
+                    'title',
+                    'slug',
+                    'body',
+                    'type',
+                    'media_url',
+                    'is_exclusive',
+                    'published_at',
+                    'category_id',
+                ])
+                ->with(['category:id,name,slug'])
+                ->where('status', 'published')
+                ->when(
+                    $request->user('sanctum') === null,
+                    fn ($query) => $query
+                        ->where('is_exclusive', false)
+                        ->where('type', '!=', 'jindungo')
+                )
+                ->when(
+                    $request->filled('type'),
+                    fn ($query) => $query->where('type', $request->string('type')->toString())
+                )
+                ->latest('published_at')
+                ->get();
+        });
+
+        return ContentListResource::collection($contents)
+            ->response()
+            ->withHeaders($this->publicCacheHeaders());
     }
 
     public function show(Request $request, Content $content): ContentResource|JsonResponse
@@ -66,7 +90,9 @@ class ContentController extends Controller
 
         $content->load(['category', 'author']);
 
-        return new ContentResource($content);
+        return (new ContentResource($content))
+            ->response()
+            ->withHeaders($this->publicCacheHeaders());
     }
 
     public function store(StoreContentRequest $request): JsonResponse
@@ -94,6 +120,8 @@ class ContentController extends Controller
         ]);
 
         $content->load(['category', 'author']);
+
+        $this->bustContentsCache();
 
         return response()->json([
             'message' => 'Conteúdo criado com sucesso.',
@@ -138,6 +166,8 @@ class ContentController extends Controller
         $content->update($data);
         $content->load(['category', 'author']);
 
+        $this->bustContentsCache();
+
         return response()->json([
             'message' => 'Conteúdo actualizado com sucesso.',
             'content' => new ContentResource($content),
@@ -149,6 +179,8 @@ class ContentController extends Controller
         $this->contentMediaService->delete($content->media_url);
 
         $content->delete();
+
+        $this->bustContentsCache();
 
         return response()->json([
             'message' => 'Conteúdo eliminado com sucesso.',
@@ -177,5 +209,21 @@ class ContentController extends Controller
     private function requiresAuthentication(Content $content): bool
     {
         return $content->is_exclusive || $content->type === 'jindungo';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function publicCacheHeaders(): array
+    {
+        return [
+            'Cache-Control' => 'public, max-age=60, stale-while-revalidate=300',
+        ];
+    }
+
+    private function bustContentsCache(): void
+    {
+        $version = (int) Cache::get('contents:version', 1);
+        Cache::forever('contents:version', $version + 1);
     }
 }

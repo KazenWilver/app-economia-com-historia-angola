@@ -29,12 +29,27 @@ export interface ContentItem {
   id: number;
   title: string;
   slug: string;
-  body: string | null;
+  excerpt: string | null;
+  body?: string | null;
   type: ContentType;
   media_url: string | null;
   is_exclusive: boolean | null;
   published_at: string | null;
   category: Category | null;
+}
+
+export function getContentPreview(content: ContentItem): string {
+  if (content.excerpt) {
+    return content.excerpt;
+  }
+
+  if (content.body) {
+    return content.body.length > 160
+      ? `${content.body.slice(0, 160).trimEnd()}…`
+      : content.body;
+  }
+
+  return "Sem descrição disponível.";
 }
 
 export interface ContentsResponse {
@@ -64,8 +79,8 @@ export interface CommentsResponse {
   data: CommentItem[];
 }
 
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+export { API_URL, buildAuthHeaders, getStoredToken } from "@/lib/api";
+import { API_URL } from "@/lib/api";
 
 export function resolveMediaUrl(url: string): string {
   if (url.startsWith("http://") || url.startsWith("https://")) {

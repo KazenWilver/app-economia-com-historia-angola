@@ -3,12 +3,13 @@ import { cn } from "@/lib/utils";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  labelClassName?: string;
   error?: string;
   hint?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, id, ...props }, ref) => {
+  ({ className, label, labelClassName, error, hint, id, ...props }, ref) => {
     const inputId = id ?? props.name;
 
     return (
@@ -16,7 +17,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label ? (
           <label
             htmlFor={inputId}
-            className="font-display text-sm font-semibold text-content-primary dark:text-content-dark-primary"
+            className={cn(
+              "font-display text-sm font-semibold text-content-primary dark:text-content-dark-primary",
+              labelClassName,
+            )}
           >
             {label}
           </label>
