@@ -6,7 +6,6 @@ import { ContentForm } from "@/components/admin/ContentForm";
 import {
   emptyContentForm,
   type AdminCategoriesResponse,
-  type AdminContentResponse,
   type ContentFormValues,
 } from "@/components/admin/content-types";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -84,14 +83,9 @@ export default function AdminCreateContentPage() {
         throw new Error(await parseApiError(response));
       }
 
-      const data = (await response.json()) as AdminContentResponse;
-      const contentId = data.content?.id;
+      await response.json();
 
-      if (contentId) {
-        router.replace(`/admin/conteudos/${contentId}/editar`);
-      } else {
-        router.replace("/admin/conteudos");
-      }
+      router.replace("/admin/conteudos?created=1");
     } catch (error) {
       setErrorMessage(
         error instanceof Error

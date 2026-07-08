@@ -108,6 +108,29 @@ class ContentTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_exclusive_content_via_multipart(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $category = Category::factory()->create();
+        Sanctum::actingAs($admin);
+
+        $response = $this->post('/api/contents', [
+            'category_id' => $category->id,
+            'title' => 'Conteúdo Exclusivo Multipart',
+            'type' => 'texto',
+            'status' => 'published',
+            'is_exclusive' => '1',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('content.is_exclusive', true);
+
+        $this->assertDatabaseHas('contents', [
+            'title' => 'Conteúdo Exclusivo Multipart',
+            'is_exclusive' => true,
+        ]);
+    }
+
     public function test_non_admin_cannot_create_content(): void
     {
         $user = User::factory()->create();

@@ -9,6 +9,7 @@ export const API_URL =
 
 export const TOKEN_STORAGE_KEY = "jindungo_token";
 export const USER_STORAGE_KEY = "jindungo_user";
+export const ADMIN_TOKEN_STORAGE_KEY = "jindungo_admin_token";
 
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") {
@@ -16,6 +17,14 @@ export function getStoredToken(): string | null {
   }
 
   return localStorage.getItem(TOKEN_STORAGE_KEY);
+}
+
+export function getStoredAdminToken(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY);
 }
 
 export function buildAuthHeaders(token?: string | null): HeadersInit {

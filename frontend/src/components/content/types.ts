@@ -19,6 +19,7 @@ export interface ContentDetail {
   body: string | null;
   type: ContentType;
   media_url: string | null;
+  statistics_data: string | null;
   is_exclusive: boolean | null;
   published_at: string | null;
   category: Category | null;

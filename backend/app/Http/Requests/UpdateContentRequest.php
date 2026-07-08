@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\PreparesContentInput;
 use App\Http\Requests\Concerns\ValidatesContentMedia;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateContentRequest extends FormRequest
 {
+    use PreparesContentInput;
     use ValidatesContentMedia;
 
     public function authorize(): bool

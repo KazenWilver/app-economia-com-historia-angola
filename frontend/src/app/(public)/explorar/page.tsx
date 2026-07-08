@@ -93,7 +93,8 @@ export default function ExplorarPage() {
   const [isFetching, setIsFetching] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const authToken = token ?? getStoredToken();
+  const publicToken = token ?? getStoredToken();
+  const isLoggedIn = Boolean(publicToken);
 
   const loadContents = useCallback(async (currentToken: string | null) => {
     setIsFetching(true);
@@ -103,8 +104,9 @@ export default function ExplorarPage() {
       const cacheKey = `GET:/contents:${currentToken ? "auth" : "guest"}`;
       const data = await apiFetch<ContentsResponse>("/contents", {
         token: currentToken,
-        cacheTtlMs: 60_000,
+        cacheTtlMs: 0,
         cacheKey,
+        skipCache: true,
       });
       setAllContents(data.data);
     } catch {
@@ -118,11 +120,21 @@ export default function ExplorarPage() {
   }, []);
 
   useEffect(() => {
-    void loadContents(authToken);
-  }, [authToken, loadContents]);
+    void loadContents(publicToken);
+  }, [publicToken, loadContents]);
 
   const requiresAuth =
-    activeFilter === "jindungo" && !isAuthenticated && !authToken;
+    activeFilter === "jindungo" && !isAuthenticated && !publicToken;
+
+  const visibleContents = useMemo(() => {
+    if (isLoggedIn) {
+      return allContents;
+    }
+
+    return allContents.filter(
+      (content) => !content.is_exclusive && content.type !== "jindungo",
+    );
+  }, [allContents, isLoggedIn]);
 
   const displayedContents = useMemo(() => {
     if (requiresAuth) {
@@ -130,11 +142,11 @@ export default function ExplorarPage() {
     }
 
     if (!activeFilter) {
-      return allContents;
+      return visibleContents;
     }
 
-    return allContents.filter((content) => content.type === activeFilter);
-  }, [activeFilter, allContents, requiresAuth]);
+    return visibleContents.filter((content) => content.type === activeFilter);
+  }, [activeFilter, requiresAuth, visibleContents]);
 
   const showSkeleton = isFetching && allContents.length === 0;
 
@@ -262,9 +274,16 @@ export default function ExplorarPage() {
                   ) : null}
                   <CardHeader className="flex-1">
                     <div className="mb-3 flex items-center justify-between gap-3">
-                      <Badge type={BADGE_TYPES[content.type]}>
-                        {TYPE_LABELS[content.type]}
-                      </Badge>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge type={BADGE_TYPES[content.type]}>
+                          {TYPE_LABELS[content.type]}
+                        </Badge>
+                        {content.is_exclusive ? (
+                          <Badge type="jindungo" className="normal-case">
+                            Exclusivo
+                          </Badge>
+                        ) : null}
+                      </div>
                       <Icon
                         className="h-5 w-5 text-bordeaux dark:text-bordeaux-dark"
                         strokeWidth={1.5}

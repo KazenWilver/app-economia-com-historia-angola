@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ExternalLink, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
+import {
+  isDirectMediaUrl,
+  slugifyPreview,
+} from "@/components/admin/content-helpers";
 import {
   CONTENT_STATUS_OPTIONS,
   CONTENT_TYPE_OPTIONS,
@@ -39,8 +44,31 @@ function MediaPreview({
   if (!previewUrl) {
     return (
       <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-tertiary">
-        Sem preview de media. Carrega um ficheiro ou indica um URL.
+        Sem pré-visualização. Faz upload de um ficheiro ou indica um URL directo
+        para imagem, áudio ou vídeo.
       </p>
+    );
+  }
+
+  if (!previewUrl.startsWith("blob:") && !isDirectMediaUrl(previewUrl)) {
+    return (
+      <div className="rounded-lg border border-amber-300/60 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-950/20 dark:text-amber-100">
+        <p className="font-semibold">Este URL não parece ser um ficheiro de media directo.</p>
+        <p className="mt-2 text-amber-800 dark:text-amber-200/90">
+          Links de artigos ou páginas web (como sites de notícias) não são
+          reproduzidos automaticamente. Usa upload ou um URL que termine em
+          .jpg, .png, .mp3, .mp4, etc.
+        </p>
+        <a
+          href={previewUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-3 inline-flex items-center gap-2 font-semibold text-bordeaux underline dark:text-bordeaux-dark"
+        >
+          <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
+          Abrir URL externo
+        </a>
+      </div>
     );
   }
 
@@ -90,11 +118,18 @@ export function ContentForm({
   const [values, setValues] = useState<ContentFormValues>(initialValues);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   useEffect(() => {
     setValues(initialValues);
     setMediaFile(null);
     setLocalPreviewUrl(null);
+
+    const autoSlug = slugifyPreview(initialValues.title);
+    setSlugManuallyEdited(
+      Boolean(initialValues.slug.trim()) &&
+        initialValues.slug.trim() !== autoSlug,
+    );
   }, [initialValues]);
 
   useEffect(() => {
@@ -117,11 +152,31 @@ export function ContentForm({
     return resolveAdminMediaUrl(existingMediaUrl);
   }, [existingMediaUrl, localPreviewUrl, values.media_url]);
 
+  const slugPreview = values.slug.trim() || slugifyPreview(values.title);
+
   const updateField = <K extends keyof ContentFormValues>(
     field: K,
     value: ContentFormValues[K],
   ) => {
     setValues((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleTitleChange = (title: string) => {
+    setValues((current) => ({
+      ...current,
+      title,
+      slug: slugManuallyEdited ? current.slug : slugifyPreview(title),
+    }));
+  };
+
+  const handleSlugChange = (slug: string) => {
+    setSlugManuallyEdited(true);
+    updateField("slug", slug);
+  };
+
+  const resetSlugFromTitle = () => {
+    setSlugManuallyEdited(false);
+    updateField("slug", slugifyPreview(values.title));
   };
 
   const handleFileChange = (file: File | null) => {
@@ -157,16 +212,41 @@ export function ContentForm({
           value={values.title}
           required
           placeholder="Título do conteúdo"
-          onChange={(event) => updateField("title", event.target.value)}
+          onChange={(event) => handleTitleChange(event.target.value)}
         />
 
-        <Input
-          label="Slug (opcional)"
-          name="slug"
-          value={values.slug}
-          placeholder="gerado-automaticamente"
-          onChange={(event) => updateField("slug", event.target.value)}
-        />
+        <div className="md:col-span-2">
+          <Input
+            label="Slug (opcional)"
+            name="slug"
+            value={values.slug}
+            placeholder="deixar vazio para gerar automaticamente"
+            onChange={(event) => handleSlugChange(event.target.value)}
+          />
+          <div className="mt-1.5 flex flex-col gap-2 text-xs text-content-tertiary dark:text-content-dark-tertiary">
+            <p>
+              Identificador único na URL pública. Enquanto não editares este
+              campo manualmente, o slug acompanha o título em tempo real.
+            </p>
+            {slugPreview ? (
+              <p>
+                Pré-visualização:{" "}
+                <span className="font-mono text-content-secondary dark:text-content-dark-secondary">
+                  /explorar/{slugPreview}
+                </span>
+              </p>
+            ) : null}
+            {slugManuallyEdited ? (
+              <button
+                type="button"
+                className="w-fit font-semibold text-bordeaux underline dark:text-bordeaux-dark"
+                onClick={resetSlugFromTitle}
+              >
+                Voltar a sincronizar com o título
+              </button>
+            ) : null}
+          </div>
+        </div>
 
         <div className="flex flex-col gap-1.5">
           <label
@@ -243,13 +323,21 @@ export function ContentForm({
           </select>
         </div>
 
-        <Input
-          label="URL de media (opcional)"
-          name="media_url"
-          value={values.media_url}
-          placeholder="https://... ou /storage/..."
-          onChange={(event) => updateField("media_url", event.target.value)}
-        />
+        <div className="md:col-span-2">
+          <Input
+            label="URL de media (opcional)"
+            name="media_url"
+            value={values.media_url}
+            placeholder="https://exemplo.com/ficheiro.jpg"
+            onChange={(event) => updateField("media_url", event.target.value)}
+          />
+          <p className="mt-1.5 text-xs text-content-tertiary dark:text-content-dark-tertiary">
+            Endereço directo de um ficheiro de imagem, áudio ou vídeo já
+            alojado (ou caminho local como /storage/...). Não uses links de
+            artigos ou páginas web — para isso, coloca o texto no corpo e, se
+            quiseres, um link manual na descrição.
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -270,27 +358,67 @@ export function ContentForm({
         />
       </div>
 
-      <Input
-        label="Dados estatísticos (opcional)"
-        name="statistics_data"
-        value={values.statistics_data}
-        placeholder="Notas ou JSON simples"
-        onChange={(event) =>
-          updateField("statistics_data", event.target.value)
-        }
-      />
-
-      <label className="inline-flex items-center gap-2 text-sm text-content-primary dark:text-content-dark-primary">
-        <input
-          type="checkbox"
-          checked={values.is_exclusive}
-          className="h-4 w-4 rounded border-border text-bordeaux focus:ring-bordeaux"
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="statistics_data"
+          className="font-display text-sm font-semibold text-content-primary dark:text-content-dark-primary"
+        >
+          Dados estatísticos (opcional)
+        </label>
+        <textarea
+          id="statistics_data"
+          name="statistics_data"
+          rows={4}
+          value={values.statistics_data}
+          placeholder='{"ano": 1975, "pib_percentual": 12.4, "fonte": "INE Angola"}'
+          className={cn(selectClassName, "min-h-28 py-3 font-mono text-xs")}
           onChange={(event) =>
-            updateField("is_exclusive", event.target.checked)
+            updateField("statistics_data", event.target.value)
           }
         />
-        Conteúdo exclusivo (requer autenticação)
-      </label>
+        <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
+          Texto livre ou JSON simples com números e factos (PIB, anos, percentagens).
+          Na página pública aparece num bloco «Dados estatísticos»; se for JSON
+          válido, é mostrado em cartões.
+        </p>
+      </div>
+
+      <div
+        className={cn(
+          "rounded-xl border-2 p-4 transition-colors",
+          values.is_exclusive
+            ? "border-bordeaux bg-bordeaux/5 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10"
+            : "border-slate-200 bg-slate-50 dark:border-border-dark dark:bg-surface-dark-secondary/40",
+        )}
+      >
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={values.is_exclusive}
+            className="mt-1 h-4 w-4 rounded border-border text-bordeaux focus:ring-bordeaux"
+            onChange={(event) =>
+              updateField("is_exclusive", event.target.checked)
+            }
+          />
+          <span className="space-y-2">
+            <span className="flex items-center gap-2 font-display text-sm font-semibold text-content-primary dark:text-content-dark-primary">
+              <Lock className="h-4 w-4 text-bordeaux dark:text-bordeaux-dark" strokeWidth={1.5} />
+              Conteúdo exclusivo
+            </span>
+            <span className="block text-sm text-content-secondary dark:text-content-dark-secondary">
+              Visitantes sem sessão iniciada não veem este conteúdo em Explorar
+              nem conseguem abrir a página de detalhe. Utilizadores registados
+              acedem normalmente.
+            </span>
+            {values.type === "jindungo" ? (
+              <span className="block text-xs text-content-tertiary dark:text-content-dark-tertiary">
+                O tipo «Jindungo» já exige autenticação por defeito; esta opção
+                reforça o mesmo comportamento para outros tipos.
+              </span>
+            ) : null}
+          </span>
+        </label>
+      </div>
 
       <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-border-dark dark:bg-surface-dark-card">
         <div className="flex flex-col gap-1.5">

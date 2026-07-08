@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AudioPlayer } from "@/components/content/AudioPlayer";
 import { CommentSection } from "@/components/content/CommentSection";
 import { ContentImage } from "@/components/content/ContentImage";
+import { ContentStatistics } from "@/components/content/ContentStatistics";
 import { VideoPlayer } from "@/components/content/VideoPlayer";
 import {
   API_URL,
@@ -58,7 +59,7 @@ export default function ContentDetailPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
   const { token } = useAuth();
-  const authToken = token ?? getStoredToken();
+  const publicToken = token ?? getStoredToken();
   const [content, setContent] = useState<ContentDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [requiresAuth, setRequiresAuth] = useState(false);
@@ -77,7 +78,7 @@ export default function ContentDetailPage() {
 
     try {
       const response = await fetch(`${API_URL}/contents/${slug}`, {
-        headers: buildAuthHeaders(authToken),
+        headers: buildAuthHeaders(publicToken),
       });
 
       if (response.status === 401) {
@@ -104,7 +105,7 @@ export default function ContentDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [slug, authToken]);
+  }, [slug, publicToken]);
 
   useEffect(() => {
     void fetchContent();
@@ -142,7 +143,7 @@ export default function ContentDetailPage() {
               Conteúdo exclusivo
             </p>
             <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
-              Inicia sessão para aceder a este conteúdo Jindungo.
+              Inicia sessão para aceder a este conteúdo exclusivo.
             </p>
             <Link
               href="/login"
@@ -178,6 +179,12 @@ export default function ContentDetailPage() {
               <Badge type={BADGE_TYPES[content.type]}>
                 {TYPE_LABELS[content.type]}
               </Badge>
+              {content.is_exclusive ? (
+                <Badge type="jindungo" className="gap-1 normal-case">
+                  <span aria-hidden>🔒</span>
+                  Exclusivo
+                </Badge>
+              ) : null}
               {content.category ? (
                 <span className="text-xs font-medium uppercase tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
                   {content.category.name}
@@ -216,6 +223,10 @@ export default function ContentDetailPage() {
             >
               {content.body}
             </div>
+          ) : null}
+
+          {content.statistics_data ? (
+            <ContentStatistics data={content.statistics_data} />
           ) : null}
 
           <CommentSection contentSlug={content.slug} />

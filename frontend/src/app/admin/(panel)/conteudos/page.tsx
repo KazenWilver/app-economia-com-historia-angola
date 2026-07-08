@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Archive, Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -50,6 +51,7 @@ function statusBadgeClass(status: ContentStatus): string {
 }
 
 export default function AdminContentsPage() {
+  const router = useRouter();
   const { token } = useAdminAuth();
   const [contents, setContents] = useState<AdminContent[]>([]);
   const [statusFilter, setStatusFilter] = useState<ContentStatus | "all">(
@@ -88,6 +90,15 @@ export default function AdminContentsPage() {
   useEffect(() => {
     void loadContents();
   }, [loadContents]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("created") === "1") {
+      setSuccessMessage("Conteúdo criado com sucesso.");
+      router.replace("/admin/conteudos");
+    }
+  }, [router]);
 
   const filteredContents = useMemo(() => {
     if (statusFilter === "all") {
@@ -245,6 +256,9 @@ export default function AdminContentsPage() {
                   Estado
                 </th>
                 <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                  Exclusivo
+                </th>
+                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
                   Actualizado
                 </th>
                 <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
@@ -279,6 +293,9 @@ export default function AdminContentsPage() {
                       >
                         {STATUS_LABELS[content.status]}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-content-dark-secondary">
+                      {content.is_exclusive ? "Sim" : "Não"}
                     </td>
                     <td className="px-4 py-3 text-slate-600 dark:text-content-dark-secondary">
                       {formatDate(content.updated_at)}
