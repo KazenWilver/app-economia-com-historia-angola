@@ -6,10 +6,12 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { CommentSection } from "@/components/content/CommentSection";
+import { ContentImage } from "@/components/content/ContentImage";
 import {
   API_URL,
   type ContentDetail,
   type ContentDetailResponse,
+  isImageMediaUrl,
 } from "@/components/content/types";
 import {
   Badge,
@@ -106,6 +108,8 @@ export default function JindungoDetailPage() {
   }
 
   const publishedDate = content ? formatPublishedDate(content.published_at) : null;
+  const showImageMedia =
+    content?.media_url && isImageMediaUrl(content.media_url);
 
   return (
     <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
@@ -160,6 +164,10 @@ export default function JindungoDetailPage() {
               {publishedDate ? <span>Publicado em {publishedDate}</span> : null}
             </div>
           </header>
+
+          {showImageMedia ? (
+            <ContentImage src={content.media_url!} alt={content.title} />
+          ) : null}
 
           {content.body ? (
             <div className="whitespace-pre-wrap leading-8 text-content-secondary dark:text-content-dark-secondary">

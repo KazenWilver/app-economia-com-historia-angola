@@ -90,3 +90,15 @@ export function resolveMediaUrl(url: string): string {
   const base = API_URL.replace(/\/api$/, "");
   return `${base}${url.startsWith("/") ? url : `/${url}`}`;
 }
+
+const IMAGE_MEDIA_PATTERN = /\.(jpe?g|png|webp|gif)$/i;
+
+export function isImageMediaUrl(url: string | null | undefined): boolean {
+  if (!url) {
+    return false;
+  }
+
+  const path = url.split("?")[0]?.split("#")[0] ?? "";
+
+  return IMAGE_MEDIA_PATTERN.test(path);
+}

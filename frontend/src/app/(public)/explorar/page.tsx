@@ -7,6 +7,8 @@ import {
   type ContentItem,
   type ContentsResponse,
   getContentPreview,
+  isImageMediaUrl,
+  resolveMediaUrl,
 } from "@/components/content/types";
 import { useAuth } from "@/hooks/useAuth";
 import { apiFetch, getStoredToken } from "@/lib/api";
@@ -235,6 +237,10 @@ export default function ExplorarPage() {
           {displayedContents.map((content) => {
             const Icon = TYPE_ICONS[content.type];
             const publishedDate = formatPublishedDate(content.published_at);
+            const cardImageUrl =
+              content.media_url && isImageMediaUrl(content.media_url)
+                ? content.media_url
+                : null;
 
             return (
               <Link
@@ -242,7 +248,18 @@ export default function ExplorarPage() {
                 href={`/explorar/${content.slug}`}
                 className="block h-full"
               >
-                <Card className="flex h-full flex-col transition-transform duration-150 hover:-translate-y-0.5">
+                <Card className="flex h-full flex-col overflow-hidden transition-transform duration-150 hover:-translate-y-0.5">
+                  {cardImageUrl ? (
+                    <div className="aspect-[16/9] w-full overflow-hidden border-b border-border dark:border-border-dark">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={resolveMediaUrl(cardImageUrl)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : null}
                   <CardHeader className="flex-1">
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <Badge type={BADGE_TYPES[content.type]}>

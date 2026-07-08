@@ -8,12 +8,14 @@ import { buildAuthHeaders, getStoredToken } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { AudioPlayer } from "@/components/content/AudioPlayer";
 import { CommentSection } from "@/components/content/CommentSection";
+import { ContentImage } from "@/components/content/ContentImage";
 import { VideoPlayer } from "@/components/content/VideoPlayer";
 import {
   API_URL,
   type ContentDetail,
   type ContentDetailResponse,
   type ContentType,
+  isImageMediaUrl,
 } from "@/components/content/types";
 import {
   Badge,
@@ -113,6 +115,8 @@ export default function ContentDetailPage() {
     content?.media_url &&
     (content.type === "audio" || content.type === "podcast");
   const showVideoPlayer = content?.media_url && content.type === "video";
+  const showImageMedia =
+    content?.media_url && isImageMediaUrl(content.media_url);
 
   return (
     <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
@@ -197,6 +201,10 @@ export default function ContentDetailPage() {
 
           {showAudioPlayer ? (
             <AudioPlayer src={content.media_url!} title={content.title} />
+          ) : null}
+
+          {showImageMedia ? (
+            <ContentImage src={content.media_url!} alt={content.title} />
           ) : null}
 
           {content.body ? (
