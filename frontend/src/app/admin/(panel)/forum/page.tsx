@@ -175,7 +175,7 @@ export default function AdminForumPage() {
         ))}
       </div>
 
-      <Card hoverLift={false}>
+      <Card hoverLift={false} className="border-slate-200 bg-white dark:border-border-dark dark:bg-surface-dark-card">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-4">
@@ -188,20 +188,32 @@ export default function AdminForumPage() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
-                <thead className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-border-dark dark:bg-surface-dark-secondary">
+              <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-border-dark">
+                <thead className="bg-slate-50 dark:bg-surface-dark-secondary">
                   <tr>
-                    <th className="px-4 py-3 font-semibold">Título</th>
-                    <th className="px-4 py-3 font-semibold">Fórum</th>
-                    <th className="px-4 py-3 font-semibold">Respostas</th>
-                    <th className="px-4 py-3 font-semibold">Estado</th>
-                    <th className="px-4 py-3 font-semibold">Criado</th>
-                    <th className="px-4 py-3 font-semibold">Acções</th>
+                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                      Título
+                    </th>
+                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                      Fórum
+                    </th>
+                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                      Respostas
+                    </th>
+                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                      Estado
+                    </th>
+                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                      Criado
+                    </th>
+                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                      Acções
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100 dark:divide-border-dark">
                   {filteredTopics.map((topic) => (
-                    <tr key={topic.id} className="border-b border-slate-100 dark:border-border-dark">
+                    <tr key={topic.id}>
                       <td className="px-4 py-3 font-medium text-slate-900 dark:text-content-dark-primary">
                         {topic.title}
                         {topic.is_private ? (

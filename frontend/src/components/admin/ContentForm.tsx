@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Lock } from "lucide-react";
+import { ExternalLink, Globe, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
@@ -383,42 +383,83 @@ export function ContentForm({
         </p>
       </div>
 
-      <div
-        className={cn(
-          "rounded-xl border-2 p-4 transition-colors",
-          values.is_exclusive
-            ? "border-bordeaux bg-bordeaux/5 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10"
-            : "border-slate-200 bg-slate-50 dark:border-border-dark dark:bg-surface-dark-secondary/40",
-        )}
-      >
-        <label className="flex cursor-pointer items-start gap-3">
-          <input
-            type="checkbox"
-            checked={values.is_exclusive}
-            className="mt-1 h-4 w-4 rounded border-border text-bordeaux focus:ring-bordeaux"
-            onChange={(event) =>
-              updateField("is_exclusive", event.target.checked)
-            }
-          />
-          <span className="space-y-2">
-            <span className="flex items-center gap-2 font-display text-sm font-semibold text-content-primary dark:text-content-dark-primary">
-              <Lock className="h-4 w-4 text-bordeaux dark:text-bordeaux-dark" strokeWidth={1.5} />
-              Conteúdo exclusivo
-            </span>
-            <span className="block text-sm text-content-secondary dark:text-content-dark-secondary">
-              Visitantes sem sessão iniciada não veem este conteúdo em Explorar
-              nem conseguem abrir a página de detalhe. Utilizadores registados
-              acedem normalmente.
-            </span>
-            {values.type === "jindungo" ? (
-              <span className="block text-xs text-content-tertiary dark:text-content-dark-tertiary">
-                O tipo «Jindungo» já exige autenticação por defeito; esta opção
-                reforça o mesmo comportamento para outros tipos.
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+          Acesso ao conteúdo
+        </legend>
+        <div className="grid gap-3 md:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => updateField("is_exclusive", false)}
+            className={cn(
+              "rounded-xl border p-4 text-left transition-all",
+              !values.is_exclusive
+                ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
+                : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+            )}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={cn(
+                  "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                  !values.is_exclusive
+                    ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
+                    : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                )}
+              >
+                <Globe className="h-5 w-5" strokeWidth={1.5} />
               </span>
-            ) : null}
-          </span>
-        </label>
-      </div>
+              <span>
+                <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                  Público
+                </span>
+                <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                  Qualquer visitante vê este conteúdo em Explorar, mesmo sem
+                  login.
+                </span>
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => updateField("is_exclusive", true)}
+            className={cn(
+              "rounded-xl border p-4 text-left transition-all",
+              values.is_exclusive
+                ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
+                : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+            )}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={cn(
+                  "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                  values.is_exclusive
+                    ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
+                    : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                )}
+              >
+                <Lock className="h-5 w-5" strokeWidth={1.5} />
+              </span>
+              <span>
+                <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                  Exclusivo
+                </span>
+                <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                  Só utilizadores com login em /login veem este conteúdo em
+                  Explorar.
+                </span>
+                {values.type === "jindungo" ? (
+                  <span className="mt-2 block text-xs text-slate-500 dark:text-content-dark-tertiary">
+                    O tipo «Jindungo» já exige login por defeito.
+                  </span>
+                ) : null}
+              </span>
+            </div>
+          </button>
+        </div>
+      </fieldset>
 
       <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-border-dark dark:bg-surface-dark-card">
         <div className="flex flex-col gap-1.5">

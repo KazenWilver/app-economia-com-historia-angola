@@ -8,11 +8,16 @@ use App\Http\Resources\ForumResource;
 use App\Http\Resources\TopicResource;
 use App\Models\Forum;
 use App\Models\Topic;
+use App\Services\ForumService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TopicController extends Controller
 {
+    public function __construct(
+        private readonly ForumService $forumService
+    ) {}
+
     public function index(): AnonymousResourceCollection
     {
         $topics = Topic::query()
@@ -46,6 +51,8 @@ class TopicController extends Controller
 
     public function forumsIndex(): AnonymousResourceCollection
     {
+        $this->forumService->ensureDefaultForumExists();
+
         $forums = Forum::query()
             ->withCount('topics')
             ->orderBy('name')
@@ -57,6 +64,7 @@ class TopicController extends Controller
     public function store(StoreTopicRequest $request): JsonResponse
     {
         $data = $request->validated();
+        $this->forumService->ensureDefaultForumExists();
 
         $topic = Topic::query()->create([
             ...$data,

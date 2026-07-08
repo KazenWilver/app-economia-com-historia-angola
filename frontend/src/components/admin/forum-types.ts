@@ -44,8 +44,38 @@ export interface TopicFormValues {
   title: string;
   description: string;
   theme: string;
-  is_private: boolean;
+  visibility: TopicVisibilityMode;
+}
+
+export type TopicVisibilityMode = "public" | "private" | "hidden";
+
+export function visibilityToFlags(mode: TopicVisibilityMode): {
   is_visible: boolean;
+  is_private: boolean;
+} {
+  switch (mode) {
+    case "private":
+      return { is_visible: false, is_private: true };
+    case "hidden":
+      return { is_visible: false, is_private: false };
+    default:
+      return { is_visible: true, is_private: false };
+  }
+}
+
+export function flagsToVisibility(
+  is_visible: boolean,
+  is_private: boolean,
+): TopicVisibilityMode {
+  if (is_private) {
+    return "private";
+  }
+
+  if (is_visible) {
+    return "public";
+  }
+
+  return "hidden";
 }
 
 export function emptyTopicForm(): TopicFormValues {
@@ -54,8 +84,7 @@ export function emptyTopicForm(): TopicFormValues {
     title: "",
     description: "",
     theme: "",
-    is_private: false,
-    is_visible: true,
+    visibility: "public",
   };
 }
 
@@ -65,18 +94,19 @@ export function topicToFormValues(topic: AdminTopic): TopicFormValues {
     title: topic.title,
     description: topic.description ?? "",
     theme: topic.theme ?? "",
-    is_private: topic.is_private,
-    is_visible: topic.is_visible,
+    visibility: flagsToVisibility(topic.is_visible, topic.is_private),
   };
 }
 
 export function formValuesToTopicPayload(values: TopicFormValues) {
+  const visibility = visibilityToFlags(values.visibility);
+
   return {
     forum_id: Number(values.forum_id),
     title: values.title.trim(),
     description: values.description.trim() || null,
     theme: values.theme.trim() || null,
-    is_private: values.is_private,
-    is_visible: values.is_visible,
+    is_private: visibility.is_private,
+    is_visible: visibility.is_visible,
   };
 }

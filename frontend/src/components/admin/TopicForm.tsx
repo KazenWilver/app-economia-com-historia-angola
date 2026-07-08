@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
-import type { AdminForum, TopicFormValues } from "@/components/admin/forum-types";
+import type {
+  AdminForum,
+  TopicFormValues,
+  TopicVisibilityMode,
+} from "@/components/admin/forum-types";
+import { cn } from "@/lib/utils";
 
 interface TopicFormProps {
   initialValues: TopicFormValues;
@@ -15,6 +21,32 @@ interface TopicFormProps {
   onSubmit: (values: TopicFormValues) => Promise<void>;
   onCancel: () => void;
 }
+
+const VISIBILITY_OPTIONS: {
+  value: TopicVisibilityMode;
+  label: string;
+  description: string;
+  icon: typeof Eye;
+}[] = [
+  {
+    value: "public",
+    label: "Público",
+    description: "Visível para todos os visitantes em /forum.",
+    icon: Eye,
+  },
+  {
+    value: "private",
+    label: "Privado",
+    description: "Só utilizadores com login podem ver e participar.",
+    icon: Lock,
+  },
+  {
+    value: "hidden",
+    label: "Oculto",
+    description: "Não aparece na área pública. Útil para preparar o debate.",
+    icon: EyeOff,
+  },
+];
 
 export function TopicForm({
   initialValues,
@@ -27,17 +59,27 @@ export function TopicForm({
 }: TopicFormProps) {
   const [values, setValues] = useState<TopicFormValues>(initialValues);
   const [localError, setLocalError] = useState<string | null>(null);
+  const singleForum = forums.length === 1 ? forums[0] : null;
 
   useEffect(() => {
     setValues(initialValues);
   }, [initialValues]);
+
+  useEffect(() => {
+    if (singleForum && values.forum_id !== String(singleForum.id)) {
+      setValues((current) => ({
+        ...current,
+        forum_id: String(singleForum.id),
+      }));
+    }
+  }, [singleForum, values.forum_id]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLocalError(null);
 
     if (!values.forum_id) {
-      setLocalError("Selecciona um fórum.");
+      setLocalError("Não foi possível carregar o fórum. Recarrega a página.");
       return;
     }
 
@@ -54,30 +96,53 @@ export function TopicForm({
       {errorMessage ? <Toast variant="error" message={errorMessage} /> : null}
       {localError ? <Toast variant="error" message={localError} /> : null}
 
-      <label className="block space-y-2">
-        <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
-          Fórum
-        </span>
-        <select
-          value={values.forum_id}
-          onChange={(event) =>
-            setValues((current) => ({ ...current, forum_id: event.target.value }))
-          }
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
-          required
-        >
-          <option value="">Seleccionar fórum</option>
-          {forums.map((forum) => (
-            <option key={forum.id} value={forum.id}>
-              {forum.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      {singleForum ? (
+        <div className="rounded-xl border border-petrol/20 bg-petrol/5 p-4 dark:border-petrol-dark/30 dark:bg-petrol-dark/10">
+          <p className="text-xs font-semibold uppercase tracking-wide text-petrol dark:text-petrol-dark">
+            Fórum
+          </p>
+          <p className="mt-1 font-display text-lg font-bold text-slate-900 dark:text-content-dark-primary">
+            {singleForum.name}
+          </p>
+          {singleForum.description ? (
+            <p className="mt-2 text-sm text-slate-600 dark:text-content-dark-secondary">
+              {singleForum.description}
+            </p>
+          ) : null}
+          <p className="mt-3 text-xs text-slate-500 dark:text-content-dark-tertiary">
+            Os tópicos são debates dentro deste fórum. Não precisas de criar
+            fóruns separados — o Jindungo usa um espaço central de debates.
+          </p>
+        </div>
+      ) : (
+        <label className="block space-y-2">
+          <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+            Fórum
+          </span>
+          <select
+            value={values.forum_id}
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                forum_id: event.target.value,
+              }))
+            }
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
+            required
+          >
+            <option value="">Seleccionar fórum</option>
+            {forums.map((forum) => (
+              <option key={forum.id} value={forum.id}>
+                {forum.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <label className="block space-y-2">
         <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
-          Título
+          Título do tópico
         </span>
         <Input
           value={values.title}
@@ -96,7 +161,10 @@ export function TopicForm({
         <textarea
           value={values.description}
           onChange={(event) =>
-            setValues((current) => ({ ...current, description: event.target.value }))
+            setValues((current) => ({
+              ...current,
+              description: event.target.value,
+            }))
           }
           rows={4}
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
@@ -117,41 +185,57 @@ export function TopicForm({
         />
       </label>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-border-dark dark:bg-surface-dark-secondary">
-          <input
-            type="checkbox"
-            checked={values.is_visible}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                is_visible: event.target.checked,
-              }))
-            }
-            className="h-4 w-4 rounded border-slate-300 text-bordeaux focus:ring-bordeaux"
-          />
-          <span className="text-sm font-medium text-slate-700 dark:text-content-dark-secondary">
-            Visível na área pública
-          </span>
-        </label>
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+          Visibilidade do tópico
+        </legend>
+        <div className="grid gap-3 md:grid-cols-3">
+          {VISIBILITY_OPTIONS.map((option) => {
+            const Icon = option.icon;
+            const isSelected = values.visibility === option.value;
 
-        <label className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-border-dark dark:bg-surface-dark-secondary">
-          <input
-            type="checkbox"
-            checked={values.is_private}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                is_private: event.target.checked,
-              }))
-            }
-            className="h-4 w-4 rounded border-slate-300 text-bordeaux focus:ring-bordeaux"
-          />
-          <span className="text-sm font-medium text-slate-700 dark:text-content-dark-secondary">
-            Debate privado (só utilizadores convidados)
-          </span>
-        </label>
-      </div>
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() =>
+                  setValues((current) => ({
+                    ...current,
+                    visibility: option.value,
+                  }))
+                }
+                className={cn(
+                  "rounded-xl border p-4 text-left transition-all",
+                  isSelected
+                    ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
+                    : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={cn(
+                      "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                      isSelected
+                        ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
+                        : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                    )}
+                  >
+                    <Icon className="h-5 w-5" strokeWidth={1.5} />
+                  </span>
+                  <span>
+                    <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                      {option.description}
+                    </span>
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
 
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={isSubmitting}>

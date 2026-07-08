@@ -138,6 +138,35 @@ class TopicTest extends TestCase
         $this->assertDatabaseMissing('topics', ['id' => $topic->id]);
     }
 
+    public function test_forums_index_ensures_default_forum(): void
+    {
+        $response = $this->getJson('/api/forums');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'debates')
+            ->assertJsonPath('data.0.name', 'Debates');
+
+        $this->assertDatabaseHas('forums', ['slug' => 'debates']);
+    }
+
+    public function test_cannot_create_topic_as_public_and_private(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $forum = $this->createForum();
+        Sanctum::actingAs($admin);
+
+        $response = $this->postJson('/api/topics', [
+            'forum_id' => $forum->id,
+            'title' => 'Tópico inválido',
+            'is_visible' => true,
+            'is_private' => true,
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['is_private']);
+    }
+
     public function test_non_admin_cannot_create_topic(): void
     {
         $user = User::factory()->create();
