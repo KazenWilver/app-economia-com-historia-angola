@@ -27,6 +27,12 @@ class LoginController extends Controller
             ], 401);
         }
 
+        if ($user->is_active === false) {
+            return response()->json([
+                'message' => 'Conta desactivada. Contacta o administrador.',
+            ], 403);
+        }
+
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([

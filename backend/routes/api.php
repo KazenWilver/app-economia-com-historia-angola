@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -45,6 +46,8 @@ Route::middleware('auth.api:sanctum')->group(function () {
 
 Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
     Route::get('/admin/contents', [ContentController::class, 'adminIndex']);
+    Route::get('/admin/users', [UserController::class, 'adminIndex']);
+    Route::put('/admin/users/{user}', [UserController::class, 'updateStatus']);
     Route::post('/contents', [ContentController::class, 'store']);
     Route::put('/contents/{content}', [ContentController::class, 'update']);
     Route::post('/contents/{content}', [ContentController::class, 'update']);
