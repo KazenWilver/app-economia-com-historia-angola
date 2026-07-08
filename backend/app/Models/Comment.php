@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Comment extends Model
 {
@@ -46,9 +47,9 @@ class Comment extends Model
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, self>
+     * @return Collection<int, self>
      */
-    public static function treeForContent(int $contentId): \Illuminate\Support\Collection
+    public static function treeForContent(int $contentId): Collection
     {
         $allComments = static::query()
             ->where('content_id', $contentId)

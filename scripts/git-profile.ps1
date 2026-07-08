@@ -46,15 +46,24 @@ function Commit-Git {
 }
 
 function Push-Git {
-  param([ValidateSet("willfredy", "sulo")][string]$Who = "willfredy")
+  param(
+    [ValidateSet("willfredy", "sulo")][string]$Who = "willfredy",
+    [switch]$SkipChecks
+  )
+
+  if (-not $SkipChecks) {
+    $checkScript = Join-Path $PSScriptRoot "check-ci.ps1"
+    if (Test-Path $checkScript) {
+      Write-Host "A correr verificações de CI locais..." -ForegroundColor Yellow
+      & $checkScript
+      if ($LASTEXITCODE -ne 0) {
+        throw "Verificações de CI falharam. Corrige os erros ou usa -SkipChecks."
+      }
+    }
+  }
 
   Use-Git $Who
-
-  if ($Who -eq "sulo") {
-    git push origin-sulo @args
-  } else {
-    git push origin-willfredy @args
-  }
+  git push @args
 }
 
 # Configuração única dos remotes (correr uma vez, se usares SSH por conta):
