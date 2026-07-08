@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminStatsController;
 use App\Http\Controllers\Auth\AdminRegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
@@ -45,6 +46,7 @@ Route::middleware('auth.api:sanctum')->group(function () {
 });
 
 Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
+    Route::get('/admin/stats', [AdminStatsController::class, 'index']);
     Route::get('/admin/contents', [ContentController::class, 'adminIndex']);
     Route::get('/admin/users', [UserController::class, 'adminIndex']);
     Route::put('/admin/users/{user}', [UserController::class, 'updateStatus']);
