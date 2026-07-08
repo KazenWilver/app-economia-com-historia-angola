@@ -74,6 +74,32 @@ class ContentController extends Controller
             ->withHeaders($this->publicCacheHeaders());
     }
 
+    /**
+     * Listagem completa para o painel admin (todos os estados).
+     */
+    public function adminIndex(Request $request): AnonymousResourceCollection
+    {
+        $request->validate([
+            'type' => ['nullable', Rule::in(['texto', 'audio', 'video', 'podcast', 'jindungo'])],
+            'status' => ['nullable', Rule::in(['draft', 'published', 'archived'])],
+        ]);
+
+        $contents = Content::query()
+            ->with(['category:id,name,slug', 'author:id,name,email'])
+            ->when(
+                $request->filled('type'),
+                fn ($query) => $query->where('type', $request->string('type')->toString())
+            )
+            ->when(
+                $request->filled('status'),
+                fn ($query) => $query->where('status', $request->string('status')->toString())
+            )
+            ->latest('updated_at')
+            ->get();
+
+        return ContentResource::collection($contents);
+    }
+
     public function show(Request $request, Content $content): ContentResource|JsonResponse
     {
         if ($content->status !== 'published' && $request->user('sanctum')?->role !== 'admin') {

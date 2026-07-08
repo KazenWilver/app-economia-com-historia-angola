@@ -30,6 +30,38 @@ class ContentTest extends TestCase
             ->assertJsonPath('data.0.title', 'Conteúdo Publicado');
     }
 
+    public function test_admin_can_list_all_content_statuses(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Content::factory()->ofType('texto')->create([
+            'title' => 'Publicado',
+            'status' => 'published',
+        ]);
+        Content::factory()->draft()->create([
+            'title' => 'Rascunho',
+        ]);
+        Content::factory()->create([
+            'title' => 'Arquivado',
+            'status' => 'archived',
+        ]);
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/admin/contents');
+
+        $response->assertOk()
+            ->assertJsonCount(3, 'data');
+    }
+
+    public function test_non_admin_cannot_list_admin_contents(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/admin/contents');
+
+        $response->assertForbidden();
+    }
+
     public function test_guest_can_filter_contents_by_type(): void
     {
         Content::factory()->ofType('audio')->create(['title' => 'Áudio Angola']);

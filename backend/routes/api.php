@@ -44,7 +44,9 @@ Route::middleware('auth.api:sanctum')->group(function () {
 });
 
 Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
+    Route::get('/admin/contents', [ContentController::class, 'adminIndex']);
     Route::post('/contents', [ContentController::class, 'store']);
     Route::put('/contents/{content}', [ContentController::class, 'update']);
+    Route::post('/contents/{content}', [ContentController::class, 'update']);
     Route::delete('/contents/{content}', [ContentController::class, 'destroy']);
 });

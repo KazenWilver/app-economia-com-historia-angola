@@ -35,7 +35,7 @@ class UpdateContentRequest extends FormRequest
             'body' => ['nullable', 'string'],
             'type' => ['sometimes', Rule::in(['texto', 'audio', 'video', 'podcast', 'jindungo'])],
             ...$this->mediaRules(),
-            'media_url' => ['nullable', 'string', 'url', 'max:500'],
+            'media_url' => ['nullable', 'string', 'max:500'],
             'statistics_data' => ['nullable', 'string'],
             'is_exclusive' => ['sometimes', 'boolean'],
             'status' => ['sometimes', Rule::in(['draft', 'published', 'archived'])],
@@ -53,7 +53,6 @@ class UpdateContentRequest extends FormRequest
             'title.required' => 'O título é obrigatório.',
             'type.in' => 'O tipo de conteúdo é inválido.',
             'slug.unique' => 'Este slug já está em uso.',
-            'media_url.url' => 'O URL de media deve ser válido.',
             ...$this->mediaMessages(),
         ];
     }
