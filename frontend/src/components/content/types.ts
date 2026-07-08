@@ -25,6 +25,26 @@ export interface ContentDetail {
   author: Author | null;
 }
 
+export interface ContentItem {
+  id: number;
+  title: string;
+  slug: string;
+  body: string | null;
+  type: ContentType;
+  media_url: string | null;
+  is_exclusive: boolean | null;
+  published_at: string | null;
+  category: Category | null;
+}
+
+export interface ContentsResponse {
+  data: ContentItem[];
+}
+
+export interface ContentDetailResponse {
+  data: ContentDetail;
+}
+
 export interface CommentUser {
   id: number;
   name: string;
@@ -38,10 +58,6 @@ export interface CommentItem {
   user: CommentUser;
   replies: CommentItem[];
   created_at: string;
-}
-
-export interface ContentDetailResponse {
-  data: ContentDetail;
 }
 
 export interface CommentsResponse {
