@@ -8,6 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class UpdateTopicRequest extends FormRequest
 {
     use ValidatesTopicVisibility;
+
     public function authorize(): bool
     {
         return true;

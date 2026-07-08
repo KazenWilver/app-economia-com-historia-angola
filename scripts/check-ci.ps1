@@ -2,6 +2,9 @@
 # Uso: .\scripts\check-ci.ps1
 #      .\scripts\check-ci.ps1 -BackendOnly
 #      .\scripts\check-ci.ps1 -Fix
+#
+# Nota Windows: vendor/bin/pint é um script PHP — sem `php` no PATH ou Docker,
+# o Pint não corre de verdade e o CI local pode passar sem formatar nada.
 
 param(
     [switch]$BackendOnly,
@@ -19,32 +22,84 @@ function Write-Step {
     Write-Host "==> $Message" -ForegroundColor Cyan
 }
 
+function Test-CommandAvailable {
+    param([string]$Name)
+
+    return [bool](Get-Command $Name -ErrorAction SilentlyContinue)
+}
+
+function Invoke-DockerCompose {
+    param(
+        [Parameter(Mandatory)][string[]]$ComposeArgs
+    )
+
+    # Em scripts .ps1 não-interactivos, `docker compose exec` pode bloquear à espera
+    # de stdin. Fechar stdin com `< nul` espelha um terminal real (como no CI Linux).
+    $quotedArgs = ($ComposeArgs | ForEach-Object {
+        if ($_ -match '\s') { '"' + $_ + '"' } else { $_ }
+    }) -join ' '
+
+    $previousErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        cmd /c "docker compose $quotedArgs < nul" 2>&1 | Out-Host
+        return $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+}
+
 function Invoke-BackendPint {
     $pintArgs = if ($Fix) { @() } else { @("--test") }
     $localPint = Join-Path $backendRoot "vendor\bin\pint"
 
-    if (Test-Path $localPint) {
-        Push-Location $backendRoot
+    if (-not (Test-Path $localPint)) {
+        throw "Laravel Pint não encontrado. Corre `composer install` em backend/ ou levanta o Docker."
+    }
+
+    # Preferir Docker — igual ao ambiente Linux do GitHub Actions.
+    if (Test-CommandAvailable "docker") {
+        Push-Location $projectRoot
         try {
-            & $localPint @pintArgs
-            if (-not $?) {
-                throw "Laravel Pint falhou."
+            $backendRunning = docker compose ps --status running --services backend 2>$null
+            $pintCommand = @("vendor/bin/pint") + $pintArgs
+
+            if ($backendRunning -match "backend") {
+                $exitCode = Invoke-DockerCompose -ComposeArgs (@("exec", "-T", "backend") + $pintCommand)
+            } else {
+                $exitCode = Invoke-DockerCompose -ComposeArgs (@("run", "--rm", "--no-deps", "backend") + $pintCommand)
+            }
+
+            if ($exitCode -ne 0) {
+                throw "Laravel Pint falhou (Docker). Usa -Fix para corrigir automaticamente."
             }
         } finally {
             Pop-Location
         }
+
         return
     }
 
-    Push-Location $projectRoot
-    try {
-        docker compose run --rm backend vendor/bin/pint @pintArgs
-        if (-not $?) {
-            throw "Laravel Pint falhou (Docker)."
+    # Fallback local: exige PHP explícito (Windows não executa vendor/bin/pint sozinho).
+    if (Test-CommandAvailable "php") {
+        Push-Location $backendRoot
+        try {
+            & php vendor/bin/pint @pintArgs
+            if ($LASTEXITCODE -ne 0) {
+                throw "Laravel Pint falhou. Usa -Fix para corrigir automaticamente."
+            }
+        } finally {
+            Pop-Location
         }
-    } finally {
-        Pop-Location
+
+        return
     }
+
+    throw @"
+Laravel Pint não pode correr nesta máquina.
+- Instala Docker Desktop e corre novamente, ou
+- Adiciona PHP ao PATH e corre: php backend/vendor/bin/pint --test
+"@
 }
 
 function Invoke-FrontendLint {
