@@ -25,6 +25,7 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'province_id' => ['required', 'integer', 'exists:provinces,id'],
             'password' => ['required', 'confirmed', Password::min(8)],
         ];
     }
@@ -41,6 +42,8 @@ class StoreUserRequest extends FormRequest
             'email.required' => 'O email é obrigatório.',
             'email.email' => 'O email deve ser válido.',
             'email.unique' => 'Este email já está registado.',
+            'province_id.required' => 'A província é obrigatória.',
+            'province_id.exists' => 'A província seleccionada é inválida.',
             'password.required' => 'A palavra-passe é obrigatória.',
             'password.confirmed' => 'A confirmação da palavra-passe não coincide.',
         ];

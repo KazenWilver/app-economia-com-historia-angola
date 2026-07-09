@@ -16,7 +16,7 @@ class ProfileController extends Controller
     public function show(Request $request): JsonResponse
     {
         return response()->json([
-            'user' => new UserResource($request->user()),
+            'user' => new UserResource($request->user()->load('province')),
         ]);
     }
 
@@ -26,11 +26,11 @@ class ProfileController extends Controller
     public function update(UpdateProfileRequest $request): JsonResponse
     {
         $user = $request->user();
-        $user->update($request->safe()->only(['name', 'email', 'phone', 'avatar_url']));
+        $user->update($request->safe()->only(['name', 'email', 'phone', 'avatar_url', 'province_id']));
 
         return response()->json([
             'message' => 'Perfil actualizado com sucesso.',
-            'user' => new UserResource($user->fresh()),
+            'user' => new UserResource($user->fresh()->load('province')),
         ]);
     }
 }

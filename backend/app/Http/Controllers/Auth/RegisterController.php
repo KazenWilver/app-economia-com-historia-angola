@@ -18,6 +18,7 @@ class RegisterController extends Controller
         $user = User::query()->create([
             'name' => $request->string('name')->toString(),
             'email' => $request->string('email')->toString(),
+            'province_id' => $request->integer('province_id'),
             'password' => $request->string('password')->toString(),
             'role' => 'user',
         ]);
@@ -25,7 +26,7 @@ class RegisterController extends Controller
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'user' => new UserResource($user),
+            'user' => new UserResource($user->load('province')),
             'token' => $token,
         ], 201);
     }

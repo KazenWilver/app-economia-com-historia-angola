@@ -22,6 +22,12 @@ export interface User {
   phone: string | null;
   role: "user" | "admin";
   avatar_url: string | null;
+  province_id: number | null;
+  province: {
+    id: number;
+    name: string;
+    code: string;
+  } | null;
 }
 
 interface AuthResponse {
@@ -44,7 +50,9 @@ interface AuthContextValue {
     email: string,
     password: string,
     passwordConfirmation: string,
+    provinceId: number,
   ) => Promise<User>;
+  updateProfile: (payload: { province_id: number }) => Promise<User>;
   registerAdmin: (
     name: string,
     email: string,
@@ -228,12 +236,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persistSession],
   );
 
+  const updateProfile = useCallback(
+    async (payload: { province_id: number }) => {
+      const activeToken = token ?? readStoredToken();
+
+      if (!activeToken) {
+        throw new Error("Sessão inválida.");
+      }
+
+      const response = await fetch(`${API_URL}/auth/profile`, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${activeToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(await parseErrorMessage(response));
+      }
+
+      const data = (await response.json()) as { user: User };
+      persistSession(data.user, activeToken);
+      return data.user;
+    },
+    [persistSession, token],
+  );
+
   const register = useCallback(
     async (
       name: string,
       email: string,
       password: string,
       passwordConfirmation: string,
+      provinceId: number,
     ) => {
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
@@ -246,6 +284,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email,
           password,
           password_confirmation: passwordConfirmation,
+          province_id: provinceId,
         }),
       });
 
@@ -331,6 +370,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: Boolean(user && token),
       login,
       register,
+      updateProfile,
       registerAdmin,
       logout,
       getFirstName,
@@ -343,6 +383,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       register,
+      updateProfile,
       registerAdmin,
       logout,
       setWelcomeMessage,

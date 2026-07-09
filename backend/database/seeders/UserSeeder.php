@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Province;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,8 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $defaultProvinceId = Province::query()->where('code', 'LUA')->value('id');
+
         User::query()->updateOrCreate(
             ['email' => 'admin@jindungo.ao'],
             [
@@ -20,6 +23,7 @@ class UserSeeder extends Seeder
                 'role' => 'admin',
                 'phone' => null,
                 'avatar_url' => null,
+                'province_id' => $defaultProvinceId,
                 'email_verified_at' => now(),
             ]
         );
@@ -32,6 +36,7 @@ class UserSeeder extends Seeder
                 'role' => 'user',
                 'phone' => '+244900000001',
                 'avatar_url' => null,
+                'province_id' => $defaultProvinceId,
                 'email_verified_at' => now(),
             ]
         );
@@ -44,6 +49,7 @@ class UserSeeder extends Seeder
                 'role' => 'user',
                 'phone' => '+244900000002',
                 'avatar_url' => null,
+                'province_id' => $defaultProvinceId,
                 'email_verified_at' => now(),
             ]
         );

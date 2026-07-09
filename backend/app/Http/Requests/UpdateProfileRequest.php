@@ -46,6 +46,7 @@ class UpdateProfileRequest extends FormRequest
             ],
             'phone' => ['nullable', 'string', 'max:20'],
             'avatar_url' => ['nullable', 'string', 'url', 'max:500'],
+            'province_id' => ['sometimes', 'required', 'integer', 'exists:provinces,id'],
         ];
     }
 
@@ -62,6 +63,8 @@ class UpdateProfileRequest extends FormRequest
             'email.email' => 'O email deve ser válido.',
             'email.unique' => 'Este email já está registado.',
             'avatar_url.url' => 'O avatar deve ser um URL válido.',
+            'province_id.required' => 'A província é obrigatória.',
+            'province_id.exists' => 'A província seleccionada é inválida.',
         ];
     }
 }
