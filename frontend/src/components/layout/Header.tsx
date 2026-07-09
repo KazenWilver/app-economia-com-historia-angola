@@ -48,12 +48,6 @@ export function Header() {
                 </span>
               </span>
               <Link
-                href="/explorar"
-                className="hidden min-h-11 items-center rounded-lg px-3 font-display text-sm font-semibold text-content-primary transition-colors hover:bg-surface-secondary hover:text-bordeaux focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux md:inline-flex dark:text-content-dark-primary dark:hover:bg-surface-dark-secondary dark:hover:text-bordeaux-dark dark:focus-visible:outline-bordeaux-dark"
-              >
-                Explorar
-              </Link>
-              <Link
                 href="/perfil"
                 className="hidden min-h-11 items-center gap-2 rounded-lg px-3 font-display text-sm font-semibold text-content-primary transition-colors hover:bg-surface-secondary hover:text-bordeaux focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux md:inline-flex dark:text-content-dark-primary dark:hover:bg-surface-dark-secondary dark:hover:text-bordeaux-dark dark:focus-visible:outline-bordeaux-dark"
                 aria-label="Perfil"
