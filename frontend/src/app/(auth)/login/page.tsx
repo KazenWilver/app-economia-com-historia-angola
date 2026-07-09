@@ -172,6 +172,15 @@ function LoginForm() {
               onChange={(event) => handleChange("password", event.target.value)}
             />
 
+            <div className="text-right">
+              <Link
+                href="/recuperar-palavra-passe"
+                className="text-sm font-medium text-bordeaux hover:underline dark:text-bordeaux-dark"
+              >
+                Esqueci a palavra-passe
+              </Link>
+            </div>
+
             <Button type="submit" className="w-full" isLoading={isSubmitting}>
               Entrar
             </Button>

@@ -161,6 +161,15 @@ export default function AdminLoginPage() {
             onChange={(event) => handleChange("password", event.target.value)}
           />
 
+          <div className="text-right">
+            <Link
+              href="/admin/recuperar-palavra-passe"
+              className="text-sm font-medium text-bordeaux-dark hover:underline"
+            >
+              Esqueci a palavra-passe
+            </Link>
+          </div>
+
           <Button type="submit" className="w-full" isLoading={isSubmitting}>
             Entrar no painel
           </Button>
