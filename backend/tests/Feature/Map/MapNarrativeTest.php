@@ -36,6 +36,42 @@ class MapNarrativeTest extends TestCase
             ->assertJsonPath('data.0.code', 'LUA');
     }
 
+    public function test_guest_can_fetch_provinces_geojson(): void
+    {
+        $province = $this->createProvince();
+
+        $response = $this->getJson('/api/provinces/geojson');
+
+        $response->assertOk()
+            ->assertJsonPath('type', 'FeatureCollection')
+            ->assertJsonCount(1, 'features')
+            ->assertJsonPath('features.0.properties.id', $province->id)
+            ->assertJsonPath('features.0.properties.name', 'Luanda')
+            ->assertJsonPath('features.0.geometry.type', 'Point')
+            ->assertJsonPath('features.0.geometry.coordinates.0', 13.2343)
+            ->assertJsonPath('features.0.geometry.coordinates.1', -8.8368);
+    }
+
+    public function test_guest_can_view_province_with_narratives(): void
+    {
+        $province = $this->createProvince();
+
+        MapNarrative::query()->create([
+            'province_id' => $province->id,
+            'title' => 'Luanda colonial',
+            'narrative_text' => 'História económica de Luanda.',
+            'period' => 'colonial',
+            'display_order' => 1,
+        ]);
+
+        $response = $this->getJson("/api/provinces/{$province->id}");
+
+        $response->assertOk()
+            ->assertJsonPath('data.name', 'Luanda')
+            ->assertJsonCount(1, 'data.narratives')
+            ->assertJsonPath('data.narratives.0.title', 'Luanda colonial');
+    }
+
     public function test_admin_can_list_map_narratives(): void
     {
         $admin = User::factory()->admin()->create();

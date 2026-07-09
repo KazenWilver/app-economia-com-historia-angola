@@ -59,6 +59,7 @@ Route::get('/topics', [TopicController::class, 'index']);
 Route::get('/topics/{topic}', [TopicController::class, 'show']);
 Route::get('/topics/{topic}/replies', [ReplyController::class, 'index']);
 Route::get('/forums', [TopicController::class, 'forumsIndex']);
+Route::get('/provinces/geojson', [MapNarrativeController::class, 'provincesGeoJson']);
 Route::get('/provinces', [MapNarrativeController::class, 'provincesIndex']);
 Route::get('/provinces/{province}', [MapNarrativeController::class, 'provinceShow']);
 

@@ -13,6 +13,74 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class MapNarrativeController extends Controller
 {
+    public function provincesGeoJson(): JsonResponse
+    {
+        $provinces = Province::query()
+            ->withCount('narratives')
+            ->orderBy('name')
+            ->get();
+
+        $features = $provinces
+            ->map(fn (Province $province): ?array => $this->provinceToGeoJsonFeature($province))
+            ->filter()
+            ->values();
+
+        return response()->json([
+            'type' => 'FeatureCollection',
+            'features' => $features,
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function provinceToGeoJsonFeature(Province $province): ?array
+    {
+        $geometry = $this->resolveProvinceGeometry($province);
+
+        if ($geometry === null) {
+            return null;
+        }
+
+        return [
+            'type' => 'Feature',
+            'properties' => [
+                'id' => $province->id,
+                'name' => $province->name,
+                'code' => $province->code,
+                'capital' => $province->capital,
+                'narratives_count' => (int) ($province->narratives_count ?? 0),
+            ],
+            'geometry' => $geometry,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function resolveProvinceGeometry(Province $province): ?array
+    {
+        if ($province->geojson_data) {
+            $decoded = json_decode($province->geojson_data, true);
+
+            if (is_array($decoded) && isset($decoded['type'])) {
+                return $decoded;
+            }
+        }
+
+        if ($province->latitude === null || $province->longitude === null) {
+            return null;
+        }
+
+        return [
+            'type' => 'Point',
+            'coordinates' => [
+                (float) $province->longitude,
+                (float) $province->latitude,
+            ],
+        ];
+    }
+
     public function provincesIndex(): AnonymousResourceCollection
     {
         $provinces = Province::query()
