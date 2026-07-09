@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Reply extends Model
 {
@@ -36,5 +39,39 @@ class Reply extends Model
     public function replies(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public static function treeForTopic(int $topicId): Collection
+    {
+        $allReplies = static::query()
+            ->where('topic_id', $topicId)
+            ->with('user')
+            ->get();
+
+        $childrenByParent = $allReplies->groupBy(
+            fn (self $reply): string => (string) ($reply->parent_id ?? 'root')
+        );
+
+        $attachReplies = function (self $reply) use ($childrenByParent, &$attachReplies): void {
+            $replies = $childrenByParent
+                ->get((string) $reply->id, collect())
+                ->sortBy('created_at')
+                ->values();
+
+            $replies->each(function (self $nestedReply) use ($attachReplies): void {
+                $attachReplies($nestedReply);
+            });
+
+            $reply->setRelation('replies', $replies);
+        };
+
+        return $childrenByParent
+            ->get('root', collect())
+            ->sortBy('created_at')
+            ->values()
+            ->each($attachReplies);
     }
 }

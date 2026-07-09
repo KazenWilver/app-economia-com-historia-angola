@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\ValidatesTopicVisibility;
+use App\Models\Topic;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTopicRequest extends FormRequest
@@ -11,7 +12,9 @@ class UpdateTopicRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        $topic = $this->route('topic');
+
+        return $topic instanceof Topic && ($this->user()?->can('update', $topic) ?? false);
     }
 
     /**

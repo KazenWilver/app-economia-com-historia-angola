@@ -3,15 +3,21 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\ValidatesTopicVisibility;
+use App\Models\Topic;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTopicRequest extends FormRequest
 {
     use ValidatesTopicVisibility;
 
-    public function authorize(): bool
+    protected function shouldRestrictHiddenTopicCreation(): bool
     {
         return true;
+    }
+
+    public function authorize(): bool
+    {
+        return $this->user()?->can('create', Topic::class) ?? false;
     }
 
     /**

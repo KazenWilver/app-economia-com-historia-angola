@@ -15,6 +15,7 @@ use App\Http\Controllers\MediaStreamController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,8 @@ Route::get('/quizzes', [QuizController::class, 'index']);
 Route::get('/quizzes/{quiz}', [QuizController::class, 'show']);
 Route::get('/rankings', [RankingController::class, 'index']);
 Route::get('/topics', [TopicController::class, 'index']);
+Route::get('/topics/{topic}', [TopicController::class, 'show']);
+Route::get('/topics/{topic}/replies', [ReplyController::class, 'index']);
 Route::get('/forums', [TopicController::class, 'forumsIndex']);
 Route::get('/provinces', [MapNarrativeController::class, 'provincesIndex']);
 Route::get('/provinces/{province}', [MapNarrativeController::class, 'provinceShow']);
@@ -63,6 +66,11 @@ Route::middleware('auth.api:sanctum')->group(function () {
     Route::delete('/contents/{content}/comments/{comment}', [CommentController::class, 'destroy']);
     Route::post('/quizzes/{quiz}/attempt', [QuizAttemptController::class, 'store']);
     Route::post('/quizzes/{quiz}/questions/{question}/feedback', [QuizAttemptController::class, 'questionFeedback']);
+    Route::post('/topics', [TopicController::class, 'store']);
+    Route::put('/topics/{topic}', [TopicController::class, 'update']);
+    Route::delete('/topics/{topic}', [TopicController::class, 'destroy']);
+    Route::post('/topics/{topic}/replies', [ReplyController::class, 'store']);
+    Route::delete('/topics/{topic}/replies/{reply}', [ReplyController::class, 'destroy']);
 });
 
 Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
@@ -83,9 +91,6 @@ Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
     Route::post('/quizzes', [QuizController::class, 'store']);
     Route::put('/quizzes/{quiz}', [QuizController::class, 'update']);
     Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy']);
-    Route::post('/topics', [TopicController::class, 'store']);
-    Route::put('/topics/{topic}', [TopicController::class, 'update']);
-    Route::delete('/topics/{topic}', [TopicController::class, 'destroy']);
     Route::post('/map-narratives', [MapNarrativeController::class, 'store']);
     Route::put('/map-narratives/{mapNarrative}', [MapNarrativeController::class, 'update']);
     Route::delete('/map-narratives/{mapNarrative}', [MapNarrativeController::class, 'destroy']);

@@ -9,11 +9,16 @@ use App\Http\Resources\TopicResource;
 use App\Models\Forum;
 use App\Models\Topic;
 use App\Services\ForumService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Gate;
 
 class TopicController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         private readonly ForumService $forumService
     ) {}
@@ -23,12 +28,26 @@ class TopicController extends Controller
         $topics = Topic::query()
             ->where('is_visible', true)
             ->where('is_private', false)
-            ->with(['forum:id,name,slug'])
+            ->with(['forum:id,name,slug', 'user:id,name'])
             ->withCount('replies')
             ->latest('updated_at')
             ->get();
 
         return TopicResource::collection($topics);
+    }
+
+    public function show(Request $request, Topic $topic): TopicResource|JsonResponse
+    {
+        if (! Gate::forUser($request->user('sanctum'))->allows('view', $topic)) {
+            return response()->json([
+                'message' => 'Tópico não encontrado.',
+            ], 404);
+        }
+
+        $topic->load(['forum', 'user']);
+        $topic->loadCount('replies');
+
+        return new TopicResource($topic);
     }
 
     public function adminIndex(): AnonymousResourceCollection
@@ -94,6 +113,8 @@ class TopicController extends Controller
 
     public function destroy(Topic $topic): JsonResponse
     {
+        $this->authorize('delete', $topic);
+
         $topic->delete();
 
         return response()->json([

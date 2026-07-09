@@ -6,6 +6,11 @@ use Illuminate\Validation\Validator;
 
 trait ValidatesTopicVisibility
 {
+    protected function shouldRestrictHiddenTopicCreation(): bool
+    {
+        return false;
+    }
+
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
@@ -20,6 +25,18 @@ trait ValidatesTopicVisibility
                 $validator->errors()->add(
                     'is_private',
                     'Um tópico não pode ser público e privado ao mesmo tempo.'
+                );
+            }
+
+            if (
+                $this->shouldRestrictHiddenTopicCreation()
+                && $this->user()?->role !== 'admin'
+                && $this->has('is_visible')
+                && ! $isVisible
+            ) {
+                $validator->errors()->add(
+                    'is_visible',
+                    'Apenas administradores podem criar tópicos ocultos.'
                 );
             }
         });
