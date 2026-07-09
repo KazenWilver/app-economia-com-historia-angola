@@ -15,6 +15,7 @@ use App\Http\Controllers\MediaStreamController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UserController;
@@ -66,6 +67,8 @@ Route::middleware('auth.api:sanctum')->group(function () {
     Route::delete('/contents/{content}/comments/{comment}', [CommentController::class, 'destroy']);
     Route::post('/quizzes/{quiz}/attempt', [QuizAttemptController::class, 'store']);
     Route::post('/quizzes/{quiz}/questions/{question}/feedback', [QuizAttemptController::class, 'questionFeedback']);
+    Route::get('/recommendations', [RecommendationController::class, 'index']);
+    Route::patch('/recommendations/{recommendation}/read', [RecommendationController::class, 'markAsRead']);
     Route::post('/topics', [TopicController::class, 'store']);
     Route::put('/topics/{topic}', [TopicController::class, 'update']);
     Route::delete('/topics/{topic}', [TopicController::class, 'destroy']);

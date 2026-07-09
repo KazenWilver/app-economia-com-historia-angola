@@ -21,6 +21,7 @@ class QuizAttemptResource extends JsonResource
             'time_spent_seconds' => $this->time_spent_seconds,
             'completed_at' => $this->completed_at,
             'answers' => QuizAttemptAnswerResource::collection($this->whenLoaded('answers')),
+            'recommendations' => RecommendationResource::collection($this->whenLoaded('recommendations')),
             'created_at' => $this->created_at,
         ];
     }

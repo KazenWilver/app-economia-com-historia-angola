@@ -5,15 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreQuestionFeedbackRequest;
 use App\Http\Requests\StoreQuizAttemptRequest;
 use App\Http\Resources\QuizAttemptResource;
+use App\Http\Resources\RecommendationResource;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Services\QuizScoringService;
+use App\Services\RecommendationService;
 use Illuminate\Http\JsonResponse;
 
 class QuizAttemptController extends Controller
 {
     public function __construct(
-        private readonly QuizScoringService $quizScoringService
+        private readonly QuizScoringService $quizScoringService,
+        private readonly RecommendationService $recommendationService,
     ) {}
 
     public function store(StoreQuizAttemptRequest $request, Quiz $quiz): JsonResponse
@@ -25,9 +28,17 @@ class QuizAttemptController extends Controller
             timeSpentSeconds: $request->validated('time_spent_seconds'),
         );
 
+        $recommendations = $this->recommendationService->generateForAttempt(
+            $attempt,
+            $request->user(),
+        );
+
+        $attempt->setRelation('recommendations', $recommendations);
+
         return response()->json([
             'message' => 'Tentativa registada com sucesso.',
             'attempt' => new QuizAttemptResource($attempt),
+            'recommendations' => RecommendationResource::collection($recommendations),
         ], 201);
     }
 

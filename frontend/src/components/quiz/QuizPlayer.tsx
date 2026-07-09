@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, Clock, Trophy, XCircle } from "lucide-react";
 import { ProvinceSelectField } from "@/components/auth/ProvinceSelectField";
+import { QuizRecommendations } from "@/components/quiz/QuizRecommendations";
 import {
   formatQuizTimeLimit,
   formatTimer,
@@ -13,6 +14,7 @@ import {
   type QuestionFeedbackResult,
   type QuizAttemptResponse,
   type QuizAttemptResult,
+  type QuizRecommendation,
 } from "@/components/quiz/quiz-types";
 import type { ProvincesResponse } from "@/components/ranking/ranking-types";
 import { Button } from "@/components/ui/Button";
@@ -61,6 +63,9 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [attemptResult, setAttemptResult] = useState<QuizAttemptResult | null>(
     null,
+  );
+  const [recommendations, setRecommendations] = useState<QuizRecommendation[]>(
+    [],
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
@@ -169,6 +174,7 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
         );
 
         setAttemptResult(response.attempt);
+        setRecommendations(response.recommendations ?? []);
         setPhase("results");
       } catch {
         setErrorMessage(
@@ -228,6 +234,7 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
     setFeedbackByQuestion({});
     setPendingAnswerId(null);
     setAttemptResult(null);
+    setRecommendations([]);
     setIsLoadingFeedback(false);
     totalTimeSecondsRef.current = quiz.time_limit_seconds;
     setSecondsLeft(quiz.time_limit_seconds);
@@ -453,6 +460,8 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
             </div>
           </CardContent>
         </Card>
+
+        <QuizRecommendations recommendations={recommendations} />
 
         <div className="space-y-4">
           <h2 className="font-display text-xl font-bold text-content-primary dark:text-content-dark-primary">
