@@ -2,14 +2,21 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     /**
      * Actualiza a tabela de províncias para a divisão de 21 unidades (Lei n.º 14/24).
+     *
+     * Só corre em bases já populadas (upgrade). Instalações novas e testes usam o ProvinceSeeder.
      */
     public function up(): void
     {
+        if (! Schema::hasTable('provinces') || DB::table('provinces')->count() === 0) {
+            return;
+        }
+
         $now = now();
 
         DB::table('provinces')

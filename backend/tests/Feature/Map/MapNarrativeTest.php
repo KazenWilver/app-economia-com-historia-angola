@@ -26,12 +26,13 @@ class MapNarrativeTest extends TestCase
 
     public function test_guest_can_list_provinces(): void
     {
-        $this->createProvince();
+        $province = $this->createProvince();
 
         $response = $this->getJson('/api/provinces');
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $province->id)
             ->assertJsonPath('data.0.code', 'LUA');
     }
 
