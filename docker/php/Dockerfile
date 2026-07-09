@@ -12,5 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
+COPY uploads.ini /usr/local/etc/php/conf.d/zz-uploads.ini
 
 WORKDIR /app
