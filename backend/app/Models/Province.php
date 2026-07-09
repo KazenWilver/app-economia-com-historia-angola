@@ -36,4 +36,9 @@ class Province extends Model
     {
         return $this->hasMany(MapNarrative::class);
     }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 }
