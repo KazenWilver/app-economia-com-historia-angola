@@ -84,6 +84,9 @@ export function MapNarrativeForm({
             </option>
           ))}
         </select>
+        <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
+          A narrativa ficará associada a esta província no mapa público.
+        </p>
       </label>
 
       <label className="block space-y-2">
@@ -98,6 +101,9 @@ export function MapNarrativeForm({
           placeholder="Ex.: Luanda no período colonial"
           required
         />
+        <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
+          Nome curto que o utilizador vê ao seleccionar a província no mapa.
+        </p>
       </label>
 
       <label className="block space-y-2">
@@ -114,10 +120,20 @@ export function MapNarrativeForm({
           }
           rows={8}
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
-          placeholder="Conteúdo histórico-económico da província"
+          placeholder="Descreve factos históricos e económicos relevantes para a região"
           required
         />
+        <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
+          Texto completo apresentado no painel lateral do mapa interactivo.
+        </p>
       </label>
+
+      <div className="rounded-xl border border-border bg-surface-secondary/50 p-4 dark:border-border-dark dark:bg-surface-dark-secondary/40">
+        <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
+          Os campos abaixo são opcionais, mas ajudam a organizar narrativas
+          quando uma província tem mais do que um episódio histórico.
+        </p>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block space-y-2">
@@ -129,8 +145,13 @@ export function MapNarrativeForm({
             onChange={(event) =>
               setValues((current) => ({ ...current, period: event.target.value }))
             }
-            placeholder="Ex.: 1975-2002"
+            placeholder="Ex.: 2000-2026, colonial ou Séc. XIX"
           />
+          <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
+            Etiqueta temporal ou temática mostrada ao público como badge (ex.:
+            «2000-2026»). Não afecta filtros — serve apenas para contextualizar
+            a narrativa.
+          </p>
         </label>
 
         <label className="block space-y-2">
@@ -147,7 +168,12 @@ export function MapNarrativeForm({
                 display_order: event.target.value,
               }))
             }
+            placeholder="0"
           />
+          <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
+            Define a sequência quando existem várias narrativas na mesma
+            província. Número menor aparece primeiro (0, 1, 2…).
+          </p>
         </label>
       </div>
 

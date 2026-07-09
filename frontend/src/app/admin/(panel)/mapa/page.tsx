@@ -109,7 +109,9 @@ export default function AdminMapaPage() {
             Mapa
           </h1>
           <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
-            Gere narrativas histórico-económicas por província.
+            Gere narrativas histórico-económicas por província. O período
+            histórico contextualiza cada narrativa; a ordem de exibição define a
+            sequência no mapa público.
           </p>
         </div>
         <Link href="/admin/mapa/novo">
@@ -160,8 +162,18 @@ export default function AdminMapaPage() {
                   <tr>
                     <th className="px-4 py-3 font-semibold">Título</th>
                     <th className="px-4 py-3 font-semibold">Província</th>
-                    <th className="px-4 py-3 font-semibold">Período</th>
-                    <th className="px-4 py-3 font-semibold">Ordem</th>
+                    <th
+                      className="px-4 py-3 font-semibold"
+                      title="Etiqueta temporal ou temática visível no mapa público"
+                    >
+                      Período histórico
+                    </th>
+                    <th
+                      className="px-4 py-3 font-semibold"
+                      title="Posição na lista quando a província tem várias narrativas (menor = primeiro)"
+                    >
+                      Ordem
+                    </th>
                     <th className="px-4 py-3 font-semibold">Acções</th>
                   </tr>
                 </thead>
