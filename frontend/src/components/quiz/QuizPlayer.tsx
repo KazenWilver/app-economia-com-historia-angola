@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, Clock, Trophy, XCircle } from "lucide-react";
+import { ProvinceSelectField } from "@/components/auth/ProvinceSelectField";
 import {
   formatQuizTimeLimit,
   formatTimer,
@@ -13,6 +14,7 @@ import {
   type QuizAttemptResponse,
   type QuizAttemptResult,
 } from "@/components/quiz/quiz-types";
+import type { ProvincesResponse } from "@/components/ranking/ranking-types";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Toast } from "@/components/ui/Toast";
@@ -40,7 +42,7 @@ function getTimerWarningThreshold(totalSeconds: number): number {
 }
 
 export function QuizPlayer({ quiz }: QuizPlayerProps) {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user, updateProfile } = useAuth();
   const questions = useMemo(
     () => sortQuestions(quiz.questions ?? []),
     [quiz.questions],
@@ -62,6 +64,10 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+  const [provinces, setProvinces] = useState<ProvincesResponse["data"]>([]);
+  const [selectedProvinceId, setSelectedProvinceId] = useState("");
+  const [provinceError, setProvinceError] = useState<string | null>(null);
+  const [isSavingProvince, setIsSavingProvince] = useState(false);
   const submitLockRef = useRef(false);
   const totalTimeSecondsRef = useRef<number | null>(quiz.time_limit_seconds);
   const timeExpiredRef = useRef(false);
@@ -80,6 +86,45 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
       : 30;
 
   const loginHref = `/login?redirect=${encodeURIComponent(`/quiz/${quiz.id}`)}`;
+  const needsProvince = isAuthenticated && !user?.province_id;
+
+  useEffect(() => {
+    if (!needsProvince) {
+      return;
+    }
+
+    const loadProvinces = async () => {
+      try {
+        const data = await apiFetch<ProvincesResponse>("/provinces", {
+          cacheTtlMs: 300_000,
+        });
+        setProvinces(data.data);
+      } catch {
+        setProvinces([]);
+      }
+    };
+
+    void loadProvinces();
+  }, [needsProvince]);
+
+  const saveProvinceAndStart = async () => {
+    if (!selectedProvinceId) {
+      setProvinceError("Selecciona a tua província para aparecer no ranking regional.");
+      return;
+    }
+
+    setIsSavingProvince(true);
+    setProvinceError(null);
+
+    try {
+      await updateProfile({ province_id: Number(selectedProvinceId) });
+      startQuiz();
+    } catch {
+      setProvinceError("Não foi possível guardar a província. Tenta novamente.");
+    } finally {
+      setIsSavingProvince(false);
+    }
+  };
 
   const submitAttempt = useCallback(
     async (finalSelections?: AnswerSelection[]) => {
@@ -330,6 +375,27 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
                 <Link href={loginHref}>
                   <Button type="button">Iniciar sessão</Button>
                 </Link>
+              </div>
+            ) : needsProvince ? (
+              <div className="space-y-4 rounded-xl border border-border bg-surface-secondary p-4 dark:border-border-dark dark:bg-surface-dark-secondary">
+                <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
+                  Para apareceres no ranking por província, indica de onde és
+                  antes de começar o quiz.
+                </p>
+                <ProvinceSelectField
+                  value={selectedProvinceId}
+                  provinces={provinces}
+                  error={provinceError ?? undefined}
+                  onChange={setSelectedProvinceId}
+                />
+                <Button
+                  type="button"
+                  onClick={() => void saveProvinceAndStart()}
+                  className="w-full sm:w-auto"
+                  isLoading={isSavingProvince}
+                >
+                  Guardar província e começar
+                </Button>
               </div>
             ) : (
               <Button type="button" onClick={startQuiz} className="w-full sm:w-auto">
