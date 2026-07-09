@@ -10,6 +10,7 @@ import {
   type AdminQuiz,
   type AdminQuizzesResponse,
 } from "@/components/admin/quiz-types";
+import { AdminConfirmDeleteModal } from "@/components/admin/AdminConfirmDeleteModal";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -42,6 +43,7 @@ export default function AdminQuizzesPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [quizToDelete, setQuizToDelete] = useState<AdminQuiz | null>(null);
 
   const loadQuizzes = useCallback(async () => {
     if (!token) {
@@ -93,29 +95,24 @@ export default function AdminQuizzesPage() {
     return quizzes.filter((quiz) => !quiz.is_active);
   }, [quizzes, statusFilter]);
 
-  const handleDelete = async (quiz: AdminQuiz) => {
-    if (!token) {
+  const confirmDelete = async () => {
+    if (!token || !quizToDelete) {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Eliminar o quiz "${quiz.title}"? Esta acção não pode ser desfeita.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setBusyId(quiz.id);
+    setBusyId(quizToDelete.id);
     setErrorMessage(null);
 
     try {
-      await adminFetch(`/quizzes/${quiz.id}`, {
+      await adminFetch(`/quizzes/${quizToDelete.id}`, {
         method: "DELETE",
         token,
       });
-      setQuizzes((current) => current.filter((item) => item.id !== quiz.id));
+      setQuizzes((current) =>
+        current.filter((item) => item.id !== quizToDelete.id),
+      );
       setSuccessMessage("Quiz eliminado com sucesso.");
+      setQuizToDelete(null);
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -274,7 +271,7 @@ export default function AdminQuizzesPage() {
                           <button
                             type="button"
                             disabled={busyId === quiz.id}
-                            onClick={() => void handleDelete(quiz)}
+                            onClick={() => setQuizToDelete(quiz)}
                             className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={1.5} />
@@ -290,6 +287,21 @@ export default function AdminQuizzesPage() {
           )}
         </CardContent>
       </Card>
+
+      <AdminConfirmDeleteModal
+        isOpen={quizToDelete !== null}
+        title="Eliminar quiz"
+        message="Deseja eliminar este quiz? Esta acção não pode ser anulada."
+        itemLabel={quizToDelete?.title}
+        itemDetail={
+          quizToDelete
+            ? `${quizToDelete.questions_count ?? 0} pergunta(s) · ${formatTimeLimit(quizToDelete.time_limit_seconds)}`
+            : undefined
+        }
+        isLoading={busyId === quizToDelete?.id}
+        onCancel={() => setQuizToDelete(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   );
 }

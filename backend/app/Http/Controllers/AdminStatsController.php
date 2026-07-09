@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Content;
+use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\Topic;
 use App\Models\User;
@@ -48,6 +49,7 @@ class AdminStatsController extends Controller
                 'totals' => [
                     'users' => User::query()->count(),
                     'contents' => Content::query()->count(),
+                    'quizzes' => Quiz::query()->count(),
                     'quiz_attempts' => QuizAttempt::query()->count(),
                     'topics' => Topic::query()->count(),
                 ],

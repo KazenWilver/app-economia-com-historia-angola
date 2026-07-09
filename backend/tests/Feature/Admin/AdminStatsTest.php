@@ -54,11 +54,12 @@ class AdminStatsTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('data.totals.contents', 2)
+            ->assertJsonPath('data.totals.quizzes', 1)
             ->assertJsonPath('data.totals.topics', 1)
             ->assertJsonPath('data.totals.quiz_attempts', 1)
             ->assertJsonStructure([
                 'data' => [
-                    'totals' => ['users', 'contents', 'quiz_attempts', 'topics'],
+                    'totals' => ['users', 'contents', 'quizzes', 'quiz_attempts', 'topics'],
                     'contents_by_type',
                     'contents_by_status',
                     'monthly_activity',

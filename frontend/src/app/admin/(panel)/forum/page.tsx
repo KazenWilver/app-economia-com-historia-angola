@@ -9,6 +9,7 @@ import {
   type AdminTopic,
   type AdminTopicsResponse,
 } from "@/components/admin/forum-types";
+import { AdminConfirmDeleteModal } from "@/components/admin/AdminConfirmDeleteModal";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -41,6 +42,7 @@ export default function AdminForumPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [topicToDelete, setTopicToDelete] = useState<AdminTopic | null>(null);
 
   const loadTopics = useCallback(async () => {
     if (!token) return;
@@ -87,15 +89,24 @@ export default function AdminForumPage() {
     return topics;
   }, [topics, filter]);
 
-  const handleDelete = async (topic: AdminTopic) => {
-    if (!token) return;
-    if (!window.confirm(`Eliminar o tópico "${topic.title}"?`)) return;
+  const confirmDelete = async () => {
+    if (!token || !topicToDelete) {
+      return;
+    }
 
-    setBusyId(topic.id);
+    setBusyId(topicToDelete.id);
+    setErrorMessage(null);
+
     try {
-      await adminFetch(`/topics/${topic.id}`, { method: "DELETE", token });
-      setTopics((current) => current.filter((item) => item.id !== topic.id));
+      await adminFetch(`/topics/${topicToDelete.id}`, {
+        method: "DELETE",
+        token,
+      });
+      setTopics((current) =>
+        current.filter((item) => item.id !== topicToDelete.id),
+      );
       setSuccessMessage("Tópico eliminado com sucesso.");
+      setTopicToDelete(null);
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Não foi possível eliminar.",
@@ -250,7 +261,7 @@ export default function AdminForumPage() {
                           <button
                             type="button"
                             disabled={busyId === topic.id}
-                            onClick={() => void handleDelete(topic)}
+                            onClick={() => setTopicToDelete(topic)}
                             className="inline-flex items-center gap-1 text-red-600"
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={1.5} />
@@ -266,6 +277,21 @@ export default function AdminForumPage() {
           )}
         </CardContent>
       </Card>
+
+      <AdminConfirmDeleteModal
+        isOpen={topicToDelete !== null}
+        title="Eliminar tópico"
+        message="Deseja eliminar este tópico? Esta acção não pode ser anulada."
+        itemLabel={topicToDelete?.title}
+        itemDetail={
+          topicToDelete
+            ? `${topicToDelete.forum?.name ?? "Fórum"} · ${topicToDelete.replies_count ?? 0} resposta(s)`
+            : undefined
+        }
+        isLoading={busyId === topicToDelete?.id}
+        onCancel={() => setTopicToDelete(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   );
 }

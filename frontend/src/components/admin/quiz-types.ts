@@ -40,12 +40,81 @@ export interface QuizMutationResponse {
   quiz: AdminQuiz;
 }
 
+export type TimeLimitUnit = "minutes" | "seconds";
+
+export const TIME_LIMIT_PRESETS_MINUTES = [2, 5, 10, 15, 30] as const;
+
 export interface QuizFormValues {
   title: string;
   description: string;
-  time_limit_seconds: string;
+  time_limit_enabled: boolean;
+  time_limit_value: string;
+  time_limit_unit: TimeLimitUnit;
   is_active: boolean;
   questions: QuizQuestion[];
+}
+
+export function secondsFromTimeLimitParts(
+  enabled: boolean,
+  value: string,
+  unit: TimeLimitUnit,
+): number | null {
+  if (!enabled) {
+    return null;
+  }
+
+  const amount = Number(value.trim());
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return null;
+  }
+
+  const seconds =
+    unit === "minutes" ? Math.round(amount * 60) : Math.round(amount);
+
+  return seconds;
+}
+
+export function timeLimitPartsFromSeconds(seconds: number | null): {
+  enabled: boolean;
+  value: string;
+  unit: TimeLimitUnit;
+} {
+  if (seconds === null || seconds <= 0) {
+    return {
+      enabled: false,
+      value: "",
+      unit: "minutes",
+    };
+  }
+
+  if (seconds % 60 === 0 && seconds >= 60) {
+    return {
+      enabled: true,
+      value: String(seconds / 60),
+      unit: "minutes",
+    };
+  }
+
+  return {
+    enabled: true,
+    value: String(seconds),
+    unit: "seconds",
+  };
+}
+
+export function formatTimeLimitInputSummary(
+  enabled: boolean,
+  value: string,
+  unit: TimeLimitUnit,
+): string {
+  const seconds = secondsFromTimeLimitParts(enabled, value, unit);
+
+  if (seconds === null) {
+    return "Sem limite";
+  }
+
+  return formatTimeLimit(seconds);
 }
 
 export function emptyAnswer(order = 0, isCorrect = false): QuizAnswer {
@@ -69,18 +138,23 @@ export function emptyQuizForm(): QuizFormValues {
   return {
     title: "",
     description: "",
-    time_limit_seconds: "",
+    time_limit_enabled: false,
+    time_limit_value: "5",
+    time_limit_unit: "minutes",
     is_active: true,
     questions: [emptyQuestion()],
   };
 }
 
 export function quizToFormValues(quiz: AdminQuiz): QuizFormValues {
+  const timeLimit = timeLimitPartsFromSeconds(quiz.time_limit_seconds);
+
   return {
     title: quiz.title,
     description: quiz.description ?? "",
-    time_limit_seconds:
-      quiz.time_limit_seconds !== null ? String(quiz.time_limit_seconds) : "",
+    time_limit_enabled: timeLimit.enabled,
+    time_limit_value: timeLimit.value,
+    time_limit_unit: timeLimit.unit,
     is_active: quiz.is_active,
     questions:
       quiz.questions?.map((question, questionIndex) => ({
@@ -102,9 +176,11 @@ export function formValuesToPayload(values: QuizFormValues) {
   return {
     title: values.title.trim(),
     description: values.description.trim() || null,
-    time_limit_seconds: values.time_limit_seconds.trim()
-      ? Number(values.time_limit_seconds)
-      : null,
+    time_limit_seconds: secondsFromTimeLimitParts(
+      values.time_limit_enabled,
+      values.time_limit_value,
+      values.time_limit_unit,
+    ),
     is_active: values.is_active,
     questions: values.questions.map((question, questionIndex) => ({
       question_text: question.question_text.trim(),

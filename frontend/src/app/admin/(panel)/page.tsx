@@ -6,6 +6,7 @@ import {
   BarChart3,
   FileText,
   MessageSquare,
+  Puzzle,
   Trophy,
   Users,
 } from "lucide-react";
@@ -42,6 +43,13 @@ const SUMMARY_CARDS: SummaryCard[] = [
     description: "Artigos, áudios, vídeos e podcasts",
     href: "/admin/conteudos",
     icon: FileText,
+  },
+  {
+    key: "quizzes",
+    label: "Quizzes criados",
+    description: "Quizzes configurados no painel (activos ou inactivos)",
+    href: "/admin/quizzes",
+    icon: Puzzle,
   },
   {
     key: "quiz_attempts",
@@ -119,7 +127,7 @@ export default function AdminDashboardPage() {
         />
       ) : null}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {SUMMARY_CARDS.map((card) => {
           const Icon = card.icon;
           const value = stats?.totals[card.key];

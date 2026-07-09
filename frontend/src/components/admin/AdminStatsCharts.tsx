@@ -38,7 +38,8 @@ export function AdminStatsCharts({ stats }: AdminStatsChartsProps) {
   const overviewData = [
     { name: "Utilizadores", total: stats.totals.users },
     { name: "Conteúdos", total: stats.totals.contents },
-    { name: "Quizzes", total: stats.totals.quiz_attempts },
+    { name: "Quizzes criados", total: stats.totals.quizzes },
+    { name: "Tentativas", total: stats.totals.quiz_attempts },
     { name: "Tópicos", total: stats.totals.topics },
   ];
 

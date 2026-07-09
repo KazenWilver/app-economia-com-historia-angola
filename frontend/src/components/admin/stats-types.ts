@@ -1,6 +1,7 @@
 export interface AdminStatsTotals {
   users: number;
   contents: number;
+  quizzes: number;
   quiz_attempts: number;
   topics: number;
 }

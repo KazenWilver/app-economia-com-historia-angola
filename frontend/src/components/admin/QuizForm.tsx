@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CircleCheck, Plus, Trash2 } from "lucide-react";
+import { CircleCheck, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
+import { QuizTimeLimitField } from "@/components/admin/QuizTimeLimitField";
 import {
   emptyAnswer,
   emptyQuestion,
+  secondsFromTimeLimitParts,
   type QuizFormValues,
   type QuizQuestion,
 } from "@/components/admin/quiz-types";
@@ -69,6 +71,29 @@ export function QuizForm({
     if (!values.title.trim()) {
       setLocalError("O título é obrigatório.");
       return;
+    }
+
+    if (values.time_limit_enabled) {
+      const seconds = secondsFromTimeLimitParts(
+        values.time_limit_enabled,
+        values.time_limit_value,
+        values.time_limit_unit,
+      );
+
+      if (seconds === null) {
+        setLocalError("Indica uma duração válida para o tempo limite.");
+        return;
+      }
+
+      if (seconds < 30) {
+        setLocalError("O tempo limite mínimo é 30 segundos.");
+        return;
+      }
+
+      if (seconds > 7200) {
+        setLocalError("O tempo limite máximo é 2 horas (120 minutos).");
+        return;
+      }
     }
 
     if (values.questions.length === 0) {
@@ -147,44 +172,90 @@ export function QuizForm({
           />
         </label>
 
-        <label className="space-y-2">
-          <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
-            Tempo limite (segundos)
-          </span>
-          <Input
-            type="number"
-            min={30}
-            max={7200}
-            value={values.time_limit_seconds}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                time_limit_seconds: event.target.value,
-              }))
-            }
-            placeholder="Ex.: 300 (5 minutos)"
-          />
-          <p className="text-xs text-slate-500 dark:text-content-dark-tertiary">
-            Deixa vazio para sem limite de tempo.
-          </p>
-        </label>
+        <QuizTimeLimitField
+          values={values}
+          onChange={(patch) =>
+            setValues((current) => ({
+              ...current,
+              ...patch,
+            }))
+          }
+        />
 
-        <label className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-border-dark dark:bg-surface-dark-secondary">
-          <input
-            type="checkbox"
-            checked={values.is_active}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                is_active: event.target.checked,
-              }))
-            }
-            className="h-4 w-4 rounded border-slate-300 text-bordeaux focus:ring-bordeaux"
-          />
-          <span className="text-sm font-medium text-slate-700 dark:text-content-dark-secondary">
-            Quiz activo (visível na área pública)
-          </span>
-        </label>
+        <fieldset className="space-y-3 md:col-span-2">
+          <legend className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+            Estado do quiz
+          </legend>
+          <div className="grid gap-3 md:grid-cols-2">
+            <button
+              type="button"
+              onClick={() =>
+                setValues((current) => ({ ...current, is_active: true }))
+              }
+              className={cn(
+                "rounded-xl border p-4 text-left transition-all",
+                values.is_active
+                  ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
+                  : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+              )}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={cn(
+                    "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                    values.is_active
+                      ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
+                      : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                  )}
+                >
+                  <Eye className="h-5 w-5" strokeWidth={1.5} />
+                </span>
+                <span>
+                  <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                    Activo
+                  </span>
+                  <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                    Visível na área pública em /quiz para todos os visitantes.
+                  </span>
+                </span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setValues((current) => ({ ...current, is_active: false }))
+              }
+              className={cn(
+                "rounded-xl border p-4 text-left transition-all",
+                !values.is_active
+                  ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
+                  : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+              )}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={cn(
+                    "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                    !values.is_active
+                      ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
+                      : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                  )}
+                >
+                  <EyeOff className="h-5 w-5" strokeWidth={1.5} />
+                </span>
+                <span>
+                  <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                    Inactivo
+                  </span>
+                  <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                    Oculto do público; só admins veem e gerem este quiz.
+                  </span>
+                </span>
+              </div>
+            </button>
+          </div>
+        </fieldset>
       </div>
 
       <div className="space-y-4">

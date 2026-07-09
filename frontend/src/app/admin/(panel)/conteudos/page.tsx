@@ -13,6 +13,7 @@ import {
   type ContentStatus,
   type ContentType,
 } from "@/components/admin/content-types";
+import { AdminConfirmDeleteModal } from "@/components/admin/AdminConfirmDeleteModal";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -61,6 +62,9 @@ export default function AdminContentsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [contentToDelete, setContentToDelete] = useState<AdminContent | null>(
+    null,
+  );
 
   const loadContents = useCallback(async () => {
     if (!token) {
@@ -142,28 +146,21 @@ export default function AdminContentsPage() {
     }
   };
 
-  const deleteContent = async (content: AdminContent) => {
-    if (!token) {
+  const confirmDelete = async () => {
+    if (!token || !contentToDelete) {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Eliminar permanentemente «${content.title}»? Esta acção não pode ser anulada.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setBusyId(content.id);
+    setBusyId(contentToDelete.id);
     setErrorMessage(null);
 
     try {
-      await adminFetch(`/contents/${content.id}`, {
+      await adminFetch(`/contents/${contentToDelete.id}`, {
         method: "DELETE",
         token,
       });
       setSuccessMessage("Conteúdo eliminado.");
+      setContentToDelete(null);
       await loadContents();
     } catch (error) {
       setErrorMessage(
@@ -348,7 +345,7 @@ export default function AdminContentsPage() {
                           variant="destructive"
                           className="min-h-9 px-3 py-1.5"
                           isLoading={isBusy}
-                          onClick={() => void deleteContent(content)}
+                          onClick={() => setContentToDelete(content)}
                         >
                           <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                           Eliminar
@@ -362,6 +359,21 @@ export default function AdminContentsPage() {
           </table>
         </div>
       )}
+
+      <AdminConfirmDeleteModal
+        isOpen={contentToDelete !== null}
+        title="Eliminar conteúdo"
+        message="Deseja eliminar este conteúdo? Esta acção não pode ser anulada."
+        itemLabel={contentToDelete?.title}
+        itemDetail={
+          contentToDelete
+            ? `${TYPE_LABELS[contentToDelete.type as ContentType]} · ${STATUS_LABELS[contentToDelete.status]}`
+            : undefined
+        }
+        isLoading={busyId === contentToDelete?.id}
+        onCancel={() => setContentToDelete(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   );
 }
