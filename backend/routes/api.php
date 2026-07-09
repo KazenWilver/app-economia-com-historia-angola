@@ -2,13 +2,16 @@
 
 use App\Http\Controllers\AdminStatsController;
 use App\Http\Controllers\Auth\AdminRegisterController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\MapNarrativeController;
+use App\Http\Controllers\MediaStreamController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\RankingController;
@@ -27,6 +30,8 @@ Route::get('/', function () {
 Route::post('/auth/register', [RegisterController::class, 'store']);
 Route::post('/auth/admin/register', [AdminRegisterController::class, 'store']);
 Route::post('/auth/login', [LoginController::class, 'store']);
+Route::post('/auth/forgot-password', [ForgotPasswordController::class, 'store']);
+Route::post('/auth/reset-password', [ResetPasswordController::class, 'store']);
 
 Route::middleware('auth.api:sanctum')->group(function () {
     Route::post('/auth/logout', [LoginController::class, 'destroy']);
@@ -41,6 +46,7 @@ Route::middleware(['auth.api:sanctum', 'admin'])->get('/admin/ping', function ()
 });
 
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/media/{path}', [MediaStreamController::class, 'show'])->where('path', '.*');
 Route::get('/contents', [ContentController::class, 'index']);
 Route::get('/contents/{content}', [ContentController::class, 'show']);
 Route::get('/contents/{content}/comments', [CommentController::class, 'index']);

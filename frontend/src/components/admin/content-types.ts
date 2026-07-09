@@ -88,6 +88,29 @@ export const TYPE_LABELS: Record<ContentType, string> = {
   jindungo: "Jindungo",
 };
 
+export const MEDIA_ACCEPT_BY_TYPE: Record<ContentType, string> = {
+  texto: "image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif",
+  audio:
+    "audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/mp4,audio/x-m4a,audio/aac,.mp3,.wav,.ogg,.m4a,.aac",
+  podcast:
+    "audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/mp4,audio/x-m4a,audio/aac,.mp3,.wav,.ogg,.m4a,.aac",
+  video:
+    "video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov",
+  jindungo: "image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif",
+};
+
+export const MEDIA_HINT_BY_TYPE: Record<ContentType, string> = {
+  texto: "Imagens JPEG, PNG, WebP ou GIF (opcional, para ilustrar o texto).",
+  audio: "Ficheiros de áudio MP3, WAV, OGG, M4A ou AAC.",
+  podcast: "Episódios em MP3, WAV, OGG, M4A ou AAC.",
+  video: "Vídeos MP4, WebM ou MOV.",
+  jindungo: "Imagem de capa JPEG, PNG, WebP ou GIF (opcional).",
+};
+
+export function getMediaAcceptForType(type: ContentType): string {
+  return MEDIA_ACCEPT_BY_TYPE[type];
+}
+
 export function emptyContentForm(): ContentFormValues {
   return {
     category_id: "",
@@ -116,16 +139,16 @@ export function contentToFormValues(content: AdminContent): ContentFormValues {
   };
 }
 
+import { resolveMediaUrl } from "@/components/content/media-player-utils";
+
 export function resolveAdminMediaUrl(url: string | null): string | null {
   if (!url) {
     return null;
   }
 
-  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("blob:")) {
+  if (url.startsWith("blob:")) {
     return url;
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
-  const base = apiUrl.replace(/\/api$/, "");
-  return `${base}${url.startsWith("/") ? url : `/${url}`}`;
+  return resolveMediaUrl(url);
 }

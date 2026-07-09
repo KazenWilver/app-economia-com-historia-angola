@@ -81,16 +81,8 @@ export interface CommentsResponse {
 }
 
 export { API_URL, buildAuthHeaders, getStoredToken } from "@/lib/api";
-import { API_URL } from "@/lib/api";
 
-export function resolveMediaUrl(url: string): string {
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-
-  const base = API_URL.replace(/\/api$/, "");
-  return `${base}${url.startsWith("/") ? url : `/${url}`}`;
-}
+export { formatMediaTime as formatTime, resolveMediaUrl } from "@/components/content/media-player-utils";
 
 const IMAGE_MEDIA_PATTERN = /\.(jpe?g|png|webp|gif)$/i;
 

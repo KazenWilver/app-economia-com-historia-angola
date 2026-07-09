@@ -25,7 +25,7 @@ return [
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => ['Accept-Ranges', 'Content-Range', 'Content-Length'],
 
     'max_age' => 86400,
 

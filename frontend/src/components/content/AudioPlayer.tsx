@@ -1,9 +1,11 @@
 "use client";
 
 import { Pause, Play, Volume2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useMemo } from "react";
+import { MediaSeekBar } from "@/components/content/MediaSeekBar";
+import { resolveMediaUrl } from "@/components/content/media-player-utils";
+import { useMediaPlayback } from "@/components/content/useMediaPlayback";
 import { cn } from "@/lib/utils";
-import { resolveMediaUrl } from "@/components/content/types";
 
 export interface AudioPlayerProps {
   src: string;
@@ -11,74 +13,19 @@ export interface AudioPlayerProps {
   className?: string;
 }
 
-function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) {
-    return "0:00";
-  }
-
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
-
 export function AudioPlayer({ src, title, className }: AudioPlayerProps) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoadedMetadata = () => setDuration(audio.duration);
-    const onEnded = () => setIsPlaying(false);
-
-    audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("loadedmetadata", onLoadedMetadata);
-    audio.addEventListener("ended", onEnded);
-
-    return () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("loadedmetadata", onLoadedMetadata);
-      audio.removeEventListener("ended", onEnded);
-    };
-  }, [src]);
-
-  const togglePlayback = async () => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-      return;
-    }
-
-    try {
-      await audio.play();
-      setIsPlaying(true);
-    } catch {
-      setIsPlaying(false);
-    }
-  };
-
-  const handleSeek = (value: number) => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    audio.currentTime = value;
-    setCurrentTime(value);
-  };
-
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const mediaSrc = useMemo(() => resolveMediaUrl(src), [src]);
+  const {
+    mediaRef,
+    isPlaying,
+    duration,
+    displayedTime,
+    progress,
+    togglePlayback,
+    beginSeek,
+    seekTo,
+    endSeek,
+  } = useMediaPlayback<HTMLAudioElement>(mediaSrc);
 
   return (
     <div
@@ -87,7 +34,13 @@ export function AudioPlayer({ src, title, className }: AudioPlayerProps) {
         className,
       )}
     >
-      <audio ref={audioRef} src={resolveMediaUrl(src)} preload="metadata">
+      <audio
+        ref={mediaRef}
+        key={mediaSrc}
+        src={mediaSrc}
+        preload="metadata"
+        crossOrigin="anonymous"
+      >
         <track kind="captions" />
       </audio>
 
@@ -105,8 +58,8 @@ export function AudioPlayer({ src, title, className }: AudioPlayerProps) {
           )}
         </button>
 
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex items-center gap-2">
             <Volume2
               className="h-4 w-4 shrink-0 text-bordeaux dark:text-bordeaux-dark"
               strokeWidth={1.5}
@@ -117,24 +70,14 @@ export function AudioPlayer({ src, title, className }: AudioPlayerProps) {
             </p>
           </div>
 
-          <input
-            type="range"
-            min={0}
-            max={duration || 0}
-            step={0.1}
-            value={currentTime}
-            onChange={(event) => handleSeek(Number(event.target.value))}
-            aria-label="Progresso da reprodução"
-            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-surface-secondary accent-bordeaux dark:bg-surface-dark-secondary dark:accent-bordeaux-dark"
-            style={{
-              background: `linear-gradient(to right, #8A1538 ${progress}%, #EDF2F7 ${progress}%)`,
-            }}
+          <MediaSeekBar
+            currentTime={displayedTime}
+            duration={duration}
+            progress={progress}
+            onSeekStart={beginSeek}
+            onSeek={seekTo}
+            onSeekEnd={endSeek}
           />
-
-          <div className="flex justify-between font-mono text-xs text-content-tertiary dark:text-content-dark-tertiary">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
         </div>
       </div>
     </div>
