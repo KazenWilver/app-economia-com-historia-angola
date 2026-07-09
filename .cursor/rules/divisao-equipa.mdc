@@ -25,7 +25,7 @@ alwaysApply: true
 - **Sulo não tem máquina própria** — os commits dele são feitos neste PC, com o perfil correcto.
 - Antes de cada commit: `. .\scripts\git-profile.ps1` e depois `Use-Git willfredy` ou `Use-Git sulo`.
 - Para commit completo (autor + committer iguais): `Commit-Git -Who sulo -Message "feat: ..."` após `git add`.
-- Antes do push: `.\scripts\check-ci.ps1` ou `Push-Git -Who sulo` (corre Pint + ESLint automaticamente).
+- Antes do push: `.\scripts\pre-push.ps1` ou `Push-Git -Who sulo` (corre Pint + PHPUnit + ESLint).
 - Corrigir estilo PHP localmente: `.\scripts\check-ci.ps1 -Fix`
 - **Nunca** uses `git commit --author=...` sem `Use-Git` — o GitHub mostra dois nomes (autor ≠ committer).
 - Não fazer push sem o utilizador pedir explicitamente.

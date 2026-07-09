@@ -2,13 +2,18 @@
 # Uso: .\scripts\check-ci.ps1
 #      .\scripts\check-ci.ps1 -BackendOnly
 #      .\scripts\check-ci.ps1 -Fix
+#      .\scripts\check-ci.ps1 -SkipTests
+#
+# Antes de push: corre SEMPRE este script ou usa Push-Git (git-profile.ps1).
+# Inclui Pint, PHPUnit (backend) e ESLint (frontend).
 #
 # Nota Windows: vendor/bin/pint é um script PHP — sem `php` no PATH ou Docker,
 # o Pint não corre de verdade e o CI local pode passar sem formatar nada.
 
 param(
     [switch]$BackendOnly,
-    [switch]$Fix
+    [switch]$Fix,
+    [switch]$SkipTests
 )
 
 $ErrorActionPreference = "Stop"
@@ -127,8 +132,34 @@ function Invoke-FrontendLint {
     }
 }
 
+function Invoke-BackendTests {
+    $testScript = Join-Path $PSScriptRoot "test-backend.ps1"
+
+    if (-not (Test-Path $testScript)) {
+        throw "scripts/test-backend.ps1 não encontrado."
+    }
+
+    if (-not (Test-CommandAvailable "docker")) {
+        throw @"
+PHPUnit local não está configurado neste script.
+- Instala Docker Desktop e corre novamente, ou
+- Corre manualmente: .\scripts\test-backend.ps1
+"@
+    }
+
+    & $testScript
+    if ($LASTEXITCODE -ne 0) {
+        throw "PHPUnit falhou. Corrige os testes antes do push."
+    }
+}
+
 Write-Step "Backend - Laravel Pint"
 Invoke-BackendPint
+
+if (-not $SkipTests) {
+    Write-Step "Backend - PHPUnit"
+    Invoke-BackendTests
+}
 
 if (-not $BackendOnly) {
     Write-Step "Frontend - ESLint"

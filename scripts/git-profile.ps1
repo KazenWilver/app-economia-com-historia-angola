@@ -54,7 +54,7 @@ function Push-Git {
   if (-not $SkipChecks) {
     $checkScript = Join-Path $PSScriptRoot "check-ci.ps1"
     if (Test-Path $checkScript) {
-      Write-Host "A correr verificações de CI locais..." -ForegroundColor Yellow
+      Write-Host "A correr verificações de CI locais (Pint + testes + lint)..." -ForegroundColor Yellow
       & $checkScript
       if ($LASTEXITCODE -ne 0) {
         throw "Verificações de CI falharam. Corrige os erros ou usa -SkipChecks."
