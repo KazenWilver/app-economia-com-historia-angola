@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 export interface ResetPasswordFormProps {
   defaultLoginHref: string;
+  forgotPasswordHref: string;
   variant?: "public" | "admin";
 }
 
@@ -33,9 +34,9 @@ function resolveLoginHref(
 
 function ResetPasswordFormContent({
   defaultLoginHref,
+  forgotPasswordHref,
   variant = "public",
 }: ResetPasswordFormProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isAdmin = variant === "admin";
 
@@ -45,20 +46,23 @@ function ResetPasswordFormContent({
     () => resolveLoginHref(searchParams.get("redirect"), defaultLoginHref),
     [defaultLoginHref, searchParams],
   );
+  const invalidLink = !token || !email;
 
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [error, setError] = useState<string | undefined>();
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(undefined);
 
-    if (!token || !email) {
-      setError("O link de recuperação é inválido ou expirou. Pede um novo pedido.");
+    if (isSubmittingRef.current || invalidLink) {
       return;
     }
+
+    setError(undefined);
 
     if (!password) {
       setError("A palavra-passe é obrigatória.");
@@ -75,6 +79,7 @@ function ResetPasswordFormContent({
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -84,7 +89,7 @@ function ResetPasswordFormContent({
         password,
         passwordConfirmation,
       });
-      router.replace(loginHref);
+      setIsSuccess(true);
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -92,6 +97,7 @@ function ResetPasswordFormContent({
           : "Não foi possível redefinir a palavra-passe.",
       );
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -106,7 +112,7 @@ function ResetPasswordFormContent({
     >
       <CardHeader>
         <CardTitle className={isAdmin ? "text-[#F8FAFC]" : undefined}>
-          Redefinir palavra-passe
+          Nova palavra-passe
         </CardTitle>
         <p
           className={cn(
@@ -116,69 +122,110 @@ function ResetPasswordFormContent({
               : "text-content-secondary dark:text-content-dark-secondary",
           )}
         >
-          Escolhe uma nova palavra-passe para a conta{" "}
-          <span className="font-medium">{email || "associada"}</span>.
+          Define uma nova palavra-passe para a tua conta Jindungo.
         </p>
       </CardHeader>
 
       <CardContent className={isAdmin ? "text-slate-300" : undefined}>
-        {error ? (
-          <Toast variant="error" title="Erro" message={error} className="mb-4" />
+        {invalidLink ? (
+          <div className="space-y-4">
+            <Toast
+              variant="error"
+              title="Link inválido"
+              message="O link está incompleto ou expirou. Pede um novo link de recuperação."
+            />
+            <Link
+              href={forgotPasswordHref}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-petrol px-4 py-2.5 font-display text-sm font-semibold text-white transition-all duration-200 hover:bg-petrol/90 dark:bg-petrol-dark dark:hover:bg-petrol-dark/90"
+            >
+              Pedir novo link
+            </Link>
+          </div>
         ) : null}
 
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
-          <Input
-            label="Nova palavra-passe"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            placeholder="••••••••"
-            labelClassName={isAdmin ? "text-[#F8FAFC]" : undefined}
-            className={
+        {!invalidLink && isSuccess ? (
+          <div className="space-y-4">
+            <Toast
+              variant="success"
+              title="Palavra-passe redefinida"
+              message="Palavra-passe redefinida com sucesso. Já podes iniciar sessão."
+            />
+            <Link
+              href={loginHref}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-bordeaux px-4 py-2.5 font-display text-sm font-semibold text-white transition-all duration-200 hover:bg-bordeaux/90 dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90"
+            >
+              Ir para o início de sessão
+            </Link>
+          </div>
+        ) : null}
+
+        {!invalidLink && !isSuccess ? (
+          <>
+            {error ? (
+              <Toast variant="error" title="Erro" message={error} className="mb-4" />
+            ) : null}
+
+            <p className="mb-4 text-sm text-content-secondary dark:text-content-dark-secondary">
+              Conta: <span className="font-medium">{email}</span>
+            </p>
+
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
+              <Input
+                label="Nova palavra-passe"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                placeholder="Mínimo 8 caracteres"
+                labelClassName={isAdmin ? "text-[#F8FAFC]" : undefined}
+                className={
+                  isAdmin
+                    ? "border-slate-600 bg-slate-950 text-[#F8FAFC] placeholder:text-slate-500 focus:border-bordeaux-dark focus:ring-bordeaux-dark/30"
+                    : undefined
+                }
+                onChange={(event) => setPassword(event.target.value)}
+              />
+
+              <Input
+                label="Confirmar palavra-passe"
+                name="password_confirmation"
+                type="password"
+                autoComplete="new-password"
+                value={passwordConfirmation}
+                placeholder="Repete a palavra-passe"
+                labelClassName={isAdmin ? "text-[#F8FAFC]" : undefined}
+                className={
+                  isAdmin
+                    ? "border-slate-600 bg-slate-950 text-[#F8FAFC] placeholder:text-slate-500 focus:border-bordeaux-dark focus:ring-bordeaux-dark/30"
+                    : undefined
+                }
+                onChange={(event) => setPasswordConfirmation(event.target.value)}
+              />
+
+              <Button type="submit" className="w-full" isLoading={isSubmitting}>
+                Redefinir palavra-passe
+              </Button>
+            </form>
+          </>
+        ) : null}
+
+        {!isSuccess ? (
+          <p
+            className={cn(
+              "mt-6 text-center text-sm",
               isAdmin
-                ? "border-slate-600 bg-slate-950 text-[#F8FAFC] placeholder:text-slate-500 focus:border-bordeaux-dark focus:ring-bordeaux-dark/30"
-                : undefined
-            }
-            onChange={(event) => setPassword(event.target.value)}
-          />
-
-          <Input
-            label="Confirmar palavra-passe"
-            name="password_confirmation"
-            type="password"
-            autoComplete="new-password"
-            value={passwordConfirmation}
-            placeholder="••••••••"
-            labelClassName={isAdmin ? "text-[#F8FAFC]" : undefined}
-            className={
-              isAdmin
-                ? "border-slate-600 bg-slate-950 text-[#F8FAFC] placeholder:text-slate-500 focus:border-bordeaux-dark focus:ring-bordeaux-dark/30"
-                : undefined
-            }
-            onChange={(event) => setPasswordConfirmation(event.target.value)}
-          />
-
-          <Button type="submit" className="w-full" isLoading={isSubmitting}>
-            Guardar nova palavra-passe
-          </Button>
-        </form>
-
-        <p
-          className={cn(
-            "mt-6 text-center text-sm",
-            isAdmin
-              ? "text-slate-400"
-              : "text-content-secondary dark:text-content-dark-secondary",
-          )}
-        >
-          <Link
-            href={loginHref}
-            className="font-semibold text-bordeaux hover:underline dark:text-bordeaux-dark"
+                ? "text-slate-400"
+                : "text-content-secondary dark:text-content-dark-secondary",
+            )}
           >
-            Voltar ao início de sessão
-          </Link>
-        </p>
+            <Link
+              href={loginHref}
+              className="font-semibold text-bordeaux hover:underline dark:text-bordeaux-dark"
+            >
+              Voltar ao início de sessão
+            </Link>
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   );

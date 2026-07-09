@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -11,8 +11,11 @@ import {
 } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
-import { requestPasswordReset } from "@/lib/auth-password";
+import { extractResetLink, requestPasswordReset } from "@/lib/auth-password";
 import { cn } from "@/lib/utils";
+
+const SAFE_SUCCESS_MESSAGE =
+  "Pedido registado. Se o email existir na plataforma, podes recuperar a palavra-passe.";
 
 export interface ForgotPasswordFormProps {
   loginHref: string;
@@ -26,17 +29,24 @@ export function ForgotPasswordForm({
   variant = "public",
 }: ForgotPasswordFormProps) {
   const isAdmin = variant === "admin";
+  const isSubmittingRef = useRef(false);
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | undefined>();
   const [successMessage, setSuccessMessage] = useState<string | undefined>();
-  const [devResetLink, setDevResetLink] = useState<string | undefined>();
+  const [resetLink, setResetLink] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isSubmittingRef.current) {
+      return;
+    }
+
     setError(undefined);
     setSuccessMessage(undefined);
-    setDevResetLink(undefined);
+    setResetLink(undefined);
 
     if (!email.trim()) {
       setError("O email é obrigatório.");
@@ -48,19 +58,25 @@ export function ForgotPasswordForm({
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
       const response = await requestPasswordReset(email.trim(), redirectAfterReset);
-      setSuccessMessage(response.message);
-      setDevResetLink(response.dev_reset_link);
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Não foi possível enviar o pedido de recuperação.",
+      const link = extractResetLink(response);
+
+      setResetLink(link);
+      setSuccessMessage(
+        link
+          ? "Pedido registado. Clica no botão abaixo para redefinires a tua palavra-passe."
+          : response.message,
       );
+      setIsSubmitted(true);
+    } catch {
+      setSuccessMessage(SAFE_SUCCESS_MESSAGE);
+      setIsSubmitted(true);
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -85,7 +101,7 @@ export function ForgotPasswordForm({
               : "text-content-secondary dark:text-content-dark-secondary",
           )}
         >
-          Indica o teu email e enviaremos instruções para redefinires a palavra-passe.
+          Introduz o teu email para gerares o link de recuperação.
         </p>
       </CardHeader>
 
@@ -94,49 +110,61 @@ export function ForgotPasswordForm({
           <Toast variant="error" title="Erro" message={error} className="mb-4" />
         ) : null}
 
-        {successMessage ? (
-          <Toast
-            variant="success"
-            title="Pedido enviado"
-            message={successMessage}
-            className="mb-4"
-          />
-        ) : null}
+        {isSubmitted && successMessage ? (
+          <div className="mb-4 space-y-4">
+            <Toast
+              variant="success"
+              title="Pedido registado"
+              message={successMessage}
+            />
 
-        {devResetLink ? (
-          <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
-            <p className="font-semibold text-amber-700 dark:text-amber-300">
-              Modo desenvolvimento
-            </p>
-            <p className="mt-1 break-all text-content-secondary dark:text-content-dark-secondary">
-              <Link href={devResetLink} className="font-medium text-bordeaux hover:underline dark:text-bordeaux-dark">
-                Abrir link de redefinição
-              </Link>
-            </p>
+            {resetLink ? (
+              <div
+                className={cn(
+                  "rounded-xl border p-4",
+                  isAdmin
+                    ? "border-bordeaux-dark/40 bg-slate-950"
+                    : "border-bordeaux/20 bg-surface-secondary dark:border-bordeaux-dark/30 dark:bg-surface-dark-secondary",
+                )}
+              >
+                <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
+                  Não usamos envio de email nesta versão. O link de recuperação
+                  fica disponível aqui:
+                </p>
+                <Link
+                  href={resetLink}
+                  className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-bordeaux px-4 py-2.5 font-display text-sm font-semibold text-white transition-all duration-200 hover:bg-bordeaux/90 dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90"
+                >
+                  Redefinir palavra-passe
+                </Link>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
-          <Input
-            label="Email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            placeholder={isAdmin ? "admin@jindungo.ao" : "utilizador@jindungo.ao"}
-            labelClassName={isAdmin ? "text-[#F8FAFC]" : undefined}
-            className={
-              isAdmin
-                ? "border-slate-600 bg-slate-950 text-[#F8FAFC] placeholder:text-slate-500 focus:border-bordeaux-dark focus:ring-bordeaux-dark/30"
-                : undefined
-            }
-            onChange={(event) => setEmail(event.target.value)}
-          />
+        {!isSubmitted ? (
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              placeholder={isAdmin ? "admin@jindungo.ao" : "utilizador@jindungo.ao"}
+              labelClassName={isAdmin ? "text-[#F8FAFC]" : undefined}
+              className={
+                isAdmin
+                  ? "border-slate-600 bg-slate-950 text-[#F8FAFC] placeholder:text-slate-500 focus:border-bordeaux-dark focus:ring-bordeaux-dark/30"
+                  : undefined
+              }
+              onChange={(event) => setEmail(event.target.value)}
+            />
 
-          <Button type="submit" className="w-full" isLoading={isSubmitting}>
-            Enviar instruções
-          </Button>
-        </form>
+            <Button type="submit" className="w-full" isLoading={isSubmitting}>
+              Gerar link de recuperação
+            </Button>
+          </form>
+        ) : null}
 
         <p
           className={cn(

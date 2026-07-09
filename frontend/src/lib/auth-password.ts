@@ -2,31 +2,45 @@ import { API_URL } from "@/lib/api";
 
 export interface PasswordResetMessageResponse {
   message: string;
+  resetLink?: string;
   dev_reset_link?: string;
+  devResetLink?: string;
 }
 
-async function parseErrorMessage(response: Response): Promise<string> {
-  try {
-    const data = (await response.json()) as {
-      message?: string;
-      errors?: Record<string, string[]>;
-    };
+interface ApiErrorPayload {
+  message?: string;
+  errors?: Record<string, string[]>;
+}
 
-    if (data.errors) {
-      const firstError = Object.values(data.errors)[0]?.[0];
-      if (firstError) {
-        return firstError;
-      }
+function extractErrorMessage(data: ApiErrorPayload): string {
+  if (data.errors) {
+    const firstError = Object.values(data.errors)[0]?.[0];
+    if (firstError) {
+      return firstError;
     }
+  }
 
-    if (data.message) {
-      return data.message;
-    }
-  } catch {
-    // Ignorar JSON inválido.
+  if (data.message) {
+    return data.message;
   }
 
   return "Ocorreu um erro inesperado. Tenta novamente.";
+}
+
+async function readJsonResponse<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (!contentType.includes("application/json")) {
+    throw new Error("Resposta inválida do servidor. Tenta novamente.");
+  }
+
+  return (await response.json()) as T;
+}
+
+export function extractResetLink(
+  response: PasswordResetMessageResponse,
+): string | undefined {
+  return response.resetLink ?? response.devResetLink ?? response.dev_reset_link;
 }
 
 export async function requestPasswordReset(
@@ -42,13 +56,20 @@ export async function requestPasswordReset(
     body: JSON.stringify({ email, redirect }),
   });
 
-  const data = (await response.json()) as PasswordResetMessageResponse;
+  const data = await readJsonResponse<PasswordResetMessageResponse>(response);
 
   if (!response.ok) {
-    throw new Error(await parseErrorMessage(response));
+    throw new Error(extractErrorMessage(data));
   }
 
-  return data;
+  const resetLink = extractResetLink(data);
+
+  return {
+    ...data,
+    resetLink,
+    dev_reset_link: resetLink,
+    devResetLink: resetLink,
+  };
 }
 
 export async function resetPassword(payload: {
@@ -71,10 +92,10 @@ export async function resetPassword(payload: {
     }),
   });
 
-  const data = (await response.json()) as PasswordResetMessageResponse;
+  const data = await readJsonResponse<PasswordResetMessageResponse>(response);
 
   if (!response.ok) {
-    throw new Error(data.message ?? (await parseErrorMessage(response)));
+    throw new Error(extractErrorMessage(data));
   }
 
   return data;

@@ -58,7 +58,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application Timezone
+    | Expor link de recuperação na resposta da API (sem SMTP)
+    |--------------------------------------------------------------------------
+    |
+    | Quando activo, o endpoint forgot-password devolve o link directamente
+    | para o frontend mostrar ao utilizador — ideal para desenvolvimento ou
+    | quando não há API de email configurada.
+    |
+    */
+
+    'expose_password_reset_link' => env('EXPOSE_PASSWORD_RESET_LINK', true),
+
+    /*
+     |--------------------------------------------------------------------------
+     | Application Timezone
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default timezone for your application, which
