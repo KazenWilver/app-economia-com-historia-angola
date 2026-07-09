@@ -42,21 +42,28 @@ export default function MapPage() {
       ).matches;
 
       if (prefersReducedMotion) {
-        gsap.set([headerRef.current, mapSectionRef.current], {
+        gsap.set(headerRef.current, {
           opacity: 1,
           y: 0,
         });
         return;
       }
 
-      gsap.set([headerRef.current, mapSectionRef.current], { opacity: 0, y: 24 });
+      // Não animar transform no contentor do Leaflet — causa erros _leaflet_pos.
+      gsap.set(headerRef.current, { opacity: 0, y: 24 });
+      gsap.set(mapSectionRef.current, { opacity: 0 });
 
       gsap
         .timeline({ defaults: { ease: "power2.out" } })
         .to(headerRef.current, { opacity: 1, y: 0, duration: 0.7 })
         .to(
           mapSectionRef.current,
-          { opacity: 1, y: 0, duration: 0.85, ease: "power3.out" },
+          {
+            opacity: 1,
+            duration: 0.85,
+            ease: "power3.out",
+            clearProps: "transform",
+          },
           "-=0.35",
         );
     },

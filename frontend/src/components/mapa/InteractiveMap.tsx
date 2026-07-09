@@ -55,16 +55,25 @@ export function InteractiveMap({
   const layerRef = useRef<L.GeoJSON | null>(null);
   const onSelectRef = useRef(onProvinceSelect);
   const selectedProvinceIdRef = useRef(selectedProvinceId);
+  const isMountedRef = useRef(true);
 
   onSelectRef.current = onProvinceSelect;
   selectedProvinceIdRef.current = selectedProvinceId;
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) {
+    isMountedRef.current = true;
+    const container = containerRef.current;
+
+    if (!container || mapRef.current) {
       return;
     }
 
-    const map = L.map(containerRef.current, {
+    // Strict Mode / remount: limpar residual do Leaflet no contentor.
+    if ("_leaflet_id" in container) {
+      delete (container as HTMLDivElement & { _leaflet_id?: number })._leaflet_id;
+    }
+
+    const map = L.map(container, {
       center: ANGOLA_CENTER,
       zoom: DEFAULT_ZOOM,
       scrollWheelZoom: true,
@@ -89,7 +98,7 @@ export function InteractiveMap({
         }
 
         const data = (await response.json()) as MapGeoJsonResponse;
-        if (isCancelled || !mapRef.current) {
+        if (isCancelled || !isMountedRef.current || !mapRef.current) {
           return;
         }
 
@@ -133,14 +142,32 @@ export function InteractiveMap({
               }
             });
           },
-        }).addTo(mapRef.current);
+        });
 
+        if (isCancelled || !mapRef.current) {
+          return;
+        }
+
+        geoJsonLayer.addTo(mapRef.current);
         layerRef.current = geoJsonLayer;
 
-        const bounds = geoJsonLayer.getBounds();
-        if (bounds.isValid()) {
-          mapRef.current.fitBounds(bounds, { padding: [36, 36], maxZoom: 7 });
+        try {
+          const bounds = geoJsonLayer.getBounds();
+          if (bounds.isValid() && mapRef.current) {
+            mapRef.current.fitBounds(bounds, {
+              padding: [36, 36],
+              maxZoom: 7,
+            });
+          }
+        } catch {
+          // Evita crash se o mapa já foi destruído a meio do cálculo.
         }
+
+        requestAnimationFrame(() => {
+          if (mapRef.current && isMountedRef.current) {
+            mapRef.current.invalidateSize();
+          }
+        });
       } catch {
         // O painel principal mostra erros de carregamento.
       }
@@ -148,41 +175,69 @@ export function InteractiveMap({
 
     void loadGeoJson();
 
+    const handleResize = () => {
+      if (mapRef.current) {
+        mapRef.current.invalidateSize();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
     return () => {
       isCancelled = true;
-      map.remove();
-      mapRef.current = null;
+      isMountedRef.current = false;
+      window.removeEventListener("resize", handleResize);
+
       layerRef.current = null;
+
+      const activeMap = mapRef.current;
+      mapRef.current = null;
+
+      if (activeMap) {
+        activeMap.off();
+        activeMap.remove();
+      }
+
+      if (container && "_leaflet_id" in container) {
+        delete (container as HTMLDivElement & { _leaflet_id?: number })
+          ._leaflet_id;
+      }
     };
   }, []);
 
   useEffect(() => {
     const layer = layerRef.current;
-    if (!layer) {
+    const map = mapRef.current;
+
+    if (!layer || !map) {
       return;
     }
 
-    layer.eachLayer((featureLayer) => {
-      if (!(featureLayer instanceof L.CircleMarker)) {
-        return;
-      }
+    try {
+      layer.eachLayer((featureLayer) => {
+        if (!(featureLayer instanceof L.CircleMarker)) {
+          return;
+        }
 
-      const feature = (
-        featureLayer as L.CircleMarker & { feature?: ProvinceFeature }
-      ).feature;
+        const feature = (
+          featureLayer as L.CircleMarker & { feature?: ProvinceFeature }
+        ).feature;
 
-      if (!feature) {
-        return;
-      }
+        if (!feature) {
+          return;
+        }
 
-      applyMarkerStyle(featureLayer, feature, selectedProvinceId);
-    });
+        applyMarkerStyle(featureLayer, feature, selectedProvinceId);
+      });
+    } catch {
+      // Ignorar se o mapa já não estiver válido.
+    }
   }, [selectedProvinceId]);
 
   return (
     <div
       ref={containerRef}
-      className="h-[min(70vh,640px)] w-full rounded-2xl border border-border shadow-glass dark:border-border-dark"
+      className="h-[min(70vh,640px)] w-full rounded-2xl border border-border bg-surface-card shadow-glass dark:border-border-dark dark:bg-surface-dark-card"
       aria-label="Mapa interactivo de Angola"
     />
   );
