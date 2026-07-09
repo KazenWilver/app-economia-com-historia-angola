@@ -39,6 +39,14 @@ interface MeResponse {
   user: User;
 }
 
+export interface UpdateProfilePayload {
+  name?: string;
+  email?: string;
+  phone?: string | null;
+  avatar_url?: string | null;
+  province_id?: number;
+}
+
 interface AuthContextValue {
   user: User | null;
   token: string | null;
@@ -52,7 +60,7 @@ interface AuthContextValue {
     passwordConfirmation: string,
     provinceId: number,
   ) => Promise<User>;
-  updateProfile: (payload: { province_id: number }) => Promise<User>;
+  updateProfile: (payload: UpdateProfilePayload) => Promise<User>;
   registerAdmin: (
     name: string,
     email: string,
@@ -237,7 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const updateProfile = useCallback(
-    async (payload: { province_id: number }) => {
+    async (payload: UpdateProfilePayload) => {
       const activeToken = token ?? readStoredToken();
 
       if (!activeToken) {
