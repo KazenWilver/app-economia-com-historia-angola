@@ -45,7 +45,11 @@ export function QuizRecommendations({ recommendations }: QuizRecommendationsProp
         {recommendations.map((recommendation) => (
           <Link
             key={recommendation.id}
-            href={`/explorar/${recommendation.content.slug}`}
+            href={
+              recommendation.content.type === "jindungo"
+                ? `/jindungo/${recommendation.content.slug}`
+                : `/explorar/${recommendation.content.slug}`
+            }
             className="block"
           >
             <Card
