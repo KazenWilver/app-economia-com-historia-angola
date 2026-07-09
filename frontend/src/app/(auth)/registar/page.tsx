@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { AuthTransitionScreen } from "@/components/auth/AuthTransitionScreen";
+import { ProvinceSelectField } from "@/components/auth/ProvinceSelectField";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -13,12 +15,15 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
 import { useAuth } from "@/hooks/useAuth";
+import { apiFetch } from "@/lib/api";
+import type { ProvincesResponse } from "@/components/ranking/ranking-types";
 
 interface RegisterForm {
   name: string;
   email: string;
   password: string;
   passwordConfirmation: string;
+  provinceId: string;
 }
 
 interface RegisterErrors {
@@ -26,6 +31,7 @@ interface RegisterErrors {
   email?: string;
   password?: string;
   passwordConfirmation?: string;
+  provinceId?: string;
   form?: string;
 }
 
@@ -55,23 +61,46 @@ function validateRegisterForm(values: RegisterForm): RegisterErrors {
       "A confirmação da palavra-passe não coincide.";
   }
 
+  if (!values.provinceId) {
+    errors.provinceId = "A província é obrigatória.";
+  }
+
   return errors;
 }
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, setWelcomeMessage, isAuthenticated, isLoading } = useAuth();
+  const { register, setWelcomeMessage, isAuthenticated, isLoading, user } = useAuth();
   const [form, setForm] = useState<RegisterForm>({
     name: "",
     email: "",
     password: "",
     passwordConfirmation: "",
+    provinceId: "",
   });
+  const [provinces, setProvinces] = useState<ProvincesResponse["data"]>([]);
   const [errors, setErrors] = useState<RegisterErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  useEffect(() => {
+    const loadProvinces = async () => {
+      try {
+        const data = await apiFetch<ProvincesResponse>("/provinces", {
+          cacheTtlMs: 300_000,
+        });
+        setProvinces(data.data);
+      } catch {
+        setProvinces([]);
+      }
+    };
+
+    void loadProvinces();
+  }, []);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
+      setIsTransitioning(true);
       router.replace("/explorar");
     }
   }, [isAuthenticated, isLoading, router]);
@@ -95,13 +124,15 @@ export default function RegisterPage() {
     setErrors({});
 
     try {
-      const user = await register(
+      const registeredUser = await register(
         form.name.trim(),
         form.email.trim(),
         form.password,
         form.passwordConfirmation,
+        Number(form.provinceId),
       );
-      setWelcomeMessage(user.name);
+      setWelcomeMessage(registeredUser.name);
+      setIsTransitioning(true);
       router.replace("/explorar");
     } catch (error) {
       setErrors({
@@ -115,15 +146,12 @@ export default function RegisterPage() {
     }
   };
 
-  if (isLoading || isAuthenticated) {
+  if (isLoading || isTransitioning || isAuthenticated) {
     return (
-      <div className="flex flex-1 items-center justify-center px-4 py-12">
-        <Card hoverLift={false} className="w-full max-w-md">
-          <CardContent className="py-10 text-center text-sm text-content-secondary">
-            A redirecionar…
-          </CardContent>
-        </Card>
-      </div>
+      <AuthTransitionScreen
+        variant="public"
+        userName={user?.name ?? form.name}
+      />
     );
   }
 
@@ -164,6 +192,13 @@ export default function RegisterPage() {
               error={errors.email}
               placeholder="utilizador@jindungo.ao"
               onChange={(event) => handleChange("email", event.target.value)}
+            />
+
+            <ProvinceSelectField
+              value={form.provinceId}
+              provinces={provinces}
+              error={errors.provinceId}
+              onChange={(value) => handleChange("provinceId", value)}
             />
 
             <Input

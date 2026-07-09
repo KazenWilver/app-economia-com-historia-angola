@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useState } from "react";
+import { AuthTransitionScreen } from "@/components/auth/AuthTransitionScreen";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -75,13 +76,15 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
-  const { login, setWelcomeMessage, isAuthenticated, isLoading } = useAuth();
+  const { login, setWelcomeMessage, isAuthenticated, isLoading, user } = useAuth();
   const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
+      setIsTransitioning(true);
       router.replace(resolvePostLoginRoute(redirectTo));
     }
   }, [isAuthenticated, isLoading, redirectTo, router]);
@@ -105,8 +108,9 @@ function LoginForm() {
     setErrors({});
 
     try {
-      const user = await login(form.email.trim(), form.password);
-      setWelcomeMessage(user.name);
+      const loggedInUser = await login(form.email.trim(), form.password);
+      setWelcomeMessage(loggedInUser.name);
+      setIsTransitioning(true);
       router.replace(resolvePostLoginRoute(redirectTo));
     } catch (error) {
       setErrors({
@@ -120,15 +124,12 @@ function LoginForm() {
     }
   };
 
-  if (isLoading || isAuthenticated) {
+  if (isLoading || isTransitioning || isAuthenticated) {
     return (
-      <div className="flex flex-1 items-center justify-center px-4 py-12">
-        <Card hoverLift={false} className="w-full max-w-md">
-          <CardContent className="py-10 text-center text-sm text-content-secondary">
-            A redirecionar…
-          </CardContent>
-        </Card>
-      </div>
+      <AuthTransitionScreen
+        variant="public"
+        userName={user?.name ?? form.email.split("@")[0]}
+      />
     );
   }
 

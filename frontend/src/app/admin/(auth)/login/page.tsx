@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { AuthTransitionScreen } from "@/components/auth/AuthTransitionScreen";
 import { Button } from "@/components/ui/Button";
 import {
   Card,
@@ -46,13 +47,15 @@ const inputClassName =
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { login, isAdmin, isLoading } = useAdminAuth();
+  const { login, isAdmin, isLoading, user } = useAdminAuth();
   const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAdmin) {
+      setIsTransitioning(true);
       router.replace("/admin");
     }
   }, [isAdmin, isLoading, router]);
@@ -81,6 +84,7 @@ export default function AdminLoginPage() {
 
     try {
       await login(form.email.trim(), form.password);
+      setIsTransitioning(true);
       router.replace("/admin");
     } catch (error) {
       setErrors({
@@ -94,17 +98,8 @@ export default function AdminLoginPage() {
     }
   };
 
-  if (isLoading || isAdmin) {
-    return (
-      <Card
-        hoverLift={false}
-        className="w-full max-w-md border-slate-700 bg-slate-900 text-[#F8FAFC]"
-      >
-        <CardContent className="py-10 text-center text-sm text-slate-300">
-          A verificar sessão do painel…
-        </CardContent>
-      </Card>
-    );
+  if (isLoading || isTransitioning || isAdmin) {
+    return <AuthTransitionScreen variant="admin" userName={user?.name ?? form.email.split("@")[0]} />;
   }
 
   return (
