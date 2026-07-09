@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\MapNarrativeController;
+use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UserController;
@@ -52,6 +53,7 @@ Route::get('/provinces/{province}', [MapNarrativeController::class, 'provinceSho
 Route::middleware('auth.api:sanctum')->group(function () {
     Route::post('/contents/{content}/comments', [CommentController::class, 'store']);
     Route::delete('/contents/{content}/comments/{comment}', [CommentController::class, 'destroy']);
+    Route::post('/quizzes/{quiz}/attempt', [QuizAttemptController::class, 'store']);
 });
 
 Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
