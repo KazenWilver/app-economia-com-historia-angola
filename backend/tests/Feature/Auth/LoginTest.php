@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\PersonalAccessToken;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
@@ -69,7 +70,10 @@ class LoginTest extends TestCase
             ->postJson('/api/auth/logout')
             ->assertOk();
 
-        $this->refreshApplication();
+        $this->assertNull(PersonalAccessToken::findToken($token));
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+
+        auth()->forgetGuards();
 
         $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/auth/me')
