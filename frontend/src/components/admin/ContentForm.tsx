@@ -12,6 +12,8 @@ import {
 import {
   CONTENT_STATUS_OPTIONS,
   CONTENT_TYPE_OPTIONS,
+  getMediaAcceptForType,
+  MEDIA_HINT_BY_TYPE,
   type ContentFormValues,
   type ContentType,
   resolveAdminMediaUrl,
@@ -188,6 +190,16 @@ export function ContentForm({
     setLocalPreviewUrl(file ? URL.createObjectURL(file) : null);
   };
 
+  const handleTypeChange = (type: ContentType) => {
+    updateField("type", type);
+
+    if (mediaFile) {
+      handleFileChange(null);
+    }
+  };
+
+  const mediaAccept = getMediaAcceptForType(values.type);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     await onSubmit(values, mediaFile);
@@ -285,7 +297,7 @@ export function ContentForm({
             value={values.type}
             className={selectClassName}
             onChange={(event) =>
-              updateField("type", event.target.value as ContentType)
+              handleTypeChange(event.target.value as ContentType)
             }
           >
             {CONTENT_TYPE_OPTIONS.map((option) => (
@@ -473,12 +485,15 @@ export function ContentForm({
             id="media"
             name="media"
             type="file"
-            accept="image/*,audio/*,video/*"
+            accept={mediaAccept}
             className="block w-full text-sm text-content-secondary file:mr-4 file:rounded-lg file:border-0 file:bg-bordeaux file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white dark:text-content-dark-secondary"
             onChange={(event) =>
               handleFileChange(event.target.files?.[0] ?? null)
             }
           />
+          <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
+            {MEDIA_HINT_BY_TYPE[values.type]} Máximo 100 MB.
+          </p>
           {mediaFile ? (
             <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
               Ficheiro seleccionado: {mediaFile.name}

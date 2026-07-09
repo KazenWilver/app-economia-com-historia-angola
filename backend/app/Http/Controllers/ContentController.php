@@ -71,7 +71,7 @@ class ContentController extends Controller
 
         return ContentListResource::collection($contents)
             ->response()
-            ->withHeaders($this->publicCacheHeaders());
+            ->withHeaders($this->cacheHeaders($request->user('sanctum') !== null));
     }
 
     /**
@@ -118,7 +118,7 @@ class ContentController extends Controller
 
         return (new ContentResource($content))
             ->response()
-            ->withHeaders($this->publicCacheHeaders());
+            ->withHeaders($this->cacheHeaders($request->user('sanctum') !== null));
     }
 
     public function store(StoreContentRequest $request): JsonResponse
@@ -240,8 +240,15 @@ class ContentController extends Controller
     /**
      * @return array<string, string>
      */
-    private function publicCacheHeaders(): array
+    private function cacheHeaders(bool $isAuthenticated): array
     {
+        if ($isAuthenticated) {
+            return [
+                'Cache-Control' => 'private, no-store, must-revalidate',
+                'Vary' => 'Authorization',
+            ];
+        }
+
         return [
             'Cache-Control' => 'public, max-age=60, stale-while-revalidate=300',
         ];

@@ -87,21 +87,20 @@ function ContentCardSkeleton() {
 }
 
 export default function ExplorarPage() {
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, isLoading: authLoading } = useAuth();
   const [activeFilter, setActiveFilter] = useState<ContentType | null>(null);
   const [allContents, setAllContents] = useState<ContentItem[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const publicToken = token ?? getStoredToken();
-  const isLoggedIn = Boolean(publicToken);
 
   const loadContents = useCallback(async (currentToken: string | null) => {
     setIsFetching(true);
     setErrorMessage(null);
 
     try {
-      const cacheKey = `GET:/contents:${currentToken ? "auth" : "guest"}`;
+      const cacheKey = `GET:/contents:${currentToken ?? "guest"}`;
       const data = await apiFetch<ContentsResponse>("/contents", {
         token: currentToken,
         cacheTtlMs: 0,
@@ -120,21 +119,25 @@ export default function ExplorarPage() {
   }, []);
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
     void loadContents(publicToken);
-  }, [publicToken, loadContents]);
+  }, [authLoading, publicToken, loadContents]);
 
   const requiresAuth =
     activeFilter === "jindungo" && !isAuthenticated && !publicToken;
 
   const visibleContents = useMemo(() => {
-    if (isLoggedIn) {
+    if (isAuthenticated || publicToken) {
       return allContents;
     }
 
     return allContents.filter(
       (content) => !content.is_exclusive && content.type !== "jindungo",
     );
-  }, [allContents, isLoggedIn]);
+  }, [allContents, isAuthenticated, publicToken]);
 
   const displayedContents = useMemo(() => {
     if (requiresAuth) {

@@ -88,6 +88,25 @@ class ContentMediaTest extends TestCase
             ->assertJsonValidationErrors(['media']);
     }
 
+    public function test_audio_content_rejects_video_file(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $category = Category::factory()->create();
+        Sanctum::actingAs($admin);
+
+        $file = UploadedFile::fake()->create('clip.mp4', 500, 'video/mp4');
+
+        $response = $this->withHeaders(['Accept' => 'application/json'])->post('/api/contents', [
+            'category_id' => $category->id,
+            'title' => 'Áudio com Vídeo',
+            'type' => 'audio',
+            'media' => $file,
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['media']);
+    }
+
     public function test_oversized_media_is_rejected(): void
     {
         $admin = User::factory()->admin()->create();

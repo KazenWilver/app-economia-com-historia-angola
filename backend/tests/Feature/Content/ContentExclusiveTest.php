@@ -79,4 +79,22 @@ class ContentExclusiveTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Texto Público');
     }
+
+    public function test_authenticated_list_includes_exclusive_for_any_user(): void
+    {
+        $user = User::factory()->create();
+        Content::factory()->ofType('texto')->create(['title' => 'Texto Público']);
+        Content::factory()->exclusive()->ofType('audio')->create(['title' => 'Áudio Exclusivo']);
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/contents');
+
+        $response->assertOk()
+            ->assertJsonCount(2, 'data');
+
+        $this->assertStringContainsString(
+            'no-store',
+            (string) $response->headers->get('Cache-Control'),
+        );
+    }
 }
