@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\QuizAttemptAnswer;
@@ -10,6 +11,40 @@ use Illuminate\Support\Facades\DB;
 
 class QuizScoringService
 {
+    /**
+     * @return array{
+     *     is_correct: bool,
+     *     selected_answer_id: int|null,
+     *     selected_answer_text: string|null,
+     *     correct_answer_id: int|null,
+     *     correct_answer_text: string|null,
+     *     explanation: string|null
+     * }
+     */
+    public function buildQuestionFeedback(Question $question, ?int $selectedAnswerId): array
+    {
+        $question->load([
+            'answers' => fn ($query) => $query->orderBy('order'),
+        ]);
+
+        $selectedAnswer = $selectedAnswerId !== null
+            ? $question->answers->firstWhere('id', $selectedAnswerId)
+            : null;
+
+        $correctAnswer = $question->answers->firstWhere('is_correct', true);
+
+        $isCorrect = $selectedAnswer !== null && $selectedAnswer->is_correct;
+
+        return [
+            'is_correct' => $isCorrect,
+            'selected_answer_id' => $selectedAnswer?->id,
+            'selected_answer_text' => $selectedAnswer?->answer_text,
+            'correct_answer_id' => $correctAnswer?->id,
+            'correct_answer_text' => $correctAnswer?->answer_text,
+            'explanation' => $question->explanation,
+        ];
+    }
+
     /**
      * @param  list<array{question_id: int, selected_answer_id?: int|null}>  $answersPayload
      */

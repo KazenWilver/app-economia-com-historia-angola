@@ -56,6 +56,7 @@ Route::middleware('auth.api:sanctum')->group(function () {
     Route::post('/contents/{content}/comments', [CommentController::class, 'store']);
     Route::delete('/contents/{content}/comments/{comment}', [CommentController::class, 'destroy']);
     Route::post('/quizzes/{quiz}/attempt', [QuizAttemptController::class, 'store']);
+    Route::post('/quizzes/{quiz}/questions/{question}/feedback', [QuizAttemptController::class, 'questionFeedback']);
 });
 
 Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {

@@ -281,4 +281,80 @@ class QuizAttemptTest extends TestCase
 
         $this->assertSame(2, QuizAttempt::query()->count());
     }
+
+    public function test_authenticated_user_can_get_immediate_feedback_for_question(): void
+    {
+        $user = User::factory()->create();
+        $fixture = $this->createQuizWithQuestions();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson(
+            "/api/quizzes/{$fixture['quiz']->id}/questions/{$fixture['questions'][0]->id}/feedback",
+            [
+                'selected_answer_id' => $fixture['wrongAnswers'][0]->id,
+            ],
+        );
+
+        $response->assertOk()
+            ->assertJsonPath('feedback.is_correct', false)
+            ->assertJsonPath('feedback.correct_answer_text', 'Kwanza')
+            ->assertJsonPath('feedback.explanation', 'O kwanza é a moeda nacional.');
+
+        $this->assertDatabaseCount('quiz_attempts', 0);
+    }
+
+    public function test_correct_question_feedback_does_not_persist_attempt(): void
+    {
+        $user = User::factory()->create();
+        $fixture = $this->createQuizWithQuestions();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson(
+            "/api/quizzes/{$fixture['quiz']->id}/questions/{$fixture['questions'][0]->id}/feedback",
+            [
+                'selected_answer_id' => $fixture['correctAnswers'][0]->id,
+            ],
+        );
+
+        $response->assertOk()
+            ->assertJsonPath('feedback.is_correct', true)
+            ->assertJsonPath('feedback.selected_answer_text', 'Kwanza');
+
+        $this->assertDatabaseCount('quiz_attempts', 0);
+    }
+
+    public function test_guest_cannot_get_question_feedback(): void
+    {
+        $fixture = $this->createQuizWithQuestions();
+
+        $response = $this->postJson(
+            "/api/quizzes/{$fixture['quiz']->id}/questions/{$fixture['questions'][0]->id}/feedback",
+            [
+                'selected_answer_id' => $fixture['correctAnswers'][0]->id,
+            ],
+        );
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_cannot_get_feedback_for_question_from_other_quiz(): void
+    {
+        $user = User::factory()->create();
+        $fixture = $this->createQuizWithQuestions();
+        $otherQuiz = Quiz::query()->create([
+            'title' => 'Outro quiz',
+            'is_active' => true,
+        ]);
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson(
+            "/api/quizzes/{$otherQuiz->id}/questions/{$fixture['questions'][0]->id}/feedback",
+            [
+                'selected_answer_id' => $fixture['correctAnswers'][0]->id,
+            ],
+        );
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['question']);
+    }
 }

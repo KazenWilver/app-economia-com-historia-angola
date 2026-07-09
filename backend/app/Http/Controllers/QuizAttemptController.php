@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreQuestionFeedbackRequest;
 use App\Http\Requests\StoreQuizAttemptRequest;
 use App\Http\Resources\QuizAttemptResource;
+use App\Models\Question;
 use App\Models\Quiz;
 use App\Services\QuizScoringService;
 use Illuminate\Http\JsonResponse;
@@ -27,5 +29,20 @@ class QuizAttemptController extends Controller
             'message' => 'Tentativa registada com sucesso.',
             'attempt' => new QuizAttemptResource($attempt),
         ], 201);
+    }
+
+    public function questionFeedback(
+        StoreQuestionFeedbackRequest $request,
+        Quiz $quiz,
+        Question $question,
+    ): JsonResponse {
+        $feedback = $this->quizScoringService->buildQuestionFeedback(
+            question: $question,
+            selectedAnswerId: $request->validated('selected_answer_id'),
+        );
+
+        return response()->json([
+            'feedback' => $feedback,
+        ]);
     }
 }
