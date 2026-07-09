@@ -1,21 +1,18 @@
-"use client";
+import type { Metadata } from "next";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { createPageMetadata } from "@/lib/seo";
 
-import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
+export const metadata: Metadata = createPageMetadata({
+  title: "Administração",
+  description: "Painel de administração da plataforma Jindungo.",
+  path: "/admin",
+  noIndex: true,
+});
 
-/**
- * Isola o painel admin: sessão própria, tema escuro forçado (classe `dark`),
- * sem Header/Footer do site público.
- */
 export default function AdminRootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <AdminAuthProvider>
-      <div className="dark min-h-screen bg-[#0F172A] text-[#F8FAFC]">
-        {children}
-      </div>
-    </AdminAuthProvider>
-  );
+  return <AdminShell>{children}</AdminShell>;
 }
