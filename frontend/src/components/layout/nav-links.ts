@@ -6,6 +6,7 @@ export interface NavLinkItem {
 export const mainNavLinks: NavLinkItem[] = [
   { href: "/explorar", label: "Explorar" },
   { href: "/quiz", label: "Quiz" },
+  { href: "/ranking", label: "Ranking" },
   { href: "/forum", label: "Fórum" },
   { href: "/mapa", label: "Mapa" },
 ];
