@@ -1,7 +1,8 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -78,6 +79,7 @@ export default function ForumTopicScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingTopic, setDeletingTopic] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) {
@@ -162,6 +164,45 @@ export default function ForumTopicScreen() {
     }
   };
 
+  const handleDeleteTopic = () => {
+    if (!token || !id || !topic) {
+      return;
+    }
+
+    Alert.alert(
+      "Eliminar tópico",
+      "Tens a certeza de que queres eliminar este tópico?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => {
+            void (async () => {
+              setDeletingTopic(true);
+              setError(null);
+              try {
+                await apiFetch(`/topics/${id}`, {
+                  method: "DELETE",
+                  token,
+                });
+                router.replace("/(tabs)/forum" as never);
+              } catch (err) {
+                setError(
+                  err instanceof Error
+                    ? err.message
+                    : "Não foi possível eliminar o tópico.",
+                );
+              } finally {
+                setDeletingTopic(false);
+              }
+            })();
+          },
+        },
+      ],
+    );
+  };
+
   if (loading) {
     return (
       <Screen>
@@ -194,6 +235,16 @@ export default function ForumTopicScreen() {
         {topic.theme ? ` · ${topic.theme}` : ""}
         {topic.is_private ? " · Privado" : ""}
       </Text>
+      {topic.author?.id === user?.id || user?.role === "admin" ? (
+        <View style={styles.topicActions}>
+          <PrimaryButton
+            label="Eliminar tópico"
+            variant="danger"
+            onPress={handleDeleteTopic}
+            isLoading={deletingTopic}
+          />
+        </View>
+      ) : null}
       {topic.description ? (
         <Card>
           <Text style={styles.description}>{topic.description}</Text>
@@ -261,6 +312,9 @@ const styles = StyleSheet.create({
     color: colors.contentTertiary,
     marginBottom: 16,
     fontWeight: "600",
+  },
+  topicActions: {
+    marginBottom: 12,
   },
   description: {
     fontSize: 15,

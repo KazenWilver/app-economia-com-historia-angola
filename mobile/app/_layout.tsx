@@ -56,6 +56,14 @@ export default function RootLayout() {
           name="ranking"
           options={{ title: "Ranking", headerBackTitle: "Voltar" }}
         />
+        <Stack.Screen
+          name="termos"
+          options={{ title: "Termos", headerBackTitle: "Voltar" }}
+        />
+        <Stack.Screen
+          name="privacidade"
+          options={{ title: "Privacidade", headerBackTitle: "Voltar" }}
+        />
         <Stack.Screen name="+not-found" options={{ title: "Não encontrado" }} />
       </Stack>
     </AuthProvider>

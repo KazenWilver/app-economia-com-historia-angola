@@ -1,4 +1,4 @@
-import { Link, Redirect, router } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -8,36 +8,56 @@ import {
   Text,
   View,
 } from "react-native";
-import { useAuth } from "@/contexts/AuthContext";
 import { Field, PrimaryButton } from "@/components/ui";
+import { apiFetch } from "@/lib/api";
 import { colors } from "@/lib/theme";
 
-export default function LoginScreen() {
-  const { login, isAuthenticated, isLoading } = useAuth();
-  const [email, setEmail] = useState("");
+export default function RedefinirPalavraPasseScreen() {
+  const params = useLocalSearchParams<{ email?: string; token?: string }>();
+  const [email, setEmail] = useState(params.email ?? "");
+  const [token, setToken] = useState(params.token ?? "");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  if (!isLoading && isAuthenticated) {
-    return <Redirect href="/(tabs)/explorar" />;
-  }
 
   const handleSubmit = async () => {
     setError(null);
+    setSuccess(null);
 
-    if (!email.trim() || !password) {
-      setError("Preenche o email e a palavra-passe.");
+    if (!email.trim() || !token.trim() || !password || !passwordConfirmation) {
+      setError("Preenche todos os campos.");
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      setError("As palavras-passe não coincidem.");
       return;
     }
 
     setSubmitting(true);
 
     try {
-      await login(email.trim(), password);
-      router.replace("/(tabs)/explorar");
+      await apiFetch("/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          token: token.trim(),
+          password,
+          password_confirmation: passwordConfirmation,
+        }),
+      });
+
+      setSuccess("Palavra-passe actualizada. Podes iniciar sessão.");
+      setTimeout(() => router.replace("/(auth)/login"), 1200);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível entrar.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível redefinir a palavra-passe.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -53,9 +73,9 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.brand}>🌶️ Jindungo</Text>
-        <Text style={styles.title}>Entrar</Text>
+        <Text style={styles.title}>Nova palavra-passe</Text>
         <Text style={styles.subtitle}>
-          Continua a explorar a economia e a história de Angola.
+          Define uma nova palavra-passe para a tua conta.
         </Text>
 
         <View style={styles.form}>
@@ -63,38 +83,39 @@ export default function LoginScreen() {
             label="Email"
             autoCapitalize="none"
             keyboardType="email-address"
-            autoComplete="email"
             value={email}
             onChangeText={setEmail}
-            placeholder="utilizador@jindungo.ao"
           />
           <Field
-            label="Palavra-passe"
+            label="Token"
+            autoCapitalize="none"
+            value={token}
+            onChangeText={setToken}
+          />
+          <Field
+            label="Nova palavra-passe"
             secureTextEntry
-            autoComplete="password"
             value={password}
             onChangeText={setPassword}
-            placeholder="••••••••"
+          />
+          <Field
+            label="Confirmar palavra-passe"
+            secureTextEntry
+            value={passwordConfirmation}
+            onChangeText={setPasswordConfirmation}
           />
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
+          {success ? <Text style={styles.success}>{success}</Text> : null}
 
           <PrimaryButton
-            label="Entrar"
+            label="Guardar"
             onPress={() => void handleSubmit()}
             isLoading={submitting}
           />
 
-          <Link href={"/(auth)/recuperar-palavra-passe" as never} style={styles.link}>
-            Esqueceste a palavra-passe?
-          </Link>
-
-          <Link href="/(auth)/registar" style={styles.link}>
-            Ainda não tens conta? Registar
-          </Link>
-
-          <Link href="/(tabs)/explorar" style={styles.guestLink}>
-            Continuar sem conta
+          <Link href="/(auth)/login" style={styles.link}>
+            Voltar ao login
           </Link>
         </View>
       </ScrollView>
@@ -140,17 +161,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 13,
   },
+  success: {
+    color: colors.success,
+    marginBottom: 12,
+    fontSize: 13,
+    fontWeight: "600",
+  },
   link: {
     marginTop: 18,
     textAlign: "center",
     color: colors.bordeauxDark,
     fontWeight: "700",
-  },
-  guestLink: {
-    marginTop: 12,
-    textAlign: "center",
-    color: colors.contentDarkSecondary,
-    fontWeight: "600",
-    fontSize: 13,
   },
 });

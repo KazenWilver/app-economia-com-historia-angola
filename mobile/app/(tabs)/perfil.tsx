@@ -34,7 +34,7 @@ type AvatarAsset = {
 };
 
 export default function PerfilScreen() {
-  const { user, token, logout, updateProfile } = useAuth();
+  const { user, token, isAuthenticated, logout, updateProfile } = useAuth();
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
@@ -197,6 +197,50 @@ export default function PerfilScreen() {
   const previewUri =
     avatarAsset?.uri ?? resolveMediaUrl(user?.avatar_url) ?? null;
 
+  if (!isAuthenticated) {
+    return (
+      <Screen scroll>
+        <Title
+          title="Perfil"
+          subtitle="Inicia sessão para gerir a conta e ver recomendações."
+        />
+        <Card>
+          <Text style={styles.hint}>
+            Como convidado podes explorar conteúdos públicos, o mapa e o fórum.
+            Para quizzes, comentários e perfil completo, cria uma conta.
+          </Text>
+          <PrimaryButton
+            label="Entrar"
+            onPress={() => router.push("/(auth)/login" as never)}
+          />
+          <View style={styles.spacer} />
+          <PrimaryButton
+            label="Criar conta"
+            onPress={() => router.push("/(auth)/registar" as never)}
+          />
+        </Card>
+
+        <Text style={styles.sectionTitle}>Atalhos</Text>
+        <View style={styles.shortcuts}>
+          <PrimaryButton
+            label="Explorar conteúdos"
+            onPress={() => router.push("/(tabs)/explorar" as never)}
+          />
+          <View style={styles.spacer} />
+          <PrimaryButton
+            label="Mapa"
+            onPress={() => router.push("/(tabs)/mapa" as never)}
+          />
+          <View style={styles.spacer} />
+          <PrimaryButton
+            label="Ranking"
+            onPress={() => router.push("/ranking" as never)}
+          />
+        </View>
+      </Screen>
+    );
+  }
+
   return (
     <Screen scroll>
       <Title
@@ -317,8 +361,23 @@ export default function PerfilScreen() {
         />
         <View style={styles.spacer} />
         <PrimaryButton
+          label="Mapa"
+          onPress={() => router.push("/(tabs)/mapa" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
           label="Fórum"
           onPress={() => router.push("/(tabs)/forum" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Termos de utilização"
+          onPress={() => router.push("/termos" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Privacidade"
+          onPress={() => router.push("/privacidade" as never)}
         />
       </View>
 

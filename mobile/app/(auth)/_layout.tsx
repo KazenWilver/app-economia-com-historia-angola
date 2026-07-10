@@ -11,6 +11,8 @@ export default function AuthLayout() {
     >
       <Stack.Screen name="login" />
       <Stack.Screen name="registar" />
+      <Stack.Screen name="recuperar-palavra-passe" />
+      <Stack.Screen name="redefinir-palavra-passe" />
     </Stack>
   );
 }

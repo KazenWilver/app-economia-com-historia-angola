@@ -3,11 +3,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import type {
+  ProvincesResponse,
   PublicQuiz,
   PublicQuizResponse,
   QuestionFeedbackResult,
@@ -45,7 +47,7 @@ function formatTimer(seconds: number): string {
 
 export default function QuizPlayScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { token, isAuthenticated } = useAuth();
+  const { user, token, isAuthenticated, updateProfile } = useAuth();
   const [quiz, setQuiz] = useState<PublicQuiz | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
   const [error, setError] = useState<string | null>(null);
@@ -63,10 +65,14 @@ export default function QuizPlayScreen() {
   const [recommendations, setRecommendations] = useState<QuizRecommendation[]>(
     [],
   );
+  const [provinces, setProvinces] = useState<ProvincesResponse["data"]>([]);
+  const [selectedProvinceId, setSelectedProvinceId] = useState("");
+  const [savingProvince, setSavingProvince] = useState(false);
   const submitLockRef = useRef(false);
   const timeExpiredRef = useRef(false);
 
   const questions = useMemo(() => quiz?.questions ?? [], [quiz]);
+  const needsProvince = isAuthenticated && !user?.province_id;
 
   const load = useCallback(async () => {
     if (!id) {
@@ -93,6 +99,23 @@ export default function QuizPlayScreen() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!needsProvince) {
+      return;
+    }
+
+    void apiFetch<ProvincesResponse>("/provinces")
+      .then((data) => {
+        setProvinces(data.data);
+        if (data.data[0]) {
+          setSelectedProvinceId(String(data.data[0].id));
+        }
+      })
+      .catch(() => {
+        setError("Não foi possível carregar as províncias.");
+      });
+  }, [needsProvince]);
 
   const submitAttempt = useCallback(
     async (finalSelections?: Record<number, number | null>) => {
@@ -181,9 +204,8 @@ export default function QuizPlayScreen() {
     void submitAttempt();
   }, [phase, secondsLeft, quiz?.time_limit_seconds, submitAttempt]);
 
-  const startQuiz = () => {
-    if (!isAuthenticated || !quiz) {
-      setError("Precisas de iniciar sessão para jogar.");
+  const beginPlaying = () => {
+    if (!quiz) {
       return;
     }
 
@@ -200,6 +222,39 @@ export default function QuizPlayScreen() {
     timeExpiredRef.current = false;
     submitLockRef.current = false;
     setPhase("playing");
+  };
+
+  const startQuiz = async () => {
+    if (!isAuthenticated || !quiz) {
+      setError("Precisas de iniciar sessão para jogar.");
+      return;
+    }
+
+    if (needsProvince) {
+      if (!selectedProvinceId) {
+        setError("Selecciona a tua província antes de começar.");
+        return;
+      }
+
+      setSavingProvince(true);
+      setError(null);
+
+      try {
+        await updateProfile({ province_id: Number(selectedProvinceId) });
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Não foi possível guardar a província.",
+        );
+        setSavingProvince(false);
+        return;
+      } finally {
+        setSavingProvince(false);
+      }
+    }
+
+    beginPlaying();
   };
 
   const currentQuestion = questions[currentIndex];
@@ -341,9 +396,50 @@ export default function QuizPlayScreen() {
             ? ` · ${Math.round(quiz.time_limit_seconds / 60)} min`
             : " · sem limite"}
         </Text>
+
+        {needsProvince ? (
+          <Card>
+            <Text style={styles.question}>
+              Indica a tua província para entrar no ranking regional.
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.provinceRow}
+            >
+              {provinces.map((province) => {
+                const active = selectedProvinceId === String(province.id);
+                return (
+                  <Pressable
+                    key={province.id}
+                    onPress={() => setSelectedProvinceId(String(province.id))}
+                    style={[
+                      styles.provinceChip,
+                      active && styles.provinceChipActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.provinceChipText,
+                        active && styles.provinceChipTextActive,
+                      ]}
+                    >
+                      {province.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </Card>
+        ) : null}
+
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.actions}>
-          <PrimaryButton label="Começar quiz" onPress={startQuiz} />
+          <PrimaryButton
+            label="Começar quiz"
+            onPress={() => void startQuiz()}
+            isLoading={savingProvince}
+          />
         </View>
       </Screen>
     );
@@ -561,5 +657,29 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: colors.error,
     fontSize: 14,
+  },
+  provinceRow: {
+    gap: 8,
+    paddingBottom: 4,
+  },
+  provinceChip: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  provinceChipActive: {
+    borderColor: colors.bordeaux,
+    backgroundColor: colors.bordeauxMuted,
+  },
+  provinceChipText: {
+    fontSize: 13,
+    color: colors.contentSecondary,
+    fontWeight: "600",
+  },
+  provinceChipTextActive: {
+    color: colors.bordeaux,
   },
 });

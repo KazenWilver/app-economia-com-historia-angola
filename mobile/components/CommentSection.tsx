@@ -9,11 +9,15 @@ import { colors } from "@/lib/theme";
 function CommentTree({
   comments,
   depth = 0,
+  currentUserId,
   onReply,
+  onDelete,
 }: {
   comments: CommentItem[];
   depth?: number;
+  currentUserId?: number;
   onReply: (parentId: number) => void;
+  onDelete: (commentId: number) => void;
 }) {
   return (
     <>
@@ -24,14 +28,25 @@ function CommentTree({
         >
           <Text style={styles.author}>{comment.user.name}</Text>
           <Text style={styles.body}>{comment.body}</Text>
-          <Pressable onPress={() => onReply(comment.id)} style={styles.replyBtn}>
-            <Text style={styles.replyAction}>Responder</Text>
-          </Pressable>
+          <View style={styles.actions}>
+            <Pressable onPress={() => onReply(comment.id)}>
+              <Text style={styles.replyAction}>Responder</Text>
+            </Pressable>
+            {currentUserId === comment.user.id ? (
+              <Pressable onPress={() => onDelete(comment.id)}>
+                <Text style={[styles.replyAction, styles.deleteAction]}>
+                  Eliminar
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
           {comment.replies?.length ? (
             <CommentTree
               comments={comment.replies}
               depth={depth + 1}
+              currentUserId={currentUserId}
               onReply={onReply}
+              onDelete={onDelete}
             />
           ) : null}
         </View>
@@ -41,7 +56,7 @@ function CommentTree({
 }
 
 export function CommentSection({ contentSlug }: { contentSlug: string }) {
-  const { token, isAuthenticated } = useAuth();
+  const { user, token, isAuthenticated } = useAuth();
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [body, setBody] = useState("");
   const [parentId, setParentId] = useState<number | null>(null);
@@ -107,6 +122,26 @@ export function CommentSection({ contentSlug }: { contentSlug: string }) {
     }
   };
 
+  const handleDelete = async (commentId: number) => {
+    if (!token) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/contents/${contentSlug}/comments/${commentId}`, {
+        method: "DELETE",
+        token,
+      });
+      await load();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível eliminar o comentário.",
+      );
+    }
+  };
+
   return (
     <View style={styles.wrap}>
       <Text style={styles.title}>Comentários</Text>
@@ -118,10 +153,12 @@ export function CommentSection({ contentSlug }: { contentSlug: string }) {
       ) : (
         <CommentTree
           comments={comments}
+          currentUserId={user?.id}
           onReply={(id) => {
             setParentId(id);
             setError(null);
           }}
+          onDelete={(id) => void handleDelete(id)}
         />
       )}
 
@@ -129,7 +166,9 @@ export function CommentSection({ contentSlug }: { contentSlug: string }) {
         <View style={styles.form}>
           {parentId ? (
             <View style={styles.replyingTo}>
-              <Text style={styles.hint}>A responder ao comentário #{parentId}</Text>
+              <Text style={styles.hint}>
+                A responder ao comentário #{parentId}
+              </Text>
               <Pressable onPress={() => setParentId(null)}>
                 <Text style={styles.replyAction}>Cancelar</Text>
               </Pressable>
@@ -184,11 +223,18 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: colors.contentPrimary,
   },
-  replyBtn: { marginTop: 8 },
+  actions: {
+    flexDirection: "row",
+    gap: 16,
+    marginTop: 8,
+  },
   replyAction: {
     fontSize: 13,
     fontWeight: "700",
     color: colors.petrol,
+  },
+  deleteAction: {
+    color: colors.error,
   },
   replyingTo: {
     flexDirection: "row",

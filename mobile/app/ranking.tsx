@@ -1,14 +1,17 @@
 import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Image,
+  Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import type { ProvincesResponse, PublicQuizzesResponse } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
 import { resolveMediaUrl } from "@/lib/media";
@@ -57,34 +60,78 @@ function formatRankingTime(seconds: number | null): string {
   return `${minutes}m ${String(remainingSeconds).padStart(2, "0")}s`;
 }
 
+function buildRankingsQuery(params: {
+  quizId?: string;
+  provinceId?: string;
+}): string {
+  const search = new URLSearchParams();
+
+  if (params.quizId && params.quizId !== "all") {
+    search.set("quiz_id", params.quizId);
+  }
+
+  if (params.provinceId && params.provinceId !== "all") {
+    search.set("province_id", params.provinceId);
+  }
+
+  const query = search.toString();
+  return query ? `/rankings?${query}` : "/rankings";
+}
+
 export default function RankingScreen() {
   const [entries, setEntries] = useState<RankingEntry[]>([]);
+  const [quizzes, setQuizzes] = useState<PublicQuizzesResponse["data"]>([]);
+  const [provinces, setProvinces] = useState<ProvincesResponse["data"]>([]);
+  const [quizId, setQuizId] = useState("all");
+  const [provinceId, setProvinceId] = useState("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const data = await apiFetch<RankingsResponse>("/rankings");
-      setEntries(data.data);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Não foi possível carregar o ranking.",
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+  useEffect(() => {
+    void Promise.all([
+      apiFetch<PublicQuizzesResponse>("/quizzes"),
+      apiFetch<ProvincesResponse>("/provinces"),
+    ])
+      .then(([quizData, provinceData]) => {
+        setQuizzes(quizData.data);
+        setProvinces(provinceData.data);
+      })
+      .catch(() => {
+        // ignore filter bootstrap errors
+      });
   }, []);
+
+  const path = useMemo(
+    () => buildRankingsQuery({ quizId, provinceId }),
+    [quizId, provinceId],
+  );
+
+  const load = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
+      try {
+        const data = await apiFetch<RankingsResponse>(path);
+        setEntries(data.data);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Não foi possível carregar o ranking.",
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [path],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -98,6 +145,79 @@ export default function RankingScreen() {
         title="Ranking"
         subtitle="Melhores pontuações nos quizzes da plataforma."
       />
+
+      <Text style={styles.filterLabel}>Quiz</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filters}
+      >
+        <Pressable
+          onPress={() => setQuizId("all")}
+          style={[styles.chip, quizId === "all" && styles.chipActive]}
+        >
+          <Text
+            style={[
+              styles.chipText,
+              quizId === "all" && styles.chipTextActive,
+            ]}
+          >
+            Todos
+          </Text>
+        </Pressable>
+        {quizzes.map((quiz) => {
+          const active = quizId === String(quiz.id);
+          return (
+            <Pressable
+              key={quiz.id}
+              onPress={() => setQuizId(String(quiz.id))}
+              style={[styles.chip, active && styles.chipActive]}
+            >
+              <Text
+                style={[styles.chipText, active && styles.chipTextActive]}
+                numberOfLines={1}
+              >
+                {quiz.title}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      <Text style={styles.filterLabel}>Província</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filters}
+      >
+        <Pressable
+          onPress={() => setProvinceId("all")}
+          style={[styles.chip, provinceId === "all" && styles.chipActive]}
+        >
+          <Text
+            style={[
+              styles.chipText,
+              provinceId === "all" && styles.chipTextActive,
+            ]}
+          >
+            Nacional
+          </Text>
+        </Pressable>
+        {provinces.map((province) => {
+          const active = provinceId === String(province.id);
+          return (
+            <Pressable
+              key={province.id}
+              onPress={() => setProvinceId(String(province.id))}
+              style={[styles.chip, active && styles.chipActive]}
+            >
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                {province.name}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
@@ -120,10 +240,21 @@ export default function RankingScreen() {
           contentContainerStyle={styles.list}
           renderItem={({ item }) => {
             const avatar = resolveMediaUrl(item.user.avatar_url);
+            const medal =
+              item.position === 1
+                ? colors.gold
+                : item.position === 2
+                  ? colors.contentTertiary
+                  : item.position === 3
+                    ? "#CD7F32"
+                    : colors.bordeaux;
+
             return (
               <Card>
                 <View style={styles.row}>
-                  <Text style={styles.position}>#{item.position}</Text>
+                  <Text style={[styles.position, { color: medal }]}>
+                    #{item.position}
+                  </Text>
                   {avatar ? (
                     <Image source={{ uri: avatar }} style={styles.avatar} />
                   ) : (
@@ -155,6 +286,38 @@ export default function RankingScreen() {
 }
 
 const styles = StyleSheet.create({
+  filterLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.contentTertiary,
+    marginBottom: 8,
+    textTransform: "uppercase",
+  },
+  filters: {
+    gap: 8,
+    paddingBottom: 12,
+  },
+  chip: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceCard,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    maxWidth: 180,
+  },
+  chipActive: {
+    borderColor: colors.bordeaux,
+    backgroundColor: colors.bordeauxMuted,
+  },
+  chipText: {
+    fontSize: 13,
+    color: colors.contentSecondary,
+    fontWeight: "600",
+  },
+  chipTextActive: {
+    color: colors.bordeaux,
+  },
   list: { paddingBottom: 32 },
   row: {
     flexDirection: "row",
@@ -165,7 +328,6 @@ const styles = StyleSheet.create({
     width: 36,
     fontSize: 15,
     fontWeight: "800",
-    color: colors.bordeaux,
   },
   avatar: {
     width: 40,

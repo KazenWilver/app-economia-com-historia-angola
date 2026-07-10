@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -45,8 +46,18 @@ export default function RegisterScreen() {
   const handleSubmit = async () => {
     setError(null);
 
+    if (!name.trim() || !email.trim() || !password || !passwordConfirmation) {
+      setError("Preenche todos os campos obrigatórios.");
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      setError("As palavras-passe não coincidem.");
+      return;
+    }
+
     if (!provinceId) {
-      setError("Selecciona uma província (usa o ID numérico).");
+      setError("Selecciona uma província.");
       return;
     }
 
@@ -63,7 +74,9 @@ export default function RegisterScreen() {
       router.replace("/(tabs)/explorar");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Não foi possível concluir o registo.",
+        err instanceof Error
+          ? err.message
+          : "Não foi possível concluir o registo.",
       );
     } finally {
       setSubmitting(false);
@@ -106,24 +119,36 @@ export default function RegisterScreen() {
             value={passwordConfirmation}
             onChangeText={setPasswordConfirmation}
           />
-          <Field
-            label={`Província (ID)${provinces[0] ? ` — ex.: ${provinces[0].id} = ${provinces[0].name}` : ""}`}
-            keyboardType="number-pad"
-            value={provinceId}
-            onChangeText={setProvinceId}
-            placeholder="1"
-          />
 
-          {provinces.length > 0 ? (
-            <Text style={styles.hint}>
-              IDs:{" "}
-              {provinces
-                .slice(0, 6)
-                .map((p) => `${p.id}=${p.name}`)
-                .join(" · ")}
-              {provinces.length > 6 ? " …" : ""}
-            </Text>
-          ) : null}
+          <Text style={styles.provinceLabel}>Província</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.provinceRow}
+          >
+            {provinces.map((province) => {
+              const active = provinceId === String(province.id);
+              return (
+                <Pressable
+                  key={province.id}
+                  onPress={() => setProvinceId(String(province.id))}
+                  style={[
+                    styles.provinceChip,
+                    active && styles.provinceChipActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.provinceChipText,
+                      active && styles.provinceChipTextActive,
+                    ]}
+                  >
+                    {province.name}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -136,6 +161,24 @@ export default function RegisterScreen() {
           <Link href="/(auth)/login" style={styles.link}>
             Já tens conta? Entrar
           </Link>
+
+          <Text style={styles.legal}>
+            Ao registar-te, aceitas os{" "}
+            <Text
+              style={styles.legalLink}
+              onPress={() => router.push("/termos" as never)}
+            >
+              Termos
+            </Text>{" "}
+            e a{" "}
+            <Text
+              style={styles.legalLink}
+              onPress={() => router.push("/privacidade" as never)}
+            >
+              Privacidade
+            </Text>
+            .
+          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -175,11 +218,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderDark,
   },
-  hint: {
-    marginBottom: 12,
-    fontSize: 12,
+  provinceLabel: {
+    fontSize: 13,
+    fontWeight: "600",
     color: colors.contentDarkSecondary,
-    lineHeight: 18,
+    marginBottom: 8,
+  },
+  provinceRow: {
+    gap: 8,
+    paddingBottom: 12,
+  },
+  provinceChip: {
+    borderWidth: 1,
+    borderColor: colors.borderDark,
+    backgroundColor: colors.surfaceDark,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  provinceChipActive: {
+    borderColor: colors.bordeauxDark,
+    backgroundColor: "rgba(225, 29, 72, 0.15)",
+  },
+  provinceChipText: {
+    fontSize: 13,
+    color: colors.contentDarkSecondary,
+    fontWeight: "600",
+  },
+  provinceChipTextActive: {
+    color: colors.bordeauxDark,
   },
   error: {
     color: colors.error,
@@ -189,6 +256,17 @@ const styles = StyleSheet.create({
   link: {
     marginTop: 18,
     textAlign: "center",
+    color: colors.bordeauxDark,
+    fontWeight: "700",
+  },
+  legal: {
+    marginTop: 16,
+    fontSize: 12,
+    lineHeight: 18,
+    color: colors.contentDarkSecondary,
+    textAlign: "center",
+  },
+  legalLink: {
     color: colors.bordeauxDark,
     fontWeight: "700",
   },

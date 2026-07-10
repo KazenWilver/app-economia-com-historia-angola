@@ -4,6 +4,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import type { ContentDetailResponse } from "@shared/types";
 import { CommentSection } from "@/components/CommentSection";
 import { ContentMediaPlayer } from "@/components/ContentMediaPlayer";
+import { ContentStatistics } from "@/components/ContentStatistics";
 import { Card, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/lib/api";
@@ -100,7 +101,7 @@ export default function ConteudoDetailScreen() {
       {content.statistics_data ? (
         <Card>
           <Text style={styles.mediaLabel}>Dados estatísticos</Text>
-          <Text style={styles.body}>{content.statistics_data}</Text>
+          <ContentStatistics data={content.statistics_data} />
         </Card>
       ) : null}
 
