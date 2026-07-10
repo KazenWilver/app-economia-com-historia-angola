@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 import type {
   AuthResponse,
   MeResponse,
@@ -211,16 +212,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (payload.province_id !== undefined) {
           formData.append("province_id", String(payload.province_id));
         }
-        if (payload.avatar_url !== undefined && payload.avatar_url !== null) {
-          formData.append("avatar_url", payload.avatar_url);
-        }
 
         const avatar = payload.avatar as unknown as {
           uri: string;
           name: string;
           type: string;
         };
-        formData.append("avatar", avatar as unknown as Blob);
+
+        // Web: precisa de File/Blob real. Native: FormData aceita { uri, name, type }.
+        // Sem isto, o Laravel recebe "avatar" como string e valida como avatar_url.
+        if (Platform.OS === "web") {
+          const fileResponse = await fetch(avatar.uri);
+          const blob = await fileResponse.blob();
+          const mime = avatar.type || blob.type || "image/jpeg";
+          const fileName =
+            avatar.name && !avatar.name.includes("blob")
+              ? avatar.name
+              : `avatar.${mime.split("/")[1] === "png" ? "png" : "jpg"}`;
+          formData.append("avatar", new File([blob], fileName, { type: mime }));
+        } else {
+          formData.append(
+            "avatar",
+            {
+              uri: avatar.uri,
+              name: avatar.name,
+              type: avatar.type || "image/jpeg",
+            } as unknown as Blob,
+          );
+        }
 
         response = await fetch(`${API_URL}/auth/profile`, {
           method: "POST",

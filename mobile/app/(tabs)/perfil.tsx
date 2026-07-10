@@ -71,18 +71,19 @@ export default function PerfilScreen() {
     }
 
     const asset = result.assets[0];
-    const extension = asset.uri.split(".").pop()?.toLowerCase() ?? "jpg";
-    const mime =
-      asset.mimeType ??
-      (extension === "png"
-        ? "image/png"
-        : extension === "webp"
-          ? "image/webp"
-          : "image/jpeg");
+    const mime = asset.mimeType ?? "image/jpeg";
+    const extensionFromMime = mime.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
+    const uriExt = asset.uri.split(".").pop()?.toLowerCase();
+    const extension =
+      uriExt && ["jpg", "jpeg", "png", "webp", "gif"].includes(uriExt)
+        ? uriExt === "jpeg"
+          ? "jpg"
+          : uriExt
+        : extensionFromMime;
 
     setAvatarAsset({
       uri: asset.uri,
-      name: `avatar.${extension === "jpeg" ? "jpg" : extension}`,
+      name: `avatar.${extension}`,
       type: mime,
     });
   };
