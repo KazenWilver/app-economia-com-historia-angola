@@ -1,28 +1,24 @@
 ---
-description: Commits mobile com Eduarda e Adelino + pre-push + push
+description: Eduarda e Adelino só para commits mobile; resto Willfredy/Sulo
 globs: mobile/**/*
 alwaysApply: false
 ---
 
-# Git — Mobile (Eduarda & Adelino)
+# Git — Mobile apenas (Eduarda & Adelino)
 
-Ao concluir trabalho em `mobile/` (e fixes relacionados, ex. CORS Expo):
+## Âmbito (obrigatório)
 
-1. **Sempre** criar commit(s), correr `.\scripts\pre-push.ps1` e fazer `git push` — sem esperar o utilizador pedir.
-2. Autores (autor = committer via env, **sem** `git config`):
-   - **Adelino** `<adelinodo003@gmail.com>` — setup, auth, explorar, quiz, mapa, perfil base
-   - **Eduarda** `<Adraude2694@gmail.com>` — fórum, avatar, fixes web/CORS/mapa
+- **Eduarda** e **Adelino** → **somente** commits que tocam `mobile/` (e fixes mínimos directamente ligados ao Expo, ex. CORS 8081/8082).
+- **Nunca** usar Eduarda/Adelino para backend, frontend web, shared genérico, Docker, CI, docs gerais, etc.
+- Fora do mobile: continuar com **Willfredy** / **Sulo** (ver `divisao-equipa.mdc`).
+
+## Fluxo no mobile
+
+Ao concluir trabalho em `mobile/`:
+
+1. **Sempre** commit(s) → `.\scripts\pre-push.ps1` → `git push` (sem esperar pedido).
+2. Autores (autor = committer; preferir env vars):
+   - **Adelino** `<adelinodo003@gmail.com>`
+   - **Eduarda** `<Adraude2694@gmail.com>`
 3. Alternar entre os dois quando houver mais do que um commit lógico.
-4. PowerShell:
-
-```powershell
-$env:GIT_AUTHOR_NAME="Adelino"   # ou Eduarda
-$env:GIT_AUTHOR_EMAIL="adelinodo003@gmail.com"  # ou Adraude2694@gmail.com
-$env:GIT_COMMITTER_NAME=$env:GIT_AUTHOR_NAME
-$env:GIT_COMMITTER_EMAIL=$env:GIT_AUTHOR_EMAIL
-git commit -m "feat: ..."
-.\scripts\pre-push.ps1
-git push origin HEAD
-```
-
-5. Ou: `. .\scripts\git-profile.ps1` → `Commit-Git -Who adelino -Message "..."` / `eduarda`.
+4. Ou: `. .\scripts\git-profile.ps1` → `Commit-Git -Who adelino|eduarda -Message "..."`.

@@ -5,7 +5,8 @@
 #        --author só altera o autor; o committer fica no perfil da máquina
 #        e o GitHub mostra "authored by X, committed by Y".
 #
-# Mobile: preferir eduarda / adelino (ver .cursor/rules/mobile-git-eduarda-adelino.mdc).
+# Mobile: eduarda / adelino **apenas** para commits em mobile/ (nunca backend/frontend).
+# Web/API: willfredy / sulo — ver .cursor/rules/divisao-equipa.mdc.
 
 $script:GitProfiles = @{
   sulo = @{
