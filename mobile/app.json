@@ -40,7 +40,8 @@
         {
           "photosPermission": "O Jindungo precisa de aceder às fotografias para o teu avatar."
         }
-      ]
+      ],
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true
