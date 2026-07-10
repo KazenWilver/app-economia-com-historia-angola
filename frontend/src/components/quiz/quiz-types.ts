@@ -1,3 +1,7 @@
+import type { QuizRecommendation } from "@shared/types";
+
+export type { QuizRecommendation } from "@shared/types";
+
 export interface PublicQuizAnswer {
   id: number;
   answer_text: string;
@@ -50,28 +54,6 @@ export interface QuizAttemptResult {
   completed_at: string | null;
   answers: QuizAttemptAnswerResult[];
   recommendations?: QuizRecommendation[];
-}
-
-export interface QuizRecommendation {
-  id: number;
-  reason: string | null;
-  is_read: boolean;
-  quiz_attempt_id: number | null;
-  content: {
-    id: number;
-    title: string;
-    slug: string;
-    excerpt: string | null;
-    type: "texto" | "audio" | "video" | "podcast" | "jindungo";
-    media_url: string | null;
-    is_exclusive: boolean | null;
-    published_at: string | null;
-    category: {
-      id: number;
-      name: string;
-      slug: string;
-    } | null;
-  };
 }
 
 export interface QuizAttemptResponse {

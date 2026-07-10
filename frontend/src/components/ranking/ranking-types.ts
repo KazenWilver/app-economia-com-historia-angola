@@ -1,8 +1,6 @@
-export interface RankingProvince {
-  id: number;
-  name: string;
-  code: string;
-}
+export type { Province as RankingProvince, ProvincesResponse, PublicProvince } from "@shared/types";
+
+import type { RankingProvince } from "@shared/types";
 
 export interface RankingUser {
   id: number;
@@ -30,16 +28,6 @@ export interface RankingsResponse {
     province_id: number | null;
     total: number;
   };
-}
-
-export interface PublicProvince {
-  id: number;
-  name: string;
-  code: string;
-}
-
-export interface ProvincesResponse {
-  data: PublicProvince[];
 }
 
 export function formatRankingTime(seconds: number | null): string {

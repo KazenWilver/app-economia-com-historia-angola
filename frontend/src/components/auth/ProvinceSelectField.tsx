@@ -2,11 +2,9 @@
 
 import { cn } from "@/lib/utils";
 
-export interface ProvinceOption {
-  id: number;
-  name: string;
-  code: string;
-}
+import type { Province } from "@shared/types";
+
+export type ProvinceOption = Province;
 
 export interface ProvinceSelectFieldProps {
   label?: string;

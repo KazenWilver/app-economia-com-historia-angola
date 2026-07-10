@@ -1,43 +1,18 @@
-export type ContentType = "texto" | "audio" | "video" | "podcast" | "jindungo";
+export type {
+  Author,
+  Category,
+  CommentItem,
+  CommentUser,
+  CommentsResponse,
+  ContentDetail,
+  ContentDetailResponse,
+  ContentItem,
+  ContentSummary,
+  ContentType,
+  ContentsResponse,
+} from "@shared/types";
 
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-export interface Author {
-  id: number;
-  name: string;
-  email: string;
-}
-
-export interface ContentDetail {
-  id: number;
-  title: string;
-  slug: string;
-  body: string | null;
-  type: ContentType;
-  media_url: string | null;
-  statistics_data: string | null;
-  is_exclusive: boolean | null;
-  published_at: string | null;
-  category: Category | null;
-  author: Author | null;
-}
-
-export interface ContentItem {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  body?: string | null;
-  type: ContentType;
-  media_url: string | null;
-  is_exclusive: boolean | null;
-  published_at: string | null;
-  category: Category | null;
-}
+import type { ContentItem } from "@shared/types";
 
 export function getContentPreview(content: ContentItem): string {
   if (content.excerpt) {
@@ -51,33 +26,6 @@ export function getContentPreview(content: ContentItem): string {
   }
 
   return "Sem descrição disponível.";
-}
-
-export interface ContentsResponse {
-  data: ContentItem[];
-}
-
-export interface ContentDetailResponse {
-  data: ContentDetail;
-}
-
-export interface CommentUser {
-  id: number;
-  name: string;
-  email: string;
-}
-
-export interface CommentItem {
-  id: number;
-  body: string;
-  parent_id: number | null;
-  user: CommentUser;
-  replies: CommentItem[];
-  created_at: string;
-}
-
-export interface CommentsResponse {
-  data: CommentItem[];
 }
 
 export { API_URL, buildAuthHeaders, getStoredToken } from "@/lib/api";

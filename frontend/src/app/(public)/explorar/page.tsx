@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FileAudio, FileText, Film, Mic2, Sparkles } from "lucide-react";
 import {
   type ContentItem,
+  type ContentType,
   type ContentsResponse,
   getContentPreview,
   isImageMediaUrl,
@@ -22,8 +23,6 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { cn } from "@/lib/utils";
-
-type ContentType = "texto" | "audio" | "video" | "podcast" | "jindungo";
 
 const CONTENT_FILTERS: { value: ContentType | null; label: string }[] = [
   { value: null, label: "Todos" },

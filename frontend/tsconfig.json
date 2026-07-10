@@ -25,6 +25,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@shared/types": [
+        "../shared/types/index.ts"
+      ],
+      "@shared/types/*": [
+        "../shared/types/*"
       ]
     }
   },
@@ -34,7 +40,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "../shared/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

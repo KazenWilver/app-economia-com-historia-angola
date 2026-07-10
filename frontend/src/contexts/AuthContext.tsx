@@ -14,38 +14,14 @@ import {
   TOKEN_STORAGE_KEY,
   USER_STORAGE_KEY,
 } from "@/lib/api";
+import type {
+  AuthResponse,
+  MeResponse,
+  UpdateProfilePayload,
+  User,
+} from "@shared/types";
 
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string | null;
-  role: "user" | "admin";
-  avatar_url: string | null;
-  province_id: number | null;
-  province: {
-    id: number;
-    name: string;
-    code: string;
-  } | null;
-}
-
-interface AuthResponse {
-  user: User;
-  token: string;
-}
-
-interface MeResponse {
-  user: User;
-}
-
-export interface UpdateProfilePayload {
-  name?: string;
-  email?: string;
-  phone?: string | null;
-  avatar_url?: string | null;
-  province_id?: number;
-}
+export type { UpdateProfilePayload, User } from "@shared/types";
 
 interface AuthContextValue {
   user: User | null;

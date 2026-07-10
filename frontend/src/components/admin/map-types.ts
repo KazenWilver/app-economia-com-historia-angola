@@ -1,7 +1,6 @@
-export interface AdminProvince {
-  id: number;
-  name: string;
-  code: string;
+import type { Province } from "@shared/types";
+
+export interface AdminProvince extends Province {
   capital: string | null;
   narratives_count?: number;
 }

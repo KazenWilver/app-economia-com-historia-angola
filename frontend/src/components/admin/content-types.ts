@@ -1,17 +1,7 @@
-export type ContentType = "texto" | "audio" | "video" | "podcast" | "jindungo";
-export type ContentStatus = "draft" | "published" | "archived";
+export type { ContentStatus, ContentType } from "@shared/types";
+export type { Author as AdminAuthor, Category as AdminCategory } from "@shared/types";
 
-export interface AdminCategory {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-export interface AdminAuthor {
-  id: number;
-  name: string;
-  email: string;
-}
+import type { Author, Category, ContentStatus, ContentType } from "@shared/types";
 
 export interface AdminContent {
   id: number;
@@ -25,8 +15,8 @@ export interface AdminContent {
   status: ContentStatus;
   view_count: number;
   published_at: string | null;
-  category: AdminCategory | null;
-  author: AdminAuthor | null;
+  category: Category | null;
+  author: Author | null;
   created_at: string;
   updated_at: string;
 }
@@ -42,7 +32,7 @@ export interface AdminContentResponse {
 }
 
 export interface AdminCategoriesResponse {
-  data: AdminCategory[];
+  data: Category[];
 }
 
 export interface ContentFormValues {
