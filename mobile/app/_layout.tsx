@@ -52,6 +52,10 @@ export default function RootLayout() {
           name="forum/novo"
           options={{ title: "Novo tópico", headerBackTitle: "Voltar" }}
         />
+        <Stack.Screen
+          name="ranking"
+          options={{ title: "Ranking", headerBackTitle: "Voltar" }}
+        />
         <Stack.Screen name="+not-found" options={{ title: "Não encontrado" }} />
       </Stack>
     </AuthProvider>

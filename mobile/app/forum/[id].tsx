@@ -2,6 +2,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -16,7 +17,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/lib/api";
 import { colors } from "@/lib/theme";
 
-function ReplyTree({ replies, depth = 0 }: { replies: ForumReply[]; depth?: number }) {
+function ReplyTree({
+  replies,
+  depth = 0,
+  currentUserId,
+  onReply,
+  onDelete,
+}: {
+  replies: ForumReply[];
+  depth?: number;
+  currentUserId?: number;
+  onReply: (parentId: number) => void;
+  onDelete: (replyId: number) => void;
+}) {
   return (
     <>
       {replies.map((reply) => (
@@ -27,9 +40,27 @@ function ReplyTree({ replies, depth = 0 }: { replies: ForumReply[]; depth?: numb
           <Card>
             <Text style={styles.replyAuthor}>{reply.user.name}</Text>
             <Text style={styles.replyBody}>{reply.body}</Text>
+            <View style={styles.replyActions}>
+              <Pressable onPress={() => onReply(reply.id)}>
+                <Text style={styles.replyAction}>Responder</Text>
+              </Pressable>
+              {currentUserId === reply.user.id ? (
+                <Pressable onPress={() => onDelete(reply.id)}>
+                  <Text style={[styles.replyAction, styles.deleteAction]}>
+                    Eliminar
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
           </Card>
           {reply.replies?.length ? (
-            <ReplyTree replies={reply.replies} depth={depth + 1} />
+            <ReplyTree
+              replies={reply.replies}
+              depth={depth + 1}
+              currentUserId={currentUserId}
+              onReply={onReply}
+              onDelete={onDelete}
+            />
           ) : null}
         </View>
       ))}
@@ -39,10 +70,11 @@ function ReplyTree({ replies, depth = 0 }: { replies: ForumReply[]; depth?: numb
 
 export default function ForumTopicScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { token, isAuthenticated } = useAuth();
+  const { user, token, isAuthenticated } = useAuth();
   const [topic, setTopic] = useState<PublicTopicResponse["data"] | null>(null);
   const [replies, setReplies] = useState<ForumReply[]>([]);
   const [body, setBody] = useState("");
+  const [parentId, setParentId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -91,9 +123,13 @@ export default function ForumTopicScreen() {
         method: "POST",
         token,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: body.trim() }),
+        body: JSON.stringify({
+          body: body.trim(),
+          ...(parentId ? { parent_id: parentId } : {}),
+        }),
       });
       setBody("");
+      setParentId(null);
       await load();
     } catch (err) {
       setError(
@@ -103,6 +139,26 @@ export default function ForumTopicScreen() {
       );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (replyId: number) => {
+    if (!token || !id) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/topics/${id}/replies/${replyId}`, {
+        method: "DELETE",
+        token,
+      });
+      await load();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível eliminar a resposta.",
+      );
     }
   };
 
@@ -136,6 +192,7 @@ export default function ForumTopicScreen() {
       <Text style={styles.meta}>
         {topic.author?.name ?? "Autor"}
         {topic.theme ? ` · ${topic.theme}` : ""}
+        {topic.is_private ? " · Privado" : ""}
       </Text>
       {topic.description ? (
         <Card>
@@ -147,11 +204,29 @@ export default function ForumTopicScreen() {
       {replies.length === 0 ? (
         <Text style={styles.empty}>Ainda não há respostas.</Text>
       ) : (
-        <ReplyTree replies={replies} />
+        <ReplyTree
+          replies={replies}
+          currentUserId={user?.id}
+          onReply={(replyId) => {
+            setParentId(replyId);
+            setError(null);
+          }}
+          onDelete={(replyId) => void handleDelete(replyId)}
+        />
       )}
 
       {isAuthenticated ? (
         <Card>
+          {parentId ? (
+            <View style={styles.replyingTo}>
+              <Text style={styles.replyingToText}>
+                A responder à mensagem #{parentId}
+              </Text>
+              <Pressable onPress={() => setParentId(null)}>
+                <Text style={styles.replyAction}>Cancelar</Text>
+              </Pressable>
+            </View>
+          ) : null}
           <Field
             label="A tua resposta"
             variant="light"
@@ -162,7 +237,7 @@ export default function ForumTopicScreen() {
           />
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <PrimaryButton
-            label="Publicar resposta"
+            label={parentId ? "Publicar resposta aninhada" : "Publicar resposta"}
             onPress={() => void handleReply()}
             isLoading={submitting}
           />
@@ -215,6 +290,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: colors.contentPrimary,
+  },
+  replyActions: {
+    flexDirection: "row",
+    gap: 16,
+    marginTop: 10,
+  },
+  replyAction: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.petrol,
+  },
+  deleteAction: {
+    color: colors.error,
+  },
+  replyingTo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  replyingToText: {
+    fontSize: 13,
+    color: colors.contentSecondary,
+    fontWeight: "600",
   },
   replyInput: {
     minHeight: 96,

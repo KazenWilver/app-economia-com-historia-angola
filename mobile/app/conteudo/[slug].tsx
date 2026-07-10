@@ -2,11 +2,12 @@ import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import type { ContentDetailResponse } from "@shared/types";
+import { CommentSection } from "@/components/CommentSection";
 import { ContentMediaPlayer } from "@/components/ContentMediaPlayer";
 import { Card, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
+import { colors, TYPE_LABELS } from "@/lib/theme";
 
 export default function ConteudoDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -66,10 +67,15 @@ export default function ConteudoDetailScreen() {
       <Text style={styles.title}>{content.title}</Text>
 
       <View style={styles.meta}>
+        <Text style={styles.badge}>
+          {TYPE_LABELS[content.type] ?? content.type}
+        </Text>
         {content.category?.name ? (
-          <Text style={styles.badge}>{content.category.name}</Text>
+          <Text style={styles.type}>{content.category.name}</Text>
         ) : null}
-        <Text style={styles.type}>{content.type}</Text>
+        {content.is_exclusive ? (
+          <Text style={styles.exclusive}>Exclusivo</Text>
+        ) : null}
       </View>
 
       {content.author?.name ? (
@@ -97,6 +103,10 @@ export default function ConteudoDetailScreen() {
           <Text style={styles.body}>{content.statistics_data}</Text>
         </Card>
       ) : null}
+
+      <Card>
+        <CommentSection contentSlug={content.slug} />
+      </Card>
     </Screen>
   );
 }
@@ -129,7 +139,11 @@ const styles = StyleSheet.create({
   type: {
     fontSize: 12,
     color: colors.contentTertiary,
-    textTransform: "capitalize",
+  },
+  exclusive: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.gold,
   },
   author: {
     marginBottom: 16,

@@ -3,9 +3,11 @@ import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
+  View,
 } from "react-native";
 import type { PublicQuizzesResponse } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
@@ -49,10 +51,21 @@ export default function QuizScreen() {
 
   return (
     <Screen>
-      <Title
-        title="Quizzes"
-        subtitle="Escolhe um quiz e testa os teus conhecimentos."
-      />
+      <View style={styles.headerRow}>
+        <View style={styles.headerText}>
+          <Title
+            title="Quizzes"
+            subtitle="Escolhe um quiz e testa os teus conhecimentos."
+          />
+        </View>
+      </View>
+
+      <Pressable
+        onPress={() => router.push("/ranking" as never)}
+        style={styles.rankingLink}
+      >
+        <Text style={styles.rankingLinkText}>Ver ranking nacional →</Text>
+      </Pressable>
 
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
@@ -98,7 +111,18 @@ export default function QuizScreen() {
 }
 
 const styles = StyleSheet.create({
-  list: { paddingBottom: 32, gap: 12 },
+  headerRow: { flexDirection: "row", alignItems: "flex-start" },
+  headerText: { flex: 1 },
+  rankingLink: {
+    marginBottom: 12,
+    alignSelf: "flex-start",
+  },
+  rankingLinkText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.bordeaux,
+  },
+  list: { paddingBottom: 32 },
   cardTitle: {
     fontSize: 17,
     fontWeight: "700",

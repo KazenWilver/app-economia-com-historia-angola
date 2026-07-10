@@ -6,40 +6,46 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  View,
 } from "react-native";
 import type { PublicTopicsResponse } from "@shared/types";
 import { Card, EmptyState, PrimaryButton, Screen, Title } from "@/components/ui";
+import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/lib/api";
 import { colors } from "@/lib/theme";
 
 export default function ForumScreen() {
+  const { token, isAuthenticated } = useAuth();
   const [items, setItems] = useState<PublicTopicsResponse["data"]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
+  const load = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
 
-    try {
-      const data = await apiFetch<PublicTopicsResponse>("/topics");
-      setItems(data.data);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Não foi possível carregar o fórum.",
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+      try {
+        const data = await apiFetch<PublicTopicsResponse>("/topics", { token });
+        setItems(data.data);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Não foi possível carregar o fórum.",
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [token],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -54,10 +60,22 @@ export default function ForumScreen() {
         subtitle="Debates e tópicos públicos da comunidade."
       />
 
-      <PrimaryButton
-        label="Novo tópico"
-        onPress={() => router.push("/forum/novo" as never)}
-      />
+      {isAuthenticated ? (
+        <PrimaryButton
+          label="Novo tópico"
+          onPress={() => router.push("/forum/novo" as never)}
+        />
+      ) : (
+        <View style={styles.authHint}>
+          <Text style={styles.authHintText}>
+            Inicia sessão para criar tópicos e ver conteúdos privados.
+          </Text>
+          <PrimaryButton
+            label="Iniciar sessão"
+            onPress={() => router.push("/(auth)/login" as never)}
+          />
+        </View>
+      )}
 
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
@@ -80,9 +98,7 @@ export default function ForumScreen() {
           }
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
-            <Card
-              onPress={() => router.push(`/forum/${item.id}` as never)}
-            >
+            <Card onPress={() => router.push(`/forum/${item.id}` as never)}>
               <Text style={styles.cardTitle}>{item.title}</Text>
               {item.description ? (
                 <Text style={styles.cardBody} numberOfLines={2}>
@@ -95,6 +111,7 @@ export default function ForumScreen() {
                   ? ` · ${item.replies_count} respostas`
                   : ""}
                 {item.theme ? ` · ${item.theme}` : ""}
+                {item.is_private ? " · Privado" : ""}
               </Text>
             </Card>
           )}
@@ -105,6 +122,15 @@ export default function ForumScreen() {
 }
 
 const styles = StyleSheet.create({
+  authHint: {
+    marginBottom: 8,
+    gap: 10,
+  },
+  authHintText: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.contentSecondary,
+  },
   list: { marginTop: 16, flex: 1 },
   listContent: { paddingBottom: 32 },
   cardTitle: {

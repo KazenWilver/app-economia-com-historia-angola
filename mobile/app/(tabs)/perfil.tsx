@@ -1,8 +1,20 @@
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
-import type { ProvincesResponse, UpdateProfilePayload } from "@shared/types";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import type {
+  ProvincesResponse,
+  QuizRecommendation,
+  RecommendationsResponse,
+  UpdateProfilePayload,
+} from "@shared/types";
 import {
   Card,
   Field,
@@ -12,6 +24,7 @@ import {
 } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/lib/api";
+import { resolveMediaUrl } from "@/lib/media";
 import { colors } from "@/lib/theme";
 
 type AvatarAsset = {
@@ -21,7 +34,7 @@ type AvatarAsset = {
 };
 
 export default function PerfilScreen() {
-  const { user, logout, updateProfile } = useAuth();
+  const { user, token, logout, updateProfile } = useAuth();
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
@@ -29,6 +42,9 @@ export default function PerfilScreen() {
     user?.province_id ? String(user.province_id) : "",
   );
   const [provinces, setProvinces] = useState<ProvincesResponse["data"]>([]);
+  const [recommendations, setRecommendations] = useState<QuizRecommendation[]>(
+    [],
+  );
   const [avatarAsset, setAvatarAsset] = useState<AvatarAsset | null>(null);
   const [saving, setSaving] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -49,6 +65,28 @@ export default function PerfilScreen() {
         // ignore
       });
   }, []);
+
+  const loadRecommendations = useCallback(async () => {
+    if (!token) {
+      setRecommendations([]);
+      return;
+    }
+
+    try {
+      const data = await apiFetch<RecommendationsResponse>("/recommendations", {
+        token,
+      });
+      setRecommendations(data.data);
+    } catch {
+      setRecommendations([]);
+    }
+  }, [token]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadRecommendations();
+    }, [loadRecommendations]),
+  );
 
   const pickAvatar = async () => {
     setError(null);
@@ -108,6 +146,7 @@ export default function PerfilScreen() {
       await updateProfile(payload);
       setAvatarAsset(null);
       setMessage("Perfil actualizado com sucesso.");
+      await loadRecommendations();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Não foi possível guardar.",
@@ -135,11 +174,35 @@ export default function PerfilScreen() {
     }
   };
 
-  const previewUri = avatarAsset?.uri ?? user?.avatar_url ?? null;
+  const markRead = async (recommendationId: number) => {
+    if (!token) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/recommendations/${recommendationId}/read`, {
+        method: "POST",
+        token,
+      });
+      setRecommendations((prev) =>
+        prev.map((item) =>
+          item.id === recommendationId ? { ...item, is_read: true } : item,
+        ),
+      );
+    } catch {
+      // ignore
+    }
+  };
+
+  const previewUri =
+    avatarAsset?.uri ?? resolveMediaUrl(user?.avatar_url) ?? null;
 
   return (
     <Screen scroll>
-      <Title title="Perfil" subtitle="Actualiza os teus dados e gere a sessão." />
+      <Title
+        title="Perfil"
+        subtitle="Actualiza os teus dados e gere a sessão."
+      />
 
       <Card>
         <View style={styles.avatarBlock}>
@@ -180,28 +243,109 @@ export default function PerfilScreen() {
           onChangeText={setPhone}
           placeholder="Opcional"
         />
-        <Field
-          label="Província (ID)"
-          variant="light"
-          keyboardType="number-pad"
-          value={provinceId}
-          onChangeText={setProvinceId}
-        />
-        {provinces.length > 0 ? (
-          <Text style={styles.hint}>
-            Ex.:{" "}
-            {provinces
-              .slice(0, 5)
-              .map((p) => `${p.id}=${p.name}`)
-              .join(" · ")}
-            {provinces.length > 5 ? " …" : ""}
-          </Text>
+
+        <Text style={styles.provinceLabel}>Província</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.provinceRow}
+        >
+          <Pressable
+            onPress={() => setProvinceId("")}
+            style={[
+              styles.provinceChip,
+              !provinceId && styles.provinceChipActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.provinceChipText,
+                !provinceId && styles.provinceChipTextActive,
+              ]}
+            >
+              Nenhuma
+            </Text>
+          </Pressable>
+          {provinces.map((province) => {
+            const active = provinceId === String(province.id);
+            return (
+              <Pressable
+                key={province.id}
+                onPress={() => setProvinceId(String(province.id))}
+                style={[
+                  styles.provinceChip,
+                  active && styles.provinceChipActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.provinceChipText,
+                    active && styles.provinceChipTextActive,
+                  ]}
+                >
+                  {province.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        {user?.province?.name ? (
+          <Text style={styles.hint}>Actual: {user.province.name}</Text>
         ) : null}
 
         {user?.role ? (
           <Text style={styles.role}>Papel: {user.role}</Text>
         ) : null}
       </Card>
+
+      <Text style={styles.sectionTitle}>Atalhos</Text>
+      <View style={styles.shortcuts}>
+        <PrimaryButton
+          label="Explorar conteúdos"
+          onPress={() => router.push("/(tabs)/explorar" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Quizzes"
+          onPress={() => router.push("/(tabs)/quiz" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Ranking"
+          onPress={() => router.push("/ranking" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Fórum"
+          onPress={() => router.push("/(tabs)/forum" as never)}
+        />
+      </View>
+
+      <Text style={styles.sectionTitle}>Recomendações</Text>
+      {recommendations.length === 0 ? (
+        <Text style={styles.hint}>Ainda não tens recomendações.</Text>
+      ) : (
+        recommendations.map((item) => (
+          <Card
+            key={item.id}
+            onPress={() => {
+              void markRead(item.id);
+              if (item.content?.slug) {
+                router.push(`/conteudo/${item.content.slug}` as never);
+              }
+            }}
+          >
+            <Text style={styles.recTitle}>{item.content?.title}</Text>
+            {item.reason ? (
+              <Text style={styles.hint}>{item.reason}</Text>
+            ) : null}
+            <Text style={styles.recMeta}>
+              {item.is_read ? "Lida" : "Nova"}
+            </Text>
+          </Card>
+        ))
+      )}
 
       {message ? <Text style={styles.success}>{message}</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -245,6 +389,36 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: colors.bordeaux,
   },
+  provinceLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.contentSecondary,
+    marginBottom: 8,
+  },
+  provinceRow: {
+    gap: 8,
+    paddingBottom: 8,
+  },
+  provinceChip: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  provinceChipActive: {
+    borderColor: colors.bordeaux,
+    backgroundColor: colors.bordeauxMuted,
+  },
+  provinceChipText: {
+    fontSize: 13,
+    color: colors.contentSecondary,
+    fontWeight: "600",
+  },
+  provinceChipTextActive: {
+    color: colors.bordeaux,
+  },
   hint: {
     fontSize: 12,
     lineHeight: 18,
@@ -257,11 +431,31 @@ const styles = StyleSheet.create({
     color: colors.contentSecondary,
     fontWeight: "600",
   },
+  sectionTitle: {
+    marginTop: 8,
+    marginBottom: 12,
+    fontSize: 18,
+    fontWeight: "800",
+    color: colors.contentPrimary,
+  },
+  shortcuts: { marginBottom: 8 },
+  recTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: colors.contentPrimary,
+    marginBottom: 4,
+  },
+  recMeta: {
+    marginTop: 6,
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.petrol,
+  },
   actions: { marginTop: 8 },
   spacer: { height: 12 },
   success: {
     marginBottom: 8,
-    color: colors.petrol,
+    color: colors.success,
     fontSize: 14,
     fontWeight: "600",
   },

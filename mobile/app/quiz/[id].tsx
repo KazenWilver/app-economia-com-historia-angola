@@ -10,6 +10,7 @@ import {
 import type {
   PublicQuiz,
   PublicQuizResponse,
+  QuestionFeedbackResult,
   QuizAttemptResult,
   QuizRecommendation,
 } from "@shared/types";
@@ -24,7 +25,17 @@ interface QuizAttemptResponse {
   recommendations: QuizRecommendation[];
 }
 
-type Phase = "loading" | "ready" | "playing" | "submitting" | "results" | "error";
+interface QuestionFeedbackResponse {
+  feedback: QuestionFeedbackResult;
+}
+
+type Phase =
+  | "loading"
+  | "ready"
+  | "playing"
+  | "submitting"
+  | "results"
+  | "error";
 
 function formatTimer(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -42,6 +53,10 @@ export default function QuizPlayScreen() {
   const [selections, setSelections] = useState<Record<number, number | null>>(
     {},
   );
+  const [feedbackByQuestion, setFeedbackByQuestion] = useState<
+    Record<number, QuestionFeedbackResult>
+  >({});
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
@@ -178,6 +193,7 @@ export default function QuizPlayScreen() {
     }
 
     setSelections(initial);
+    setFeedbackByQuestion({});
     setCurrentIndex(0);
     setStartedAt(Date.now());
     setSecondsLeft(quiz.time_limit_seconds);
@@ -190,6 +206,61 @@ export default function QuizPlayScreen() {
   const selectedAnswerId = currentQuestion
     ? (selections[currentQuestion.id] ?? null)
     : null;
+  const currentFeedback = currentQuestion
+    ? feedbackByQuestion[currentQuestion.id]
+    : undefined;
+  const isRevealed = Boolean(currentFeedback);
+
+  const confirmAnswer = async () => {
+    if (!currentQuestion || !quiz || !token) {
+      return;
+    }
+
+    if (!isRevealed) {
+      if (selectedAnswerId === null) {
+        setError("Selecciona uma resposta antes de confirmar.");
+        return;
+      }
+
+      setLoadingFeedback(true);
+      setError(null);
+
+      try {
+        const response = await apiFetch<QuestionFeedbackResponse>(
+          `/quizzes/${quiz.id}/questions/${currentQuestion.id}/feedback`,
+          {
+            method: "POST",
+            token,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ selected_answer_id: selectedAnswerId }),
+          },
+        );
+
+        setFeedbackByQuestion((prev) => ({
+          ...prev,
+          [currentQuestion.id]: response.feedback,
+        }));
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Não foi possível validar a resposta.",
+        );
+      } finally {
+        setLoadingFeedback(false);
+      }
+
+      return;
+    }
+
+    if (currentIndex >= questions.length - 1) {
+      void submitAttempt();
+      return;
+    }
+
+    setCurrentIndex((i) => Math.min(questions.length - 1, i + 1));
+    setError(null);
+  };
 
   if (phase === "loading") {
     return (
@@ -301,19 +372,36 @@ export default function QuizPlayScreen() {
 
       {currentQuestion.answers.map((answer) => {
         const selected = selectedAnswerId === answer.id;
+        const showCorrect =
+          isRevealed && currentFeedback?.correct_answer_id === answer.id;
+        const showWrong =
+          isRevealed &&
+          selected &&
+          currentFeedback &&
+          !currentFeedback.is_correct;
+
         return (
           <Pressable
             key={answer.id}
+            disabled={isRevealed || loadingFeedback || phase === "submitting"}
             onPress={() =>
               setSelections((prev) => ({
                 ...prev,
                 [currentQuestion.id]: answer.id,
               }))
             }
-            style={[styles.option, selected && styles.optionSelected]}
+            style={[
+              styles.option,
+              selected && !isRevealed && styles.optionSelected,
+              showCorrect && styles.optionCorrect,
+              showWrong && styles.optionWrong,
+            ]}
           >
             <Text
-              style={[styles.optionText, selected && styles.optionTextSelected]}
+              style={[
+                styles.optionText,
+                (selected || showCorrect) && styles.optionTextSelected,
+              ]}
             >
               {answer.answer_text}
             </Text>
@@ -321,29 +409,52 @@ export default function QuizPlayScreen() {
         );
       })}
 
+      {currentFeedback ? (
+        <Card>
+          <Text
+            style={[
+              styles.answerLine,
+              currentFeedback.is_correct ? styles.correct : styles.incorrect,
+            ]}
+          >
+            {currentFeedback.is_correct
+              ? "Resposta correcta!"
+              : "Resposta incorrecta."}
+          </Text>
+          {!currentFeedback.is_correct && currentFeedback.correct_answer_text ? (
+            <Text style={styles.answerLine}>
+              Correcta: {currentFeedback.correct_answer_text}
+            </Text>
+          ) : null}
+          {currentFeedback.explanation ? (
+            <Text style={styles.explanation}>{currentFeedback.explanation}</Text>
+          ) : null}
+        </Card>
+      ) : null}
+
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <View style={styles.navRow}>
         <PrimaryButton
           label="Anterior"
-          onPress={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+          onPress={() => {
+            setCurrentIndex((i) => Math.max(0, i - 1));
+            setError(null);
+          }}
           disabled={currentIndex === 0 || phase === "submitting"}
         />
-        {currentIndex < questions.length - 1 ? (
-          <PrimaryButton
-            label="Seguinte"
-            onPress={() =>
-              setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))
-            }
-            disabled={phase === "submitting"}
-          />
-        ) : (
-          <PrimaryButton
-            label="Submeter"
-            onPress={() => void submitAttempt()}
-            isLoading={phase === "submitting"}
-          />
-        )}
+        <PrimaryButton
+          label={
+            !isRevealed
+              ? "Confirmar"
+              : currentIndex < questions.length - 1
+                ? "Seguinte"
+                : "Submeter"
+          }
+          onPress={() => void confirmAnswer()}
+          isLoading={loadingFeedback || phase === "submitting"}
+          disabled={phase === "submitting"}
+        />
       </View>
     </Screen>
   );
@@ -400,6 +511,14 @@ const styles = StyleSheet.create({
     borderColor: colors.bordeaux,
     backgroundColor: colors.bordeauxMuted,
   },
+  optionCorrect: {
+    borderColor: colors.success,
+    backgroundColor: "#DCFCE7",
+  },
+  optionWrong: {
+    borderColor: colors.error,
+    backgroundColor: "#FEE2E2",
+  },
   optionText: {
     fontSize: 15,
     color: colors.contentPrimary,
@@ -422,7 +541,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: colors.contentSecondary,
   },
-  correct: { color: colors.petrol, fontWeight: "700" },
+  correct: { color: colors.success, fontWeight: "700" },
   incorrect: { color: colors.error, fontWeight: "700" },
   explanation: {
     marginTop: 8,
