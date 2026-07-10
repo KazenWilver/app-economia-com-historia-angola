@@ -14,8 +14,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <a
+        href="#conteudo-principal"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-bordeaux focus:px-4 focus:py-2 focus:font-display focus:text-sm focus:font-semibold focus:text-white focus:outline-none focus:ring-2 focus:ring-offset-2"
+      >
+        Saltar para o conteúdo
+      </a>
       <Header />
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main id="conteudo-principal" className="flex flex-1 flex-col" tabIndex={-1}>
+        {children}
+      </main>
       <Footer />
     </>
   );

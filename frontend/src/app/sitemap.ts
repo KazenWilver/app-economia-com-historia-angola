@@ -8,6 +8,8 @@ const publicRoutes = [
   "/ranking",
   "/forum",
   "/mapa",
+  "/privacidade",
+  "/termos",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

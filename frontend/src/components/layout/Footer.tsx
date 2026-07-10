@@ -32,6 +32,24 @@ export function Footer() {
               </Link>
             ))}
           </nav>
+
+          <nav
+            aria-label="Informação legal"
+            className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
+          >
+            <Link
+              href="/privacidade"
+              className="text-sm text-content-tertiary transition-colors hover:text-bordeaux dark:text-content-dark-tertiary dark:hover:text-bordeaux-dark"
+            >
+              Privacidade
+            </Link>
+            <Link
+              href="/termos"
+              className="text-sm text-content-tertiary transition-colors hover:text-bordeaux dark:text-content-dark-tertiary dark:hover:text-bordeaux-dark"
+            >
+              Termos de utilização
+            </Link>
+          </nav>
         </div>
       </div>
     </footer>
