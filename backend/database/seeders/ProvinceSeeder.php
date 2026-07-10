@@ -59,28 +59,7 @@ class ProvinceSeeder extends Seeder
 
         DB::table('provinces')->where('code', 'CCU')->delete();
 
-        $cabindaId = DB::table('provinces')->where('code', 'CAB')->value('id');
-
-        if ($cabindaId) {
-            DB::table('map_narratives')->updateOrInsert(
-                [
-                    'province_id' => $cabindaId,
-                    'title' => 'Cabinda: Enclave e Identidade Histórica',
-                ],
-                [
-                    'narrative_text' => 'A província de Cabinda, enclave ao norte do rio Congo, tem uma história '
-                        .'marcada pelo Tratado de Simulambuco (1885) e pelo contexto internacional do Tratado de Berlim, '
-                        .'que consolidou a partilha colonial de África. A identidade cabindense afirmou-se ao longo do '
-                        .'século XX, culminando no movimento de 28 de Maio de 1956, data simbólica da reivindicação '
-                        .'política e cultural do povo cabindense no quadro da descolonização e das transformações '
-                        .'económicas ligadas ao petróleo na região.',
-                    'period' => 'colonial',
-                    'display_order' => 1,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]
-            );
-        }
+        $this->call(MapNarrativeSeeder::class);
     }
 
     /**

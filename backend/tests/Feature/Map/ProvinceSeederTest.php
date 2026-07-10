@@ -45,5 +45,13 @@ class ProvinceSeederTest extends TestCase
         $geometry = json_decode((string) $luanda->geojson_data, true);
         $this->assertIsArray($geometry);
         $this->assertContains($geometry['type'] ?? null, ['Polygon', 'MultiPolygon']);
+
+        $this->assertDatabaseCount('map_narratives', 21);
+        $this->assertDatabaseHas('map_narratives', [
+            'title' => 'Cabinda: Enclave, petróleo e Mayombe',
+        ]);
+        $this->assertDatabaseHas('map_narratives', [
+            'title' => 'Ícolo e Bengo: Catete, Quiminha e berço de Neto',
+        ]);
     }
 }
