@@ -16,11 +16,18 @@ export const TIME_LIMIT_PRESETS_MINUTES = [2, 5, 10, 15, 30] as const;
 export interface QuizFormValues {
   title: string;
   description: string;
+  topic_id: string;
   time_limit_enabled: boolean;
   time_limit_value: string;
   time_limit_unit: TimeLimitUnit;
   is_active: boolean;
   questions: QuizQuestion[];
+}
+
+export interface QuizTopicOption {
+  id: number;
+  title: string;
+  theme: string | null;
 }
 
 export function secondsFromTimeLimitParts(
@@ -107,6 +114,7 @@ export function emptyQuizForm(): QuizFormValues {
   return {
     title: "",
     description: "",
+    topic_id: "",
     time_limit_enabled: false,
     time_limit_value: "5",
     time_limit_unit: "minutes",
@@ -121,6 +129,7 @@ export function quizToFormValues(quiz: AdminQuiz): QuizFormValues {
   return {
     title: quiz.title,
     description: quiz.description ?? "",
+    topic_id: quiz.topic_id ? String(quiz.topic_id) : "",
     time_limit_enabled: timeLimit.enabled,
     time_limit_value: timeLimit.value,
     time_limit_unit: timeLimit.unit,
@@ -145,6 +154,7 @@ export function formValuesToPayload(values: QuizFormValues) {
   return {
     title: values.title.trim(),
     description: values.description.trim() || null,
+    topic_id: values.topic_id.trim() ? Number(values.topic_id) : null,
     time_limit_seconds: secondsFromTimeLimitParts(
       values.time_limit_enabled,
       values.time_limit_value,

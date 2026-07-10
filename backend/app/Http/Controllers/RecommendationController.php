@@ -12,12 +12,25 @@ class RecommendationController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
+        // Uma entrada por conteúdo: preferir não lida; senão a mais recente.
         $recommendations = Recommendation::query()
             ->with(['content.category'])
             ->where('user_id', $request->user()->id)
             ->latest()
-            ->limit(20)
-            ->get();
+            ->get()
+            ->groupBy('content_id')
+            ->map(function ($group) {
+                return $group
+                    ->sortBy([
+                        ['is_read', 'asc'],
+                        ['created_at', 'desc'],
+                    ])
+                    ->first();
+            })
+            ->filter()
+            ->sortByDesc(fn (Recommendation $item) => $item->created_at)
+            ->take(12)
+            ->values();
 
         return RecommendationResource::collection($recommendations);
     }

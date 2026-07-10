@@ -38,12 +38,24 @@ class RecommendationService
             'quiz.topic',
         ]);
 
-        $matchedContents = $this->findRecommendedContents($attempt, $user);
+        $matchedContents = $this->findRecommendedContents($attempt);
 
         return DB::transaction(function () use ($attempt, $user, $matchedContents): EloquentCollection {
             Recommendation::query()
                 ->where('quiz_attempt_id', $attempt->id)
                 ->delete();
+
+            $contentIds = $matchedContents
+                ->map(fn (array $match) => $match['content']->id)
+                ->all();
+
+            // Evita duplicados no perfil: remove recomendações antigas do mesmo conteúdo.
+            if ($contentIds !== []) {
+                Recommendation::query()
+                    ->where('user_id', $user->id)
+                    ->whereIn('content_id', $contentIds)
+                    ->delete();
+            }
 
             $recommendations = new EloquentCollection;
 
@@ -66,11 +78,13 @@ class RecommendationService
     /**
      * @return Collection<int, array{content: Content, reason: string}>
      */
-    private function findRecommendedContents(QuizAttempt $attempt, User $user): Collection
+    private function findRecommendedContents(QuizAttempt $attempt): Collection
     {
         $wrongAnswers = $attempt->answers->where('is_correct', false);
         $categorySlugs = $this->resolveCategorySlugs($attempt);
         $keywords = $this->extractKeywords($wrongAnswers);
+        $topicTheme = $attempt->quiz?->topic?->theme;
+        $themeTokens = $this->tokenize($topicTheme ?? '');
 
         $candidates = Content::query()
             ->with('category:id,name,slug')
@@ -83,7 +97,7 @@ class RecommendationService
                 )
             )
             ->latest('published_at')
-            ->limit(30)
+            ->limit(40)
             ->get();
 
         if ($candidates->isEmpty()) {
@@ -91,12 +105,12 @@ class RecommendationService
                 ->with('category:id,name,slug')
                 ->where('status', 'published')
                 ->latest('published_at')
-                ->limit(30)
+                ->limit(40)
                 ->get();
         }
 
         $scored = $candidates
-            ->map(function (Content $content) use ($attempt, $wrongAnswers, $categorySlugs, $keywords): array {
+            ->map(function (Content $content) use ($attempt, $wrongAnswers, $categorySlugs, $keywords, $topicTheme, $themeTokens): array {
                 $score = 0;
                 $reason = 'Conteúdo recomendado para continuares a aprender.';
 
@@ -108,10 +122,17 @@ class RecommendationService
                     $reason = "Conteúdo de {$content->category->name} para aprofundares o que aprendeste.";
                 }
 
-                $topicTheme = $attempt->quiz?->topic?->theme;
-                if ($topicTheme) {
-                    $score += 4;
-                    $reason = "Relacionado com o tema «{$topicTheme}» do quiz.";
+                if ($topicTheme && $themeTokens->isNotEmpty()) {
+                    $themeHits = $themeTokens->filter(
+                        fn (string $token) => $this->contentContainsKeyword($content, $token)
+                            || ($content->category !== null
+                                && Str::contains(Str::lower($content->category->name), $token))
+                    )->count();
+
+                    if ($themeHits > 0) {
+                        $score += 6 + ($themeHits * 2);
+                        $reason = "Relacionado com o tema «{$topicTheme}» do tópico ligado ao quiz.";
+                    }
                 }
 
                 $matchedQuestion = $this->firstMatchingWrongQuestion($content, $wrongAnswers, $keywords);
@@ -130,7 +151,9 @@ class RecommendationService
 
                 if ($wrongAnswers->isEmpty() && $attempt->score >= 80) {
                     $score += 2;
-                    $reason = 'Parabéns! Aprofunda o tema com este conteúdo.';
+                    if ($score <= 2) {
+                        $reason = 'Parabéns! Aprofunda o tema com este conteúdo.';
+                    }
                 }
 
                 return [
@@ -139,8 +162,24 @@ class RecommendationService
                     'score' => $score,
                 ];
             })
+            ->filter(fn (array $item) => $item['score'] > 0)
             ->sortByDesc('score')
             ->values();
+
+        // Se nada pontuou (sem tópico/keywords), evita recomendações aleatórias:
+        // devolve só conteúdos da mesma categoria resolvida, senão vazio.
+        if ($scored->isEmpty() && $categorySlugs->isNotEmpty()) {
+            $scored = $candidates
+                ->filter(fn (Content $content) => $content->category !== null
+                    && $categorySlugs->contains($content->category->slug))
+                ->take(self::MAX_RECOMMENDATIONS)
+                ->map(fn (Content $content) => [
+                    'content' => $content,
+                    'reason' => "Conteúdo de {$content->category?->name} ligado ao quiz.",
+                    'score' => 1,
+                ])
+                ->values();
+        }
 
         return $scored
             ->unique(fn (array $item) => $item['content']->id)
@@ -162,6 +201,21 @@ class RecommendationService
         $topicTheme = $attempt->quiz?->topic?->theme;
         if ($topicTheme) {
             $slugs->push(Str::slug($topicTheme));
+
+            Category::query()
+                ->get(['id', 'slug', 'name'])
+                ->each(function (Category $category) use ($topicTheme, $slugs): void {
+                    $theme = Str::lower($topicTheme);
+                    $name = Str::lower($category->name);
+
+                    if (
+                        Str::contains($theme, $name)
+                        || Str::contains($name, $theme)
+                        || Str::slug($topicTheme) === $category->slug
+                    ) {
+                        $slugs->push($category->slug);
+                    }
+                });
         }
 
         $quizTitle = $attempt->quiz?->title;
@@ -188,8 +242,24 @@ class RecommendationService
             ->flatMap(function (QuizAttemptAnswer $answer): array {
                 $text = $answer->question?->question_text ?? '';
 
-                return preg_split('/\s+/u', Str::lower($text)) ?: [];
+                return $this->tokenize($text)->all();
             })
+            ->unique()
+            ->values();
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    private function tokenize(?string $text): Collection
+    {
+        if ($text === null || trim($text) === '') {
+            return collect();
+        }
+
+        $parts = preg_split('/\s+/u', Str::lower($text)) ?: [];
+
+        return collect($parts)
             ->map(fn (string $word) => trim($word, ".,;:!?()[]«»\"'"))
             ->filter(fn (string $word) => mb_strlen($word) >= 5)
             ->reject(fn (string $word) => in_array($word, self::STOPWORDS, true))

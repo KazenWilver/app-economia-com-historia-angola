@@ -252,6 +252,38 @@ class RecommendationTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_recommendations_list_deduplicates_by_content(): void
+    {
+        $user = User::factory()->create();
+        $content = $this->createEconomyContent();
+        $fixture = $this->createQuizFixture();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'answers' => [
+                [
+                    'question_id' => $fixture['questions'][0]->id,
+                    'selected_answer_id' => $fixture['wrongAnswers'][0]->id,
+                ],
+                [
+                    'question_id' => $fixture['questions'][1]->id,
+                    'selected_answer_id' => $fixture['wrongAnswers'][1]->id,
+                ],
+            ],
+        ];
+
+        $this->postJson("/api/quizzes/{$fixture['quiz']->id}/attempt", $payload)
+            ->assertCreated();
+        $this->postJson("/api/quizzes/{$fixture['quiz']->id}/attempt", $payload)
+            ->assertCreated();
+
+        $response = $this->getJson('/api/recommendations');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.content.id', $content->id);
+    }
+
     public function test_guest_cannot_list_recommendations(): void
     {
         $this->getJson('/api/recommendations')

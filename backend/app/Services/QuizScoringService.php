@@ -99,7 +99,7 @@ class QuizScoringService
             }
 
             $score = $totalQuestions > 0
-                ? (int) round(($correctAnswers / $totalQuestions) * 100)
+                ? (int) round(($correctAnswers / $totalQuestions) * 100, 0, PHP_ROUND_HALF_UP)
                 : 0;
 
             $attempt->update([

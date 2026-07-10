@@ -12,7 +12,9 @@ import {
   secondsFromTimeLimitParts,
   type QuizFormValues,
   type QuizQuestion,
+  type QuizTopicOption,
 } from "@/components/admin/quiz-types";
+import { adminFetch } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
 
 interface QuizFormProps {
@@ -47,10 +49,49 @@ export function QuizForm({
 }: QuizFormProps) {
   const [values, setValues] = useState<QuizFormValues>(initialValues);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [topicOptions, setTopicOptions] = useState<QuizTopicOption[]>([]);
 
   useEffect(() => {
     setValues(initialValues);
   }, [initialValues]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadTopics = async () => {
+      try {
+        const data = await adminFetch<{
+          data: Array<{
+            id: number;
+            title: string;
+            theme: string | null;
+          }>;
+        }>("/admin/topics");
+
+        if (cancelled) {
+          return;
+        }
+
+        setTopicOptions(
+          data.data.map((topic) => ({
+            id: topic.id,
+            title: topic.title,
+            theme: topic.theme,
+          })),
+        );
+      } catch {
+        if (!cancelled) {
+          setTopicOptions([]);
+        }
+      }
+    };
+
+    void loadTopics();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const updateQuestion = (
     questionIndex: number,
@@ -170,6 +211,34 @@ export function QuizForm({
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
             placeholder="Breve introdução ao quiz"
           />
+        </label>
+
+        <label className="space-y-2 md:col-span-2">
+          <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+            Tópico do fórum (recomendado)
+          </span>
+          <select
+            value={values.topic_id}
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                topic_id: event.target.value,
+              }))
+            }
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
+          >
+            <option value="">Sem tópico ligado</option>
+            {topicOptions.map((topic) => (
+              <option key={topic.id} value={topic.id}>
+                {topic.title}
+                {topic.theme ? ` · ${topic.theme}` : ""}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-slate-500 dark:text-content-dark-tertiary">
+            Liga o quiz a um tópico para recomendações usarem o tema do debate
+            (não são aleatórias).
+          </p>
         </label>
 
         <QuizTimeLimitField
