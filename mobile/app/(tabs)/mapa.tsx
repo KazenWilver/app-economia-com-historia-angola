@@ -3,14 +3,12 @@ import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Platform,
   RefreshControl,
   StyleSheet,
   Text,
-  View,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import type { MapProvinceSummary } from "@shared/types";
+import { ProvinceMap, type ProvinceMapMarker } from "@/components/ProvinceMap";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
 import { colors } from "@/lib/theme";
@@ -18,13 +16,6 @@ import { colors } from "@/lib/theme";
 interface ProvincesMapResponse {
   data: MapProvinceSummary[];
 }
-
-const ANGOLA_REGION = {
-  latitude: -12.5,
-  longitude: 17.5,
-  latitudeDelta: 14,
-  longitudeDelta: 14,
-};
 
 function toCoord(value: number | string | null | undefined): number | null {
   if (value === null || value === undefined || value === "") {
@@ -80,10 +71,7 @@ export default function MapaScreen() {
           }
           return { ...province, latitude, longitude };
         })
-        .filter((item): item is MapProvinceSummary & {
-          latitude: number;
-          longitude: number;
-        } => item !== null),
+        .filter((item): item is ProvinceMapMarker => item !== null),
     [items],
   );
 
@@ -100,30 +88,12 @@ export default function MapaScreen() {
         <Text style={styles.error}>{error}</Text>
       ) : (
         <>
-          {Platform.OS !== "web" && markers.length > 0 ? (
-            <View style={styles.mapWrap}>
-              <MapView style={styles.map} initialRegion={ANGOLA_REGION}>
-                {markers.map((province) => (
-                  <Marker
-                    key={province.id}
-                    coordinate={{
-                      latitude: province.latitude,
-                      longitude: province.longitude,
-                    }}
-                    title={province.name}
-                    description={
-                      province.capital
-                        ? `Capital: ${province.capital}`
-                        : undefined
-                    }
-                    onCalloutPress={() =>
-                      router.push(`/provincia/${province.id}` as never)
-                    }
-                  />
-                ))}
-              </MapView>
-            </View>
-          ) : null}
+          <ProvinceMap
+            markers={markers}
+            onMarkerPress={(provinceId) =>
+              router.push(`/provincia/${provinceId}` as never)
+            }
+          />
 
           <FlatList
             data={items}
@@ -162,17 +132,6 @@ export default function MapaScreen() {
 }
 
 const styles = StyleSheet.create({
-  mapWrap: {
-    height: 220,
-    borderRadius: 16,
-    overflow: "hidden",
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  map: {
-    flex: 1,
-  },
   list: { paddingBottom: 32 },
   cardTitle: {
     fontSize: 17,
