@@ -1,14 +1,32 @@
 import "react-native-gesture-handler";
 import "../global.css";
-import { Stack } from "expo-router";
+import * as Linking from "expo-linking";
+import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { API_URL } from "@/lib/api";
+import { parsePasswordResetLink } from "@/lib/password-reset";
 import { colors } from "@/lib/theme";
 
 SplashScreen.preventAutoHideAsync();
+
+function handleIncomingUrl(url: string | null) {
+  if (!url) {
+    return;
+  }
+
+  const parsed = parsePasswordResetLink(url);
+  if (!parsed?.token) {
+    return;
+  }
+
+  router.push({
+    pathname: "/(auth)/redefinir-palavra-passe",
+    params: parsed,
+  } as never);
+}
 
 export default function RootLayout() {
   useEffect(() => {
@@ -16,6 +34,14 @@ export default function RootLayout() {
       console.log("[Jindungo] API_URL =", API_URL);
     }
     void SplashScreen.hideAsync();
+  }, []);
+
+  useEffect(() => {
+    void Linking.getInitialURL().then(handleIncomingUrl);
+    const subscription = Linking.addEventListener("url", (event) => {
+      handleIncomingUrl(event.url);
+    });
+    return () => subscription.remove();
   }, []);
 
   return (
@@ -55,6 +81,10 @@ export default function RootLayout() {
         <Stack.Screen
           name="ranking"
           options={{ title: "Ranking", headerBackTitle: "Voltar" }}
+        />
+        <Stack.Screen
+          name="jindungo"
+          options={{ title: "Jindungo", headerBackTitle: "Voltar" }}
         />
         <Stack.Screen
           name="termos"

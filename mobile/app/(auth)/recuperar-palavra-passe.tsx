@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Field, PrimaryButton } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
+import { parsePasswordResetLink } from "@/lib/password-reset";
 import { colors } from "@/lib/theme";
 
 interface ForgotResponse {
@@ -23,13 +24,23 @@ export default function RecuperarPalavraPasseScreen() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [resetLink, setResetLink] = useState<string | null>(null);
+  const [resetParams, setResetParams] = useState<{
+    email: string;
+    token: string;
+  } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const goToReset = (params: { email: string; token: string }) => {
+    router.push({
+      pathname: "/(auth)/redefinir-palavra-passe",
+      params,
+    } as never);
+  };
 
   const handleSubmit = async () => {
     setError(null);
     setSuccess(null);
-    setResetLink(null);
+    setResetParams(null);
 
     if (!email.trim()) {
       setError("Indica o teu email.");
@@ -54,22 +65,13 @@ export default function RecuperarPalavraPasseScreen() {
 
       const link =
         data.resetLink ?? data.devResetLink ?? data.dev_reset_link ?? null;
-      setResetLink(link);
+      const parsed = link
+        ? parsePasswordResetLink(link, email.trim())
+        : null;
 
-      if (link && __DEV__) {
-        try {
-          const url = new URL(link);
-          const token = url.searchParams.get("token");
-          const mail = url.searchParams.get("email") ?? email.trim();
-          if (token) {
-            router.push({
-              pathname: "/(auth)/redefinir-palavra-passe",
-              params: { email: mail, token },
-            } as never);
-          }
-        } catch {
-          // ignore parse errors — show link below
-        }
+      if (parsed) {
+        setResetParams(parsed);
+        goToReset(parsed);
       }
     } catch (err) {
       setError(
@@ -108,17 +110,21 @@ export default function RecuperarPalavraPasseScreen() {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
           {success ? <Text style={styles.success}>{success}</Text> : null}
-          {resetLink && __DEV__ ? (
-            <Text style={styles.devLink}>
-              Link de desenvolvimento: {resetLink}
-            </Text>
-          ) : null}
 
           <PrimaryButton
             label="Enviar pedido"
             onPress={() => void handleSubmit()}
             isLoading={submitting}
           />
+
+          {resetParams ? (
+            <View style={styles.resetContinue}>
+              <PrimaryButton
+                label="Continuar para redefinir"
+                onPress={() => goToReset(resetParams)}
+              />
+            </View>
+          ) : null}
 
           <Link href="/(auth)/login" style={styles.link}>
             Voltar ao login
@@ -173,11 +179,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
-  devLink: {
-    color: colors.contentDarkSecondary,
-    marginBottom: 12,
-    fontSize: 11,
-    lineHeight: 16,
+  resetContinue: {
+    marginTop: 12,
   },
   link: {
     marginTop: 18,

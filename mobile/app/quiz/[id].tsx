@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -370,11 +370,27 @@ export default function QuizPlayScreen() {
           <>
             <Text style={styles.sectionTitle}>Recomendações</Text>
             {recommendations.map((item) => (
-              <Card key={item.id}>
+              <Card
+                key={item.id}
+                onPress={() => {
+                  if (item.content?.slug) {
+                    if (token) {
+                      void apiFetch(`/recommendations/${item.id}/read`, {
+                        method: "POST",
+                        token,
+                      }).catch(() => {
+                        // ignore
+                      });
+                    }
+                    router.push(`/conteudo/${item.content.slug}` as never);
+                  }
+                }}
+              >
                 <Text style={styles.question}>{item.content?.title}</Text>
                 {item.reason ? (
                   <Text style={styles.explanation}>{item.reason}</Text>
                 ) : null}
+                <Text style={styles.recLink}>Abrir conteúdo →</Text>
               </Card>
             ))}
           </>
@@ -651,6 +667,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "800",
     color: colors.contentPrimary,
+  },
+  recLink: {
+    marginTop: 8,
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.bordeaux,
   },
   error: {
     marginTop: 12,

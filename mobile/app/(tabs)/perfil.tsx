@@ -236,6 +236,16 @@ export default function PerfilScreen() {
             label="Ranking"
             onPress={() => router.push("/ranking" as never)}
           />
+          <View style={styles.spacer} />
+          <PrimaryButton
+            label="Termos de utilização"
+            onPress={() => router.push("/termos" as never)}
+          />
+          <View style={styles.spacer} />
+          <PrimaryButton
+            label="Privacidade"
+            onPress={() => router.push("/privacidade" as never)}
+          />
         </View>
       </Screen>
     );
@@ -353,6 +363,11 @@ export default function PerfilScreen() {
         <PrimaryButton
           label="Quizzes"
           onPress={() => router.push("/(tabs)/quiz" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Biblioteca Jindungo"
+          onPress={() => router.push("/jindungo" as never)}
         />
         <View style={styles.spacer} />
         <PrimaryButton
