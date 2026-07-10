@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Map;
 
+use App\Models\Province;
 use Database\Seeders\ProvinceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -37,7 +38,7 @@ class ProvinceSeederTest extends TestCase
         ]);
         $this->assertDatabaseMissing('provinces', ['code' => 'CCU']);
 
-        $luanda = \App\Models\Province::query()->where('code', 'LUA')->first();
+        $luanda = Province::query()->where('code', 'LUA')->first();
         $this->assertNotNull($luanda);
         $this->assertNotNull($luanda->geojson_data);
 
