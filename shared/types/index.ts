@@ -33,3 +33,57 @@ export type {
   QuizRecommendation,
   RecommendationsResponse,
 } from "./recommendation";
+
+export type {
+  AdminForum,
+  AdminForumsResponse,
+  AdminTopic,
+  AdminTopicMutationResponse,
+  AdminTopicResponse,
+  AdminTopicsResponse,
+  ForumAuthor,
+  ForumReply,
+  ForumSummary,
+  ForumsResponse,
+  PublicTopic,
+  PublicTopicResponse,
+  PublicTopicVisibility,
+  PublicTopicsResponse,
+  RepliesResponse,
+  TopicMutationResponse,
+  TopicVisibilityMode,
+} from "./forum";
+
+export type {
+  AdminMapNarrative,
+  AdminMapNarrativeResponse,
+  AdminMapNarrativesResponse,
+  AdminProvince,
+  AdminProvincesResponse,
+  MapGeoJsonFeature,
+  MapGeoJsonFeatureProperties,
+  MapGeoJsonResponse,
+  MapNarrative,
+  MapNarrativeMutationResponse,
+  MapProvinceDetail,
+  MapProvinceDetailResponse,
+  MapProvinceSummary,
+} from "./map";
+
+export type {
+  AdminQuiz,
+  AdminQuizResponse,
+  AdminQuizzesResponse,
+  PublicQuiz,
+  PublicQuizAnswer,
+  PublicQuizQuestion,
+  PublicQuizResponse,
+  PublicQuizzesResponse,
+  QuestionFeedbackResponse,
+  QuestionFeedbackResult,
+  QuizAnswer,
+  QuizAttemptAnswerResult,
+  QuizAttemptResult,
+  QuizMutationResponse,
+  QuizQuestion,
+} from "./quiz";

@@ -1,44 +1,13 @@
-export interface QuizAnswer {
-  id?: number;
-  answer_text: string;
-  is_correct: boolean;
-  order: number;
-}
+export type {
+  AdminQuiz,
+  AdminQuizResponse,
+  AdminQuizzesResponse,
+  QuizAnswer,
+  QuizMutationResponse,
+  QuizQuestion,
+} from "@shared/types";
 
-export interface QuizQuestion {
-  id?: number;
-  question_text: string;
-  explanation: string;
-  order: number;
-  answers: QuizAnswer[];
-}
-
-export interface AdminQuiz {
-  id: number;
-  topic_id: number | null;
-  title: string;
-  description: string | null;
-  time_limit_seconds: number | null;
-  is_active: boolean;
-  questions_count?: number;
-  attempts_count?: number;
-  questions?: QuizQuestion[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AdminQuizzesResponse {
-  data: AdminQuiz[];
-}
-
-export interface AdminQuizResponse {
-  data: AdminQuiz;
-}
-
-export interface QuizMutationResponse {
-  message: string;
-  quiz: AdminQuiz;
-}
+import type { AdminQuiz, QuizAnswer, QuizQuestion } from "@shared/types";
 
 export type TimeLimitUnit = "minutes" | "seconds";
 

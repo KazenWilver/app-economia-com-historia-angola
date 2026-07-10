@@ -1,63 +1,17 @@
-export interface ForumAuthor {
-  id: number;
-  name: string;
-}
+export type {
+  ForumAuthor,
+  ForumReply,
+  ForumSummary,
+  ForumsResponse,
+  PublicTopic,
+  PublicTopicResponse,
+  PublicTopicVisibility,
+  PublicTopicsResponse,
+  RepliesResponse,
+  TopicMutationResponse,
+} from "@shared/types";
 
-export interface ForumSummary {
-  id: number;
-  name: string;
-  slug: string;
-  description?: string | null;
-}
-
-export interface PublicTopic {
-  id: number;
-  forum_id: number;
-  title: string;
-  description: string | null;
-  theme: string | null;
-  is_private: boolean;
-  is_visible: boolean;
-  replies_count?: number;
-  forum?: ForumSummary;
-  author?: ForumAuthor;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PublicTopicsResponse {
-  data: PublicTopic[];
-}
-
-export interface PublicTopicResponse {
-  data: PublicTopic;
-}
-
-export interface ForumsResponse {
-  data: ForumSummary[];
-}
-
-export interface TopicMutationResponse {
-  message: string;
-  topic: PublicTopic;
-}
-
-export interface ForumReply {
-  id: number;
-  topic_id: number;
-  body: string;
-  parent_id: number | null;
-  user: ForumAuthor;
-  replies: ForumReply[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RepliesResponse {
-  data: ForumReply[];
-}
-
-export type PublicTopicVisibility = "public" | "private";
+import type { PublicTopicVisibility } from "@shared/types";
 
 export interface CreateTopicFormValues {
   title: string;

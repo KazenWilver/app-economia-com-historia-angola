@@ -1,43 +1,14 @@
-export interface AdminForum {
-  id: number;
-  name: string;
-  slug: string;
-  description: string | null;
-  topics_count?: number;
-}
+export type {
+  AdminForum,
+  AdminTopic,
+  AdminTopicMutationResponse as TopicMutationResponse,
+  AdminTopicResponse,
+  AdminTopicsResponse,
+  AdminForumsResponse as ForumsResponse,
+  TopicVisibilityMode,
+} from "@shared/types";
 
-export interface AdminTopic {
-  id: number;
-  forum_id: number;
-  user_id: number;
-  title: string;
-  description: string | null;
-  theme: string | null;
-  is_private: boolean;
-  is_visible: boolean;
-  replies_count?: number;
-  forum?: AdminForum;
-  author?: { id: number; name: string; email: string };
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AdminTopicsResponse {
-  data: AdminTopic[];
-}
-
-export interface AdminTopicResponse {
-  data: AdminTopic;
-}
-
-export interface ForumsResponse {
-  data: AdminForum[];
-}
-
-export interface TopicMutationResponse {
-  message: string;
-  topic: AdminTopic;
-}
+import type { AdminTopic, TopicVisibilityMode } from "@shared/types";
 
 export interface TopicFormValues {
   forum_id: string;
@@ -46,8 +17,6 @@ export interface TopicFormValues {
   theme: string;
   visibility: TopicVisibilityMode;
 }
-
-export type TopicVisibilityMode = "public" | "private" | "hidden";
 
 export function visibilityToFlags(mode: TopicVisibilityMode): {
   is_visible: boolean;

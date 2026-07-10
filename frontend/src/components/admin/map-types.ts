@@ -1,38 +1,13 @@
-import type { Province } from "@shared/types";
+export type {
+  AdminMapNarrative,
+  AdminMapNarrativeResponse,
+  AdminMapNarrativesResponse,
+  AdminProvince,
+  AdminProvincesResponse as ProvincesResponse,
+  MapNarrativeMutationResponse,
+} from "@shared/types";
 
-export interface AdminProvince extends Province {
-  capital: string | null;
-  narratives_count?: number;
-}
-
-export interface AdminMapNarrative {
-  id: number;
-  province_id: number;
-  title: string;
-  narrative_text: string;
-  period: string | null;
-  display_order: number;
-  province?: AdminProvince;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AdminMapNarrativesResponse {
-  data: AdminMapNarrative[];
-}
-
-export interface AdminMapNarrativeResponse {
-  data: AdminMapNarrative;
-}
-
-export interface ProvincesResponse {
-  data: AdminProvince[];
-}
-
-export interface MapNarrativeMutationResponse {
-  message: string;
-  narrative: AdminMapNarrative;
-}
+import type { AdminMapNarrative } from "@shared/types";
 
 export interface MapNarrativeFormValues {
   province_id: string;
