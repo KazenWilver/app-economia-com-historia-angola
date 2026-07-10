@@ -8,13 +8,38 @@ import {
   Text,
 } from "react-native";
 import type { MapProvinceSummary } from "@shared/types";
-import { ProvinceMap, type ProvinceMapMarker } from "@/components/ProvinceMap";
+import {
+  ProvinceMap,
+  type LatLng,
+  type ProvinceMapMarker,
+  type ProvincePolygon,
+} from "@/components/ProvinceMap";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
 import { colors } from "@/lib/theme";
 
 interface ProvincesMapResponse {
   data: MapProvinceSummary[];
+}
+
+interface GeoJsonFeature {
+  type: "Feature";
+  properties: {
+    id: number;
+    name: string;
+    code?: string;
+    capital?: string | null;
+    narratives_count?: number;
+  };
+  geometry: {
+    type: string;
+    coordinates: unknown;
+  };
+}
+
+interface GeoJsonResponse {
+  type: "FeatureCollection";
+  features: GeoJsonFeature[];
 }
 
 function toCoord(value: number | string | null | undefined): number | null {
@@ -25,8 +50,52 @@ function toCoord(value: number | string | null | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+function ringToLatLng(ring: unknown): LatLng[] {
+  if (!Array.isArray(ring)) {
+    return [];
+  }
+
+  return ring
+    .map((point) => {
+      if (!Array.isArray(point) || point.length < 2) {
+        return null;
+      }
+      const longitude = Number(point[0]);
+      const latitude = Number(point[1]);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        return null;
+      }
+      return { latitude, longitude };
+    })
+    .filter((item): item is LatLng => item !== null);
+}
+
+function geometryToRings(geometry: GeoJsonFeature["geometry"]): LatLng[][] {
+  if (geometry.type === "Polygon") {
+    const coords = geometry.coordinates as unknown[];
+    const outer = ringToLatLng(coords[0]);
+    return outer.length >= 3 ? [outer] : [];
+  }
+
+  if (geometry.type === "MultiPolygon") {
+    const polygons = geometry.coordinates as unknown[];
+    return polygons
+      .map((polygon) => {
+        if (!Array.isArray(polygon)) {
+          return null;
+        }
+        const outer = ringToLatLng(polygon[0]);
+        return outer.length >= 3 ? outer : null;
+      })
+      .filter((item): item is LatLng[] => item !== null);
+  }
+
+  return [];
+}
+
 export default function MapaScreen() {
   const [items, setItems] = useState<MapProvinceSummary[]>([]);
+  const [polygons, setPolygons] = useState<ProvincePolygon[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -40,8 +109,27 @@ export default function MapaScreen() {
     setError(null);
 
     try {
-      const data = await apiFetch<ProvincesMapResponse>("/provinces");
-      setItems(data.data);
+      const [listData, geoData] = await Promise.all([
+        apiFetch<ProvincesMapResponse>("/provinces"),
+        apiFetch<GeoJsonResponse>("/provinces/geojson"),
+      ]);
+
+      setItems(listData.data);
+      setPolygons(
+        geoData.features
+          .map((feature) => {
+            const rings = geometryToRings(feature.geometry);
+            if (rings.length === 0) {
+              return null;
+            }
+            return {
+              id: feature.properties.id,
+              name: feature.properties.name,
+              rings,
+            };
+          })
+          .filter((item): item is ProvincePolygon => item !== null),
+      );
     } catch (err) {
       setError(
         err instanceof Error
@@ -90,6 +178,7 @@ export default function MapaScreen() {
         <>
           <ProvinceMap
             markers={markers}
+            polygons={polygons}
             onMarkerPress={(provinceId) =>
               router.push(`/provincia/${provinceId}` as never)
             }

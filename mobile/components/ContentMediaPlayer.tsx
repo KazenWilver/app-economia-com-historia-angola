@@ -33,6 +33,7 @@ export function ContentMediaPlayer({
   const [positionMs, setPositionMs] = useState(0);
   const [durationMs, setDurationMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [barWidth, setBarWidth] = useState(0);
 
   const showAudio = isAudioType(contentType, mediaUrl);
   const showVideo = isVideoType(contentType, mediaUrl);
@@ -115,6 +116,23 @@ export function ContentMediaPlayer({
     }
   };
 
+  const seekAudio = async (locationX: number) => {
+    const sound = soundRef.current;
+    if (!sound || durationMs <= 0 || barWidth <= 0) {
+      return;
+    }
+
+    const ratio = Math.min(1, Math.max(0, locationX / barWidth));
+    const nextPosition = Math.round(durationMs * ratio);
+
+    try {
+      await sound.setPositionAsync(nextPosition);
+      setPositionMs(nextPosition);
+    } catch {
+      setError("Não foi possível avançar no áudio.");
+    }
+  };
+
   if (showImage) {
     return (
       <View>
@@ -141,6 +159,8 @@ export function ContentMediaPlayer({
   }
 
   if (showAudio) {
+    const progress = durationMs > 0 ? positionMs / durationMs : 0;
+
     return (
       <View>
         <Text style={styles.label}>Áudio</Text>
@@ -155,6 +175,15 @@ export function ContentMediaPlayer({
             {isPlaying ? "Pausar" : "Reproduzir"}
           </Text>
         </Pressable>
+
+        <Pressable
+          onLayout={(event) => setBarWidth(event.nativeEvent.layout.width)}
+          onPress={(event) => void seekAudio(event.nativeEvent.locationX)}
+          style={styles.seekTrack}
+        >
+          <View style={[styles.seekFill, { width: `${progress * 100}%` }]} />
+        </Pressable>
+
         <Text style={styles.time}>
           {formatMediaTime(positionMs / 1000)} /{" "}
           {formatMediaTime(durationMs / 1000)}
@@ -208,6 +237,17 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   pressed: { opacity: 0.88 },
+  seekTrack: {
+    marginTop: 12,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: colors.border,
+    overflow: "hidden",
+  },
+  seekFill: {
+    height: "100%",
+    backgroundColor: colors.bordeaux,
+  },
   time: {
     marginTop: 10,
     fontSize: 13,

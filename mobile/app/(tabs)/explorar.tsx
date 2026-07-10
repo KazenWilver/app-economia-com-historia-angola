@@ -112,6 +112,17 @@ export default function ExplorarScreen() {
         })}
       </ScrollView>
 
+      {!isAuthenticated && activeFilter === "jindungo" ? (
+        <View style={styles.guestBanner}>
+          <Text style={styles.guestText}>
+            Os conteúdos Jindungo são exclusivos. Inicia sessão para os ver.
+          </Text>
+          <Pressable onPress={() => router.push("/(auth)/login" as never)}>
+            <Text style={styles.guestLink}>Entrar →</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
       ) : error ? (
@@ -237,6 +248,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     color: colors.gold,
+  },
+  guestBanner: {
+    marginBottom: 12,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bordeauxMuted,
+  },
+  guestText: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.contentSecondary,
+    marginBottom: 8,
+  },
+  guestLink: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.bordeaux,
   },
   error: {
     marginTop: 16,

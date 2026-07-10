@@ -1,4 +1,4 @@
-import { Redirect, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import {
   BookOpen,
   HelpCircle,
@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { colors } from "@/lib/theme";
 
 export default function TabsLayout() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -26,10 +26,6 @@ export default function TabsLayout() {
         <ActivityIndicator color={colors.bordeaux} />
       </View>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
   }
 
   return (
