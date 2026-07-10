@@ -161,10 +161,10 @@ export default function AdminQuizzesPage() {
     <div className="space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-content-dark-primary">
+          <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
             Quizzes
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
+          <p className="mt-2 text-content-secondary dark:text-content-dark-secondary">
             Cria e gere quizzes interactivos para a plataforma.
           </p>
         </div>
@@ -193,7 +193,7 @@ export default function AdminQuizzesPage() {
               "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
               statusFilter === filter.value
                 ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                : "bg-surface-secondary text-content-secondary hover:bg-surface-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
             )}
           >
             {filter.label}
@@ -201,7 +201,7 @@ export default function AdminQuizzesPage() {
         ))}
       </div>
 
-      <Card hoverLift={false} className="border-slate-200 bg-white dark:border-border-dark dark:bg-surface-dark-card">
+      <Card hoverLift={false} className="border-border bg-surface-card dark:border-border-dark dark:bg-surface-dark-card">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-4">
@@ -210,13 +210,13 @@ export default function AdminQuizzesPage() {
               <Skeleton className="h-10 w-full" />
             </div>
           ) : filteredQuizzes.length === 0 ? (
-            <p className="p-8 text-center text-slate-600 dark:text-content-dark-secondary">
+            <p className="p-8 text-center text-content-secondary dark:text-content-dark-secondary">
               Nenhum quiz encontrado.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
-                <thead className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-secondary">
+                <thead className="border-b border-border bg-surface-secondary text-content-secondary dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-secondary">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Título</th>
                     <th className="px-4 py-3 font-semibold">Perguntas</th>
@@ -230,15 +230,15 @@ export default function AdminQuizzesPage() {
                   {filteredQuizzes.map((quiz) => (
                     <tr
                       key={quiz.id}
-                      className="border-b border-slate-100 last:border-b-0 dark:border-border-dark"
+                      className="border-b border-border last:border-b-0 dark:border-border-dark"
                     >
-                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-content-dark-primary">
+                      <td className="px-4 py-3 font-medium text-content-primary dark:text-content-dark-primary">
                         {quiz.title}
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-content-dark-secondary">
+                      <td className="px-4 py-3 text-content-secondary dark:text-content-dark-secondary">
                         {quiz.questions_count ?? 0}
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-content-dark-secondary">
+                      <td className="px-4 py-3 text-content-secondary dark:text-content-dark-secondary">
                         {formatTimeLimit(quiz.time_limit_seconds)}
                       </td>
                       <td className="px-4 py-3">
@@ -250,13 +250,13 @@ export default function AdminQuizzesPage() {
                             "rounded-full px-3 py-1 text-xs font-semibold",
                             quiz.is_active
                               ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
-                              : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
+                              : "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
                           )}
                         >
                           {quiz.is_active ? "Activo" : "Inactivo"}
                         </button>
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-content-dark-secondary">
+                      <td className="px-4 py-3 text-content-secondary dark:text-content-dark-secondary">
                         {formatDate(quiz.updated_at)}
                       </td>
                       <td className="px-4 py-3">

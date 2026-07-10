@@ -51,17 +51,17 @@ export default function AdminCreateQuizPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-content-dark-primary">
+        <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
           Novo quiz
         </h1>
-        <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
+        <p className="mt-2 text-content-secondary dark:text-content-dark-secondary">
           Define o quiz, adiciona perguntas e marca a resposta correcta em cada uma.
         </p>
       </header>
 
-      <Card hoverLift={false} className="border-slate-200 bg-white dark:border-border-dark dark:bg-surface-dark-card">
+      <Card hoverLift={false} className="border-border bg-surface-card dark:border-border-dark dark:bg-surface-dark-card">
         <CardHeader>
-          <CardTitle className="text-slate-900 dark:text-content-dark-primary">
+          <CardTitle className="text-content-primary dark:text-content-dark-primary">
             Dados do quiz
           </CardTitle>
         </CardHeader>

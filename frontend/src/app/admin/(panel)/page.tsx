@@ -106,14 +106,14 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-content-dark-primary">
+          <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
             Dashboard
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
+          <p className="mt-2 text-content-secondary dark:text-content-dark-secondary">
             Resumo da actividade e métricas principais do Jindungo.
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-content-dark-tertiary">
+        <div className="inline-flex items-center gap-2 text-sm text-content-tertiary dark:text-content-dark-tertiary">
           <BarChart3 className="h-4 w-4" strokeWidth={1.5} />
           Dados em tempo real da API
         </div>
@@ -136,14 +136,14 @@ export default function AdminDashboardPage() {
             <Link key={card.key} href={card.href} className="block h-full">
               <Card
                 hoverLift={false}
-                className="h-full border-slate-200 bg-white transition-colors hover:border-bordeaux/40 dark:border-border-dark dark:bg-surface-dark-card"
+                className="h-full border-border bg-surface-card transition-colors hover:border-bordeaux/40 dark:border-border-dark dark:bg-surface-dark-card"
               >
                 <CardHeader className="flex flex-row items-start justify-between gap-3">
                   <div>
-                    <CardTitle className="text-base text-slate-900 dark:text-content-dark-primary">
+                    <CardTitle className="text-base text-content-primary dark:text-content-dark-primary">
                       {card.label}
                     </CardTitle>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-content-dark-tertiary">
+                    <p className="mt-1 text-xs text-content-tertiary dark:text-content-dark-tertiary">
                       {card.description}
                     </p>
                   </div>

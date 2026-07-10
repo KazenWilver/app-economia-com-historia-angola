@@ -101,22 +101,22 @@ export function TopicForm({
           <p className="text-xs font-semibold uppercase tracking-wide text-petrol dark:text-petrol-dark">
             Fórum
           </p>
-          <p className="mt-1 font-display text-lg font-bold text-slate-900 dark:text-content-dark-primary">
+          <p className="mt-1 font-display text-lg font-bold text-content-primary dark:text-content-dark-primary">
             {singleForum.name}
           </p>
           {singleForum.description ? (
-            <p className="mt-2 text-sm text-slate-600 dark:text-content-dark-secondary">
+            <p className="mt-2 text-sm text-content-secondary dark:text-content-dark-secondary">
               {singleForum.description}
             </p>
           ) : null}
-          <p className="mt-3 text-xs text-slate-500 dark:text-content-dark-tertiary">
+          <p className="mt-3 text-xs text-content-tertiary dark:text-content-dark-tertiary">
             Os tópicos são debates dentro deste fórum. Não precisas de criar
             fóruns separados — o Jindungo usa um espaço central de debates.
           </p>
         </div>
       ) : (
         <label className="block space-y-2">
-          <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+          <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
             Fórum
           </span>
           <select
@@ -127,7 +127,7 @@ export function TopicForm({
                 forum_id: event.target.value,
               }))
             }
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
+            className="w-full rounded-lg border border-border bg-surface-card px-3 py-2 text-sm text-content-primary outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
             required
           >
             <option value="">Seleccionar fórum</option>
@@ -141,7 +141,7 @@ export function TopicForm({
       )}
 
       <label className="block space-y-2">
-        <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+        <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
           Título do tópico
         </span>
         <Input
@@ -155,7 +155,7 @@ export function TopicForm({
       </label>
 
       <label className="block space-y-2">
-        <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+        <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
           Descrição
         </span>
         <textarea
@@ -167,13 +167,13 @@ export function TopicForm({
             }))
           }
           rows={4}
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
+          className="w-full rounded-lg border border-border bg-surface-card px-3 py-2 text-sm text-content-primary outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
           placeholder="Contexto do debate"
         />
       </label>
 
       <label className="block space-y-2">
-        <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+        <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
           Tema
         </span>
         <Input
@@ -186,7 +186,7 @@ export function TopicForm({
       </label>
 
       <fieldset className="space-y-3">
-        <legend className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+        <legend className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
           Visibilidade do tópico
         </legend>
         <div className="grid gap-3 md:grid-cols-3">
@@ -208,7 +208,7 @@ export function TopicForm({
                   "rounded-xl border p-4 text-left transition-all",
                   isSelected
                     ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
-                    : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+                    : "border-border bg-surface-card hover:border-border dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -217,16 +217,16 @@ export function TopicForm({
                       "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
                       isSelected
                         ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
-                        : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                        : "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
                     )}
                   >
                     <Icon className="h-5 w-5" strokeWidth={1.5} />
                   </span>
                   <span>
-                    <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                    <span className="block font-display font-bold text-content-primary dark:text-content-dark-primary">
                       {option.label}
                     </span>
-                    <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                    <span className="mt-1 block text-sm text-content-secondary dark:text-content-dark-secondary">
                       {option.description}
                     </span>
                   </span>

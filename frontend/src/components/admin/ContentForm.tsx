@@ -45,7 +45,7 @@ function MediaPreview({
 }) {
   if (!previewUrl) {
     return (
-      <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-tertiary">
+      <p className="rounded-lg border border-dashed border-border bg-surface-secondary p-4 text-sm text-content-tertiary dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-tertiary">
         Sem pré-visualização. Faz upload de um ficheiro ou indica um URL directo
         para imagem, áudio ou vídeo.
       </p>
@@ -80,7 +80,7 @@ function MediaPreview({
         key={previewUrl}
         src={previewUrl}
         controls
-        className="max-h-64 w-full rounded-lg border border-slate-200 bg-black dark:border-border-dark"
+        className="max-h-64 w-full rounded-lg border border-border bg-black dark:border-border-dark"
       />
     );
   }
@@ -102,7 +102,7 @@ function MediaPreview({
       key={previewUrl}
       src={previewUrl}
       alt="Pré-visualização da media"
-      className="max-h-64 w-full rounded-lg border border-slate-200 object-contain dark:border-border-dark"
+      className="max-h-64 w-full rounded-lg border border-border object-contain dark:border-border-dark"
     />
   );
 }
@@ -396,7 +396,7 @@ export function ContentForm({
       </div>
 
       <fieldset className="space-y-3">
-        <legend className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+        <legend className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
           Acesso ao conteúdo
         </legend>
         <div className="grid gap-3 md:grid-cols-2">
@@ -407,7 +407,7 @@ export function ContentForm({
               "rounded-xl border p-4 text-left transition-all",
               !values.is_exclusive
                 ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
-                : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+                : "border-border bg-surface-card hover:border-border dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
             )}
           >
             <div className="flex items-start gap-3">
@@ -416,16 +416,16 @@ export function ContentForm({
                   "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
                   !values.is_exclusive
                     ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
-                    : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                    : "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
                 )}
               >
                 <Globe className="h-5 w-5" strokeWidth={1.5} />
               </span>
               <span>
-                <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                <span className="block font-display font-bold text-content-primary dark:text-content-dark-primary">
                   Público
                 </span>
-                <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                <span className="mt-1 block text-sm text-content-secondary dark:text-content-dark-secondary">
                   Qualquer visitante vê este conteúdo em Explorar, mesmo sem
                   login.
                 </span>
@@ -440,7 +440,7 @@ export function ContentForm({
               "rounded-xl border p-4 text-left transition-all",
               values.is_exclusive
                 ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
-                : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+                : "border-border bg-surface-card hover:border-border dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
             )}
           >
             <div className="flex items-start gap-3">
@@ -449,21 +449,21 @@ export function ContentForm({
                   "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
                   values.is_exclusive
                     ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
-                    : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                    : "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
                 )}
               >
                 <Lock className="h-5 w-5" strokeWidth={1.5} />
               </span>
               <span>
-                <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                <span className="block font-display font-bold text-content-primary dark:text-content-dark-primary">
                   Exclusivo
                 </span>
-                <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                <span className="mt-1 block text-sm text-content-secondary dark:text-content-dark-secondary">
                   Só utilizadores com login em /login veem este conteúdo em
                   Explorar.
                 </span>
                 {values.type === "jindungo" ? (
-                  <span className="mt-2 block text-xs text-slate-500 dark:text-content-dark-tertiary">
+                  <span className="mt-2 block text-xs text-content-tertiary dark:text-content-dark-tertiary">
                     O tipo «Jindungo» já exige login por defeito.
                   </span>
                 ) : null}
@@ -473,7 +473,7 @@ export function ContentForm({
         </div>
       </fieldset>
 
-      <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-border-dark dark:bg-surface-dark-card">
+      <div className="space-y-3 rounded-xl border border-border bg-surface-card p-4 dark:border-border-dark dark:bg-surface-dark-card">
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="media"

@@ -59,14 +59,14 @@ export function AdminStatsCharts({ stats }: AdminStatsChartsProps) {
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-      <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-border-dark dark:bg-surface-dark-card">
-        <h2 className="mb-4 font-display text-lg font-semibold text-slate-900 dark:text-content-dark-primary">
+      <div className="rounded-xl border border-border bg-surface-card p-4 dark:border-border-dark dark:bg-surface-dark-card">
+        <h2 className="mb-4 font-display text-lg font-semibold text-content-primary dark:text-content-dark-primary">
           Visão geral da plataforma
         </h2>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={overviewData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-700" />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border dark:stroke-border-dark" />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip />
@@ -80,14 +80,14 @@ export function AdminStatsCharts({ stats }: AdminStatsChartsProps) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-border-dark dark:bg-surface-dark-card">
-        <h2 className="mb-4 font-display text-lg font-semibold text-slate-900 dark:text-content-dark-primary">
+      <div className="rounded-xl border border-border bg-surface-card p-4 dark:border-border-dark dark:bg-surface-dark-card">
+        <h2 className="mb-4 font-display text-lg font-semibold text-content-primary dark:text-content-dark-primary">
           Actividade mensal
         </h2>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={stats.monthly_activity} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-700" />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border dark:stroke-border-dark" />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip />
@@ -121,8 +121,8 @@ export function AdminStatsCharts({ stats }: AdminStatsChartsProps) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-border-dark dark:bg-surface-dark-card">
-        <h2 className="mb-4 font-display text-lg font-semibold text-slate-900 dark:text-content-dark-primary">
+      <div className="rounded-xl border border-border bg-surface-card p-4 dark:border-border-dark dark:bg-surface-dark-card">
+        <h2 className="mb-4 font-display text-lg font-semibold text-content-primary dark:text-content-dark-primary">
           Conteúdos por tipo
         </h2>
         <div className="h-72">
@@ -150,15 +150,15 @@ export function AdminStatsCharts({ stats }: AdminStatsChartsProps) {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-content-dark-tertiary">
+            <p className="flex h-full items-center justify-center text-sm text-content-tertiary dark:text-content-dark-tertiary">
               Ainda não existem conteúdos registados.
             </p>
           )}
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-border-dark dark:bg-surface-dark-card">
-        <h2 className="mb-4 font-display text-lg font-semibold text-slate-900 dark:text-content-dark-primary">
+      <div className="rounded-xl border border-border bg-surface-card p-4 dark:border-border-dark dark:bg-surface-dark-card">
+        <h2 className="mb-4 font-display text-lg font-semibold text-content-primary dark:text-content-dark-primary">
           Conteúdos por estado
         </h2>
         <div className="h-72">
@@ -169,7 +169,7 @@ export function AdminStatsCharts({ stats }: AdminStatsChartsProps) {
                 layout="vertical"
                 margin={{ top: 8, right: 16, left: 16, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-700" />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border dark:stroke-border-dark" />
                 <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
                 <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 12 }} />
                 <Tooltip />
@@ -177,7 +177,7 @@ export function AdminStatsCharts({ stats }: AdminStatsChartsProps) {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-content-dark-tertiary">
+            <p className="flex h-full items-center justify-center text-sm text-content-tertiary dark:text-content-dark-tertiary">
               Ainda não existem conteúdos registados.
             </p>
           )}

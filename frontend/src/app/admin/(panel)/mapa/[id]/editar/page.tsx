@@ -121,7 +121,7 @@ export default function AdminEditMapNarrativePage() {
     <div className="space-y-6">
       <header>
         <h1 className="font-display text-3xl font-bold">Editar narrativa</h1>
-        <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
+        <p className="mt-2 text-content-secondary dark:text-content-dark-secondary">
           {narrative.title}
         </p>
       </header>

@@ -146,10 +146,10 @@ export default function AdminForumPage() {
     <div className="space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-content-dark-primary">
+          <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
             Fórum
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
+          <p className="mt-2 text-content-secondary dark:text-content-dark-secondary">
             Modera debates e gere tópicos de discussão.
           </p>
         </div>
@@ -178,7 +178,7 @@ export default function AdminForumPage() {
               "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
               filter === item.value
                 ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
-                : "bg-slate-100 text-slate-700 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                : "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
             )}
           >
             {item.label}
@@ -186,7 +186,7 @@ export default function AdminForumPage() {
         ))}
       </div>
 
-      <Card hoverLift={false} className="border-slate-200 bg-white dark:border-border-dark dark:bg-surface-dark-card">
+      <Card hoverLift={false} className="border-border bg-surface-card dark:border-border-dark dark:bg-surface-dark-card">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="space-y-3 p-4">
@@ -194,38 +194,38 @@ export default function AdminForumPage() {
               <Skeleton className="h-10 w-full" />
             </div>
           ) : filteredTopics.length === 0 ? (
-            <p className="p-8 text-center text-slate-600 dark:text-content-dark-secondary">
+            <p className="p-8 text-center text-content-secondary dark:text-content-dark-secondary">
               Nenhum tópico encontrado.
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-border-dark">
-                <thead className="bg-slate-50 dark:bg-surface-dark-secondary">
+              <table className="min-w-full divide-y divide-border text-left text-sm dark:divide-border-dark">
+                <thead className="bg-surface-secondary dark:bg-surface-dark-secondary">
                   <tr>
-                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                    <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                       Título
                     </th>
-                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                    <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                       Fórum
                     </th>
-                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                    <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                       Respostas
                     </th>
-                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                    <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                       Estado
                     </th>
-                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                    <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                       Criado
                     </th>
-                    <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                    <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                       Acções
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-border-dark">
+                <tbody className="divide-y divide-border dark:divide-border-dark">
                   {filteredTopics.map((topic) => (
                     <tr key={topic.id}>
-                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-content-dark-primary">
+                      <td className="px-4 py-3 font-medium text-content-primary dark:text-content-dark-primary">
                         {topic.title}
                         {topic.is_private ? (
                           <span className="ml-2 text-xs text-amber-700">Privado</span>
@@ -242,7 +242,7 @@ export default function AdminForumPage() {
                             "rounded-full px-3 py-1 text-xs font-semibold",
                             topic.is_visible
                               ? "bg-emerald-100 text-emerald-800"
-                              : "bg-slate-200 text-slate-700",
+                              : "bg-surface-secondary text-content-secondary",
                           )}
                         >
                           {topic.is_visible ? "Visível" : "Oculto"}

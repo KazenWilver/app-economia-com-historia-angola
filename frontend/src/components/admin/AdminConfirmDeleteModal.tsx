@@ -27,17 +27,17 @@ export function AdminConfirmDeleteModal({
 }: AdminConfirmDeleteModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onCancel} title={title}>
-      <Card hoverLift={false} className="border-slate-200 dark:border-border-dark">
+      <Card hoverLift={false} className="border-border dark:border-border-dark">
         <CardContent className="space-y-6 py-2">
-          <p className="text-sm text-slate-700 dark:text-content-dark-secondary">
+          <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
             {message}
           </p>
 
           {itemLabel ? (
-            <p className="text-sm font-semibold text-slate-900 dark:text-content-dark-primary">
+            <p className="text-sm font-semibold text-content-primary dark:text-content-dark-primary">
               {itemLabel}
               {itemDetail ? (
-                <span className="mt-1 block text-xs font-normal text-slate-500 dark:text-content-dark-tertiary">
+                <span className="mt-1 block text-xs font-normal text-content-tertiary dark:text-content-dark-tertiary">
                   {itemDetail}
                 </span>
               ) : null}

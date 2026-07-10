@@ -45,7 +45,7 @@ function statusBadgeClass(status: ContentStatus): string {
     case "published":
       return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300";
     case "archived":
-      return "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200";
+      return "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary";
     default:
       return "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300";
   }
@@ -177,10 +177,10 @@ export default function AdminContentsPage() {
     <div className="space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-content-dark-primary">
+          <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
             Conteúdos
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
+          <p className="mt-2 text-content-secondary dark:text-content-dark-secondary">
             Criar, editar, publicar e arquivar conteúdos da plataforma.
           </p>
         </div>
@@ -202,7 +202,7 @@ export default function AdminContentsPage() {
               "shrink-0 rounded-full border px-4 py-2 font-display text-sm font-semibold transition-colors",
               statusFilter === filter.value
                 ? "border-bordeaux bg-bordeaux text-white"
-                : "border-slate-300 bg-white text-slate-600 hover:border-bordeaux hover:text-bordeaux dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-secondary",
+                : "border-border bg-surface-card text-content-secondary hover:border-bordeaux hover:text-bordeaux dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-secondary",
             )}
           >
             {filter.label}
@@ -234,51 +234,51 @@ export default function AdminContentsPage() {
         </div>
       ) : filteredContents.length === 0 ? (
         <Card hoverLift={false}>
-          <CardContent className="py-10 text-center text-slate-600 dark:text-content-dark-secondary">
+          <CardContent className="py-10 text-center text-content-secondary dark:text-content-dark-secondary">
             Nenhum conteúdo encontrado neste filtro.
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-border-dark dark:bg-surface-dark-card">
-          <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-border-dark">
-            <thead className="bg-slate-50 dark:bg-surface-dark-secondary">
+        <div className="overflow-x-auto rounded-xl border border-border bg-surface-card dark:border-border-dark dark:bg-surface-dark-card">
+          <table className="min-w-full divide-y divide-border text-left text-sm dark:divide-border-dark">
+            <thead className="bg-surface-secondary dark:bg-surface-dark-secondary">
               <tr>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Título
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Tipo
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Estado
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Exclusivo
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Actualizado
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Acções
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-border-dark">
+            <tbody className="divide-y divide-border dark:divide-border-dark">
               {filteredContents.map((content) => {
                 const isBusy = busyId === content.id;
 
                 return (
                   <tr key={content.id}>
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-slate-900 dark:text-content-dark-primary">
+                      <p className="font-semibold text-content-primary dark:text-content-dark-primary">
                         {content.title}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-content-dark-tertiary">
+                      <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
                         {content.category?.name ?? "Sem categoria"} ·{" "}
                         {content.slug}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-content-dark-secondary">
+                    <td className="px-4 py-3 text-content-secondary dark:text-content-dark-secondary">
                       {TYPE_LABELS[content.type as ContentType]}
                     </td>
                     <td className="px-4 py-3">
@@ -291,10 +291,10 @@ export default function AdminContentsPage() {
                         {STATUS_LABELS[content.status]}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-content-dark-secondary">
+                    <td className="px-4 py-3 text-content-secondary dark:text-content-dark-secondary">
                       {content.is_exclusive ? "Sim" : "Não"}
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-content-dark-secondary">
+                    <td className="px-4 py-3 text-content-secondary dark:text-content-dark-secondary">
                       {formatDate(content.updated_at)}
                     </td>
                     <td className="px-4 py-3">

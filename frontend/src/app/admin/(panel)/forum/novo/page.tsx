@@ -71,7 +71,7 @@ export default function AdminCreateTopicPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-content-dark-primary">
+        <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
           Novo tópico
         </h1>
       </header>

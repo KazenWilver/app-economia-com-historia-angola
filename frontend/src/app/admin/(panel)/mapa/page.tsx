@@ -105,10 +105,10 @@ export default function AdminMapaPage() {
     <div className="space-y-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-content-dark-primary">
+          <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
             Mapa
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
+          <p className="mt-2 text-content-secondary dark:text-content-dark-secondary">
             Gere narrativas histórico-económicas por província. O período
             histórico contextualiza cada narrativa; a ordem de exibição define a
             sequência no mapa público.
@@ -133,7 +133,7 @@ export default function AdminMapaPage() {
         <select
           value={provinceFilter}
           onChange={(event) => setProvinceFilter(event.target.value)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-border-dark dark:bg-surface-dark-secondary"
+          className="rounded-lg border border-border bg-surface-card px-3 py-2 text-sm dark:border-border-dark dark:bg-surface-dark-secondary"
         >
           <option value="all">Todas as províncias</option>
           {provinces.map((province) => (
@@ -152,13 +152,13 @@ export default function AdminMapaPage() {
               <Skeleton className="h-10 w-full" />
             </div>
           ) : filteredNarratives.length === 0 ? (
-            <p className="p-8 text-center text-slate-600 dark:text-content-dark-secondary">
+            <p className="p-8 text-center text-content-secondary dark:text-content-dark-secondary">
               Nenhuma narrativa encontrada.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
-                <thead className="border-b border-slate-200 bg-slate-50 dark:border-border-dark dark:bg-surface-dark-secondary">
+                <thead className="border-b border-border bg-surface-secondary dark:border-border-dark dark:bg-surface-dark-secondary">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Título</th>
                     <th className="px-4 py-3 font-semibold">Província</th>
@@ -179,7 +179,7 @@ export default function AdminMapaPage() {
                 </thead>
                 <tbody>
                   {filteredNarratives.map((narrative) => (
-                    <tr key={narrative.id} className="border-b border-slate-100 dark:border-border-dark">
+                    <tr key={narrative.id} className="border-b border-border dark:border-border-dark">
                       <td className="px-4 py-3 font-medium">{narrative.title}</td>
                       <td className="px-4 py-3">{narrative.province?.name ?? "—"}</td>
                       <td className="px-4 py-3">{narrative.period ?? "—"}</td>

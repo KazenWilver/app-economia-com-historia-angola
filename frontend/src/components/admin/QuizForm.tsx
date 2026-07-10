@@ -182,7 +182,7 @@ export function QuizForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+          <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
             Título
           </span>
           <Input
@@ -196,7 +196,7 @@ export function QuizForm({
         </label>
 
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+          <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
             Descrição
           </span>
           <textarea
@@ -208,13 +208,13 @@ export function QuizForm({
               }))
             }
             rows={3}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
+            className="w-full rounded-lg border border-border bg-surface-card px-3 py-2 text-sm text-content-primary outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
             placeholder="Breve introdução ao quiz"
           />
         </label>
 
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+          <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
             Tópico do fórum (recomendado)
           </span>
           <select
@@ -225,7 +225,7 @@ export function QuizForm({
                 topic_id: event.target.value,
               }))
             }
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
+            className="w-full rounded-lg border border-border bg-surface-card px-3 py-2 text-sm text-content-primary outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-secondary dark:text-content-dark-primary"
           >
             <option value="">Sem tópico ligado</option>
             {topicOptions.map((topic) => (
@@ -235,7 +235,7 @@ export function QuizForm({
               </option>
             ))}
           </select>
-          <p className="text-xs text-slate-500 dark:text-content-dark-tertiary">
+          <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
             Liga o quiz a um tópico para recomendações usarem o tema do debate
             (não são aleatórias).
           </p>
@@ -252,7 +252,7 @@ export function QuizForm({
         />
 
         <fieldset className="space-y-3 md:col-span-2">
-          <legend className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+          <legend className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
             Estado do quiz
           </legend>
           <div className="grid gap-3 md:grid-cols-2">
@@ -265,7 +265,7 @@ export function QuizForm({
                 "rounded-xl border p-4 text-left transition-all",
                 values.is_active
                   ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
-                  : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+                  : "border-border bg-surface-card hover:border-border dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
               )}
             >
               <div className="flex items-start gap-3">
@@ -274,16 +274,16 @@ export function QuizForm({
                     "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
                     values.is_active
                       ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
-                      : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                      : "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
                   )}
                 >
                   <Eye className="h-5 w-5" strokeWidth={1.5} />
                 </span>
                 <span>
-                  <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                  <span className="block font-display font-bold text-content-primary dark:text-content-dark-primary">
                     Activo
                   </span>
-                  <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                  <span className="mt-1 block text-sm text-content-secondary dark:text-content-dark-secondary">
                     Visível na área pública em /quiz para todos os visitantes.
                   </span>
                 </span>
@@ -299,7 +299,7 @@ export function QuizForm({
                 "rounded-xl border p-4 text-left transition-all",
                 !values.is_active
                   ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
-                  : "border-slate-200 bg-white hover:border-slate-300 dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
+                  : "border-border bg-surface-card hover:border-border dark:border-border-dark dark:bg-surface-dark-card dark:hover:border-border-dark",
               )}
             >
               <div className="flex items-start gap-3">
@@ -308,16 +308,16 @@ export function QuizForm({
                     "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
                     !values.is_active
                       ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
-                      : "bg-slate-100 text-slate-600 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                      : "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
                   )}
                 >
                   <EyeOff className="h-5 w-5" strokeWidth={1.5} />
                 </span>
                 <span>
-                  <span className="block font-display font-bold text-slate-900 dark:text-content-dark-primary">
+                  <span className="block font-display font-bold text-content-primary dark:text-content-dark-primary">
                     Inactivo
                   </span>
-                  <span className="mt-1 block text-sm text-slate-600 dark:text-content-dark-secondary">
+                  <span className="mt-1 block text-sm text-content-secondary dark:text-content-dark-secondary">
                     Oculto do público; só admins veem e gerem este quiz.
                   </span>
                 </span>
@@ -329,7 +329,7 @@ export function QuizForm({
 
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="font-display text-xl font-bold text-slate-900 dark:text-content-dark-primary">
+          <h2 className="font-display text-xl font-bold text-content-primary dark:text-content-dark-primary">
             Perguntas
           </h2>
           <Button
@@ -350,10 +350,10 @@ export function QuizForm({
         {values.questions.map((question, questionIndex) => (
           <div
             key={`question-${questionIndex}`}
-            className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-border-dark dark:bg-surface-dark-secondary/50"
+            className="space-y-4 rounded-xl border border-border bg-surface-secondary/70 p-4 dark:border-border-dark dark:bg-surface-dark-secondary/50"
           >
             <div className="flex items-start justify-between gap-3">
-              <h3 className="font-semibold text-slate-900 dark:text-content-dark-primary">
+              <h3 className="font-semibold text-content-primary dark:text-content-dark-primary">
                 Pergunta {questionIndex + 1}
               </h3>
               {values.questions.length > 1 ? (
@@ -376,7 +376,7 @@ export function QuizForm({
             </div>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+              <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
                 Texto da pergunta
               </span>
               <textarea
@@ -388,12 +388,12 @@ export function QuizForm({
                   }))
                 }
                 rows={2}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary"
+                className="w-full rounded-lg border border-border bg-surface-card px-3 py-2 text-sm text-content-primary outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary"
               />
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+              <span className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
                 Explicação (após resposta)
               </span>
               <textarea
@@ -405,14 +405,14 @@ export function QuizForm({
                   }))
                 }
                 rows={2}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary"
+                className="w-full rounded-lg border border-border bg-surface-card px-3 py-2 text-sm text-content-primary outline-none ring-bordeaux/30 focus:border-bordeaux focus:ring-2 dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary"
                 placeholder="Opcional — mostrada ao utilizador depois de responder"
               />
             </label>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-slate-700 dark:text-content-dark-secondary">
+                <p className="text-sm font-semibold text-content-secondary dark:text-content-dark-secondary">
                   Respostas (marca a correcta)
                 </p>
                 <Button
@@ -436,7 +436,7 @@ export function QuizForm({
               {question.answers.map((answer, answerIndex) => (
                 <div
                   key={`answer-${questionIndex}-${answerIndex}`}
-                  className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-3 sm:flex-row sm:items-center dark:border-border-dark dark:bg-surface-dark-card"
+                  className="flex flex-col gap-3 rounded-lg border border-border bg-surface-card p-3 sm:flex-row sm:items-center dark:border-border-dark dark:bg-surface-dark-card"
                 >
                   <button
                     type="button"
@@ -449,7 +449,7 @@ export function QuizForm({
                       "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition-colors",
                       answer.is_correct
                         ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
+                        : "bg-surface-secondary text-content-secondary hover:bg-surface-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
                     )}
                   >
                     <CircleCheck className="h-4 w-4" strokeWidth={1.5} />

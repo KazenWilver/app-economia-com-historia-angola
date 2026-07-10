@@ -155,10 +155,10 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-content-dark-primary">
+        <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
           Utilizadores
         </h1>
-        <p className="mt-2 text-slate-600 dark:text-content-dark-secondary">
+        <p className="mt-2 text-content-secondary dark:text-content-dark-secondary">
           Consultar contas registadas e activar ou desactivar acesso à
           plataforma.
         </p>
@@ -174,7 +174,7 @@ export default function AdminUsersPage() {
               "shrink-0 rounded-full border px-4 py-2 font-display text-sm font-semibold transition-colors",
               statusFilter === filter.value
                 ? "border-bordeaux bg-bordeaux text-white"
-                : "border-slate-300 bg-white text-slate-600 hover:border-bordeaux hover:text-bordeaux dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-secondary",
+                : "border-border bg-surface-card text-content-secondary hover:border-bordeaux hover:text-bordeaux dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-secondary",
             )}
           >
             {filter.label}
@@ -206,33 +206,33 @@ export default function AdminUsersPage() {
         </div>
       ) : filteredUsers.length === 0 ? (
         <Card hoverLift={false}>
-          <CardContent className="py-10 text-center text-slate-600 dark:text-content-dark-secondary">
+          <CardContent className="py-10 text-center text-content-secondary dark:text-content-dark-secondary">
             Nenhum utilizador encontrado neste filtro.
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-border-dark dark:bg-surface-dark-card">
-          <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-border-dark">
-            <thead className="bg-slate-50 dark:bg-surface-dark-secondary">
+        <div className="overflow-x-auto rounded-xl border border-border bg-surface-card dark:border-border-dark dark:bg-surface-dark-card">
+          <table className="min-w-full divide-y divide-border text-left text-sm dark:divide-border-dark">
+            <thead className="bg-surface-secondary dark:bg-surface-dark-secondary">
               <tr>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Nome
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Perfil
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Estado
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Registado
                 </th>
-                <th className="px-4 py-3 font-display font-semibold text-slate-700 dark:text-content-dark-primary">
+                <th className="px-4 py-3 font-display font-semibold text-content-secondary dark:text-content-dark-primary">
                   Acções
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-border-dark">
+            <tbody className="divide-y divide-border dark:divide-border-dark">
               {filteredUsers.map((user) => {
                 const isBusy = busyId === user.id;
                 const canToggle = canChangeStatus(user);
@@ -240,10 +240,10 @@ export default function AdminUsersPage() {
                 return (
                   <tr key={user.id}>
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-slate-900 dark:text-content-dark-primary">
+                      <p className="font-semibold text-content-primary dark:text-content-dark-primary">
                         {user.name}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-content-dark-tertiary">
+                      <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
                         {user.email}
                         {user.phone ? ` · ${user.phone}` : ""}
                       </p>
@@ -254,7 +254,7 @@ export default function AdminUsersPage() {
                           "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
                           user.role === "admin"
                             ? "bg-bordeaux/10 text-bordeaux dark:bg-bordeaux-dark/20 dark:text-bordeaux-dark"
-                            : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200",
+                            : "bg-surface-secondary text-content-secondary dark:bg-surface-dark-secondary dark:text-content-dark-secondary",
                         )}
                       >
                         {user.role === "admin" ? (
@@ -273,7 +273,7 @@ export default function AdminUsersPage() {
                         {user.is_active ? "Activo" : "Inactivo"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-content-dark-secondary">
+                    <td className="px-4 py-3 text-content-secondary dark:text-content-dark-secondary">
                       {formatDate(user.created_at)}
                     </td>
                     <td className="px-4 py-3">
@@ -304,7 +304,7 @@ export default function AdminUsersPage() {
                           )}
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-500 dark:text-content-dark-tertiary">
+                        <span className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
                           —
                         </span>
                       )}
@@ -322,16 +322,16 @@ export default function AdminUsersPage() {
         onClose={() => setUserToDeactivate(null)}
         title="Desactivar conta"
       >
-        <Card hoverLift={false} className="border-slate-200 dark:border-border-dark">
+        <Card hoverLift={false} className="border-border dark:border-border-dark">
           <CardContent className="space-y-6 py-6">
-            <p className="text-sm text-slate-700 dark:text-content-dark-secondary">
+            <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
               Deseja desactivar essa conta?
             </p>
 
             {userToDeactivate ? (
-              <p className="text-sm font-semibold text-slate-900 dark:text-content-dark-primary">
+              <p className="text-sm font-semibold text-content-primary dark:text-content-dark-primary">
                 {userToDeactivate.name}
-                <span className="mt-1 block text-xs font-normal text-slate-500 dark:text-content-dark-tertiary">
+                <span className="mt-1 block text-xs font-normal text-content-tertiary dark:text-content-dark-tertiary">
                   {userToDeactivate.email}
                 </span>
               </p>
