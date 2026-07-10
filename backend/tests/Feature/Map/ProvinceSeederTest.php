@@ -36,5 +36,13 @@ class ProvinceSeederTest extends TestCase
             'capital' => 'Mavinga',
         ]);
         $this->assertDatabaseMissing('provinces', ['code' => 'CCU']);
+
+        $luanda = \App\Models\Province::query()->where('code', 'LUA')->first();
+        $this->assertNotNull($luanda);
+        $this->assertNotNull($luanda->geojson_data);
+
+        $geometry = json_decode((string) $luanda->geojson_data, true);
+        $this->assertIsArray($geometry);
+        $this->assertContains($geometry['type'] ?? null, ['Polygon', 'MultiPolygon']);
     }
 }

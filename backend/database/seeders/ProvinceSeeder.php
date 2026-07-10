@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class ProvinceSeeder extends Seeder
 {
@@ -12,6 +13,8 @@ class ProvinceSeeder extends Seeder
      */
     public function run(): void
     {
+        $geojsonByCode = $this->loadProvinceGeometries();
+
         $provinces = [
             ['name' => 'Bengo', 'code' => 'BGO', 'capital' => 'Dande', 'latitude' => -8.4494, 'longitude' => 13.7422],
             ['name' => 'Benguela', 'code' => 'BGU', 'capital' => 'Benguela', 'latitude' => -12.5763, 'longitude' => 13.4055],
@@ -39,6 +42,8 @@ class ProvinceSeeder extends Seeder
         $now = now();
 
         foreach ($provinces as $province) {
+            $geometry = $geojsonByCode[$province['code']] ?? null;
+
             DB::table('provinces')->updateOrInsert(
                 ['code' => $province['code']],
                 [
@@ -46,7 +51,7 @@ class ProvinceSeeder extends Seeder
                     'capital' => $province['capital'],
                     'latitude' => $province['latitude'],
                     'longitude' => $province['longitude'],
-                    'geojson_data' => null,
+                    'geojson_data' => $geometry ? json_encode($geometry, JSON_UNESCAPED_UNICODE) : null,
                     'created_at' => $now,
                 ]
             );
@@ -76,5 +81,42 @@ class ProvinceSeeder extends Seeder
                 ]
             );
         }
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function loadProvinceGeometries(): array
+    {
+        $path = database_path('data/angola-provinces.geojson');
+
+        if (! File::exists($path)) {
+            return [];
+        }
+
+        $decoded = json_decode(File::get($path), true);
+
+        if (! is_array($decoded) || ! isset($decoded['features']) || ! is_array($decoded['features'])) {
+            return [];
+        }
+
+        $geometries = [];
+
+        foreach ($decoded['features'] as $feature) {
+            if (! is_array($feature)) {
+                continue;
+            }
+
+            $code = $feature['properties']['code'] ?? null;
+            $geometry = $feature['geometry'] ?? null;
+
+            if (! is_string($code) || ! is_array($geometry) || ! isset($geometry['type'])) {
+                continue;
+            }
+
+            $geometries[$code] = $geometry;
+        }
+
+        return $geometries;
     }
 }

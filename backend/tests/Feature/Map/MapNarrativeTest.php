@@ -52,6 +52,37 @@ class MapNarrativeTest extends TestCase
             ->assertJsonPath('features.0.geometry.coordinates.1', -8.8368);
     }
 
+    public function test_geojson_prefers_polygon_over_point_when_available(): void
+    {
+        $polygon = [
+            'type' => 'Polygon',
+            'coordinates' => [
+                [
+                    [13.1, -8.9],
+                    [13.4, -8.9],
+                    [13.4, -8.7],
+                    [13.1, -8.7],
+                    [13.1, -8.9],
+                ],
+            ],
+        ];
+
+        $province = Province::query()->create([
+            'name' => 'Luanda',
+            'code' => 'LUA',
+            'capital' => 'Luanda',
+            'latitude' => -8.8368,
+            'longitude' => 13.2343,
+            'geojson_data' => json_encode($polygon, JSON_THROW_ON_ERROR),
+        ]);
+
+        $response = $this->getJson('/api/provinces/geojson');
+
+        $response->assertOk()
+            ->assertJsonPath('features.0.properties.id', $province->id)
+            ->assertJsonPath('features.0.geometry.type', 'Polygon');
+    }
+
     public function test_guest_can_view_province_with_narratives(): void
     {
         $province = $this->createProvince();

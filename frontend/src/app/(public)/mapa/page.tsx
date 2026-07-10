@@ -114,7 +114,7 @@ export default function MapPage() {
         </h1>
         <p className="max-w-3xl text-content-secondary dark:text-content-dark-secondary">
           Explora as 21 províncias de Angola e descobre narrativas sobre economia,
-          história e território. Os pontos com narrativas disponíveis aparecem
+          história e território. As províncias com narrativas disponíveis aparecem
           com maior destaque no mapa.
         </p>
       </header>

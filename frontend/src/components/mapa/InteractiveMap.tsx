@@ -28,21 +28,43 @@ type ProvinceFeature = GeoJSON.Feature<
   }
 >;
 
-function applyMarkerStyle(
-  marker: L.CircleMarker,
+function isPathLayer(
+  layer: L.Layer,
+): layer is L.Path & { feature?: ProvinceFeature } {
+  return (
+    layer instanceof L.Path ||
+    layer instanceof L.Polygon ||
+    layer instanceof L.CircleMarker
+  );
+}
+
+function applyFeatureStyle(
+  layer: L.Path,
   feature: ProvinceFeature,
   selectedProvinceId: number | null,
 ) {
   const narrativesCount = feature.properties?.narratives_count ?? 0;
   const provinceId = feature.properties?.id ?? null;
   const isSelected = provinceId === selectedProvinceId;
+  const hasNarratives = narrativesCount > 0;
 
-  marker.setStyle({
-    radius: narrativesCount > 0 ? 11 : 8,
+  if (layer instanceof L.CircleMarker) {
+    layer.setStyle({
+      radius: hasNarratives ? 11 : 8,
+      fillColor: isSelected ? BORDEAUX : PETROL,
+      color: isSelected ? GOLD : BORDEAUX,
+      weight: isSelected ? 3 : 2,
+      fillOpacity: 0.9,
+    });
+    return;
+  }
+
+  layer.setStyle({
     fillColor: isSelected ? BORDEAUX : PETROL,
     color: isSelected ? GOLD : BORDEAUX,
-    weight: isSelected ? 3 : 2,
-    fillOpacity: 0.9,
+    weight: isSelected ? 2.5 : 1.25,
+    fillOpacity: isSelected ? 0.55 : hasNarratives ? 0.42 : 0.28,
+    opacity: 1,
   });
 }
 
@@ -68,7 +90,6 @@ export function InteractiveMap({
       return;
     }
 
-    // Strict Mode / remount: limpar residual do Leaflet no contentor.
     if ("_leaflet_id" in container) {
       delete (container as HTMLDivElement & { _leaflet_id?: number })._leaflet_id;
     }
@@ -103,6 +124,22 @@ export function InteractiveMap({
         }
 
         const geoJsonLayer = L.geoJSON(data, {
+          style(feature) {
+            const typedFeature = feature as ProvinceFeature | undefined;
+            const narrativesCount =
+              typedFeature?.properties?.narratives_count ?? 0;
+            const provinceId = typedFeature?.properties?.id ?? null;
+            const isSelected = provinceId === selectedProvinceIdRef.current;
+            const hasNarratives = narrativesCount > 0;
+
+            return {
+              fillColor: isSelected ? BORDEAUX : PETROL,
+              color: isSelected ? GOLD : BORDEAUX,
+              weight: isSelected ? 2.5 : 1.25,
+              fillOpacity: isSelected ? 0.55 : hasNarratives ? 0.42 : 0.28,
+              opacity: 1,
+            };
+          },
           pointToLayer(feature, latlng) {
             const marker = L.circleMarker(latlng, {
               radius: 8,
@@ -112,7 +149,7 @@ export function InteractiveMap({
               fillOpacity: 0.9,
             });
 
-            applyMarkerStyle(
+            applyFeatureStyle(
               marker,
               feature as ProvinceFeature,
               selectedProvinceIdRef.current,
@@ -141,6 +178,14 @@ export function InteractiveMap({
                 onSelectRef.current(provinceId);
               }
             });
+
+            if (isPathLayer(layer)) {
+              applyFeatureStyle(
+                layer,
+                typedFeature,
+                selectedProvinceIdRef.current,
+              );
+            }
           },
         });
 
@@ -215,19 +260,16 @@ export function InteractiveMap({
 
     try {
       layer.eachLayer((featureLayer) => {
-        if (!(featureLayer instanceof L.CircleMarker)) {
+        if (!isPathLayer(featureLayer)) {
           return;
         }
 
-        const feature = (
-          featureLayer as L.CircleMarker & { feature?: ProvinceFeature }
-        ).feature;
-
+        const feature = featureLayer.feature;
         if (!feature) {
           return;
         }
 
-        applyMarkerStyle(featureLayer, feature, selectedProvinceId);
+        applyFeatureStyle(featureLayer, feature, selectedProvinceId);
       });
     } catch {
       // Ignorar se o mapa já não estiver válido.
