@@ -5,7 +5,7 @@
 #      .\scripts\check-ci.ps1 -SkipTests
 #
 # Antes de push: corre SEMPRE este script ou usa Push-Git (git-profile.ps1).
-# Inclui Pint, PHPUnit (backend) e ESLint (frontend).
+# Inclui Pint, PHPUnit (backend), ESLint e Vitest (frontend).
 #
 # Nota Windows: vendor/bin/pint é um script PHP — sem `php` no PATH ou Docker,
 # o Pint não corre de verdade e o CI local pode passar sem formatar nada.
@@ -132,6 +132,31 @@ function Invoke-FrontendLint {
     }
 }
 
+function Invoke-FrontendTests {
+    if (-not (Test-Path (Join-Path $frontendRoot "package.json"))) {
+        Write-Host "Frontend ignorado (package.json não encontrado)." -ForegroundColor Yellow
+        return
+    }
+
+    Push-Location $frontendRoot
+    try {
+        if (-not (Test-Path "node_modules")) {
+            Write-Host "A instalar dependências do frontend..." -ForegroundColor Yellow
+            npm ci
+            if ($LASTEXITCODE -ne 0) {
+                throw "npm ci falhou."
+            }
+        }
+
+        npm test
+        if ($LASTEXITCODE -ne 0) {
+            throw "Vitest falhou."
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
 function Invoke-BackendTests {
     $testScript = Join-Path $PSScriptRoot "test-backend.ps1"
 
@@ -164,6 +189,11 @@ if (-not $SkipTests) {
 if (-not $BackendOnly) {
     Write-Step "Frontend - ESLint"
     Invoke-FrontendLint
+
+    if (-not $SkipTests) {
+        Write-Step "Frontend - Vitest"
+        Invoke-FrontendTests
+    }
 }
 
 Write-Host ""
