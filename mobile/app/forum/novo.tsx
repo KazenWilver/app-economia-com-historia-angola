@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { ForumsResponse, TopicMutationResponse } from "@shared/types";
 import { Card, Field, PrimaryButton, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ export default function NovoTopicoScreen() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [theme, setTheme] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -74,8 +75,8 @@ export default function NovoTopicoScreen() {
           title: title.trim(),
           description: description.trim() || null,
           theme: theme.trim() || null,
-          is_private: false,
-          is_visible: true,
+          is_private: isPrivate,
+          is_visible: !isPrivate,
         }),
       });
 
@@ -115,6 +116,19 @@ export default function NovoTopicoScreen() {
           value={theme}
           onChangeText={setTheme}
         />
+        <Pressable
+          onPress={() => setIsPrivate((value) => !value)}
+          style={styles.privacyRow}
+        >
+          <View style={[styles.checkbox, isPrivate && styles.checkboxOn]} />
+          <View style={styles.privacyText}>
+            <Text style={styles.privacyTitle}>Tópico privado</Text>
+            <Text style={styles.privacyHint}>
+              Só tu e administradores o conseguem ver. Não aparece na lista
+              pública.
+            </Text>
+          </View>
+        </Pressable>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.actions}>
           <PrimaryButton
@@ -139,6 +153,37 @@ const styles = StyleSheet.create({
     minHeight: 100,
     textAlignVertical: "top",
     paddingTop: 12,
+  },
+  privacyRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    marginBottom: 16,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    marginTop: 2,
+    backgroundColor: colors.surfaceCard,
+  },
+  checkboxOn: {
+    backgroundColor: colors.bordeaux,
+    borderColor: colors.bordeaux,
+  },
+  privacyText: { flex: 1 },
+  privacyTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: colors.contentPrimary,
+  },
+  privacyHint: {
+    marginTop: 4,
+    fontSize: 12,
+    lineHeight: 18,
+    color: colors.contentTertiary,
   },
   actions: { marginTop: 4 },
   error: {
