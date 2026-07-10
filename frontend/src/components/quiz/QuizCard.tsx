@@ -17,11 +17,11 @@ export function QuizCard({ quiz }: QuizCardProps) {
   return (
     <Card className="flex h-full flex-col">
       <CardHeader>
-        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-bordeaux/10 px-3 py-1 text-xs font-semibold text-bordeaux dark:bg-bordeaux-dark/10 dark:text-bordeaux-dark">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-bordeaux/10 px-3 py-1 font-display text-xs font-semibold tracking-display text-bordeaux dark:bg-bordeaux-dark/10 dark:text-bordeaux-dark">
           <Puzzle className="h-3.5 w-3.5" strokeWidth={1.5} />
           Quiz
         </div>
-        <CardTitle className="text-xl">{quiz.title}</CardTitle>
+        <CardTitle className="text-xl tracking-display">{quiz.title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-4">
         {quiz.description ? (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Compass, Home } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export default function NotFound() {
   return (
@@ -8,7 +9,7 @@ export default function NotFound() {
         404
       </p>
 
-      <h1 className="mt-4 font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary sm:text-4xl">
+      <h1 className="mt-4 font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary sm:text-4xl">
         Página não encontrada
       </h1>
 
@@ -18,20 +19,18 @@ export default function NotFound() {
       </p>
 
       <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-        <Link
-          href="/"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-bordeaux px-5 font-display text-sm font-semibold text-white transition-colors hover:bg-bordeaux/90 dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90"
-        >
-          <Home className="h-4 w-4" strokeWidth={1.5} />
-          Ir para o início
+        <Link href="/">
+          <Button type="button" className="w-full sm:w-auto">
+            <Home className="h-4 w-4" strokeWidth={1.5} />
+            Ir para o início
+          </Button>
         </Link>
 
-        <Link
-          href="/explorar"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border bg-surface-card px-5 font-display text-sm font-semibold text-content-primary transition-colors hover:border-bordeaux hover:text-bordeaux dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary dark:hover:border-bordeaux-dark dark:hover:text-bordeaux-dark"
-        >
-          <Compass className="h-4 w-4" strokeWidth={1.5} />
-          Explorar conteúdos
+        <Link href="/explorar">
+          <Button type="button" variant="secondary" className="w-full sm:w-auto">
+            <Compass className="h-4 w-4" strokeWidth={1.5} />
+            Explorar conteúdos
+          </Button>
         </Link>
       </div>
     </div>

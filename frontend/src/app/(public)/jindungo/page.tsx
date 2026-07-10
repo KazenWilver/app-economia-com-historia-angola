@@ -100,15 +100,14 @@ export default function JindungoListPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8 space-y-3">
+    <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <header className="mb-10 space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1">
-          <span aria-hidden>🌶️</span>
-          <span className="font-display text-xs font-bold uppercase tracking-wide text-gold dark:text-gold-dark">
+          <span className="font-display text-xs font-semibold tracking-display text-gold dark:text-gold-dark">
             Exclusivo Jindungo
           </span>
         </div>
-        <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary sm:text-4xl">
           Textos com Jindungo
         </h1>
         <p className="max-w-2xl text-content-secondary dark:text-content-dark-secondary">
@@ -161,19 +160,19 @@ export default function JindungoListPage() {
                 className="block h-full"
               >
                 <Card
+                  hoverLift
                   className={cn(
-                    "flex h-full flex-col border-gold/20 bg-gradient-to-br from-surface-card to-gold/5 transition-transform duration-150 hover:-translate-y-0.5",
-                    "dark:border-gold-dark/20 dark:from-surface-dark-card dark:to-gold-dark/5",
+                    "flex h-full flex-col border-gold/20 bg-surface-card",
+                    "dark:border-gold-dark/20 dark:bg-surface-dark-card",
                   )}
                 >
                   <CardHeader className="flex-1">
                     <Badge type="jindungo" className="mb-3 w-fit">
-                      <span aria-hidden>🌶️ </span>
                       Jindungo
                     </Badge>
                     <CardTitle className="line-clamp-2">{content.title}</CardTitle>
                     {content.category ? (
-                      <p className="text-xs font-medium uppercase tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
+                      <p className="text-xs font-medium tracking-display text-content-tertiary dark:text-content-dark-tertiary">
                         {content.category.name}
                       </p>
                     ) : null}

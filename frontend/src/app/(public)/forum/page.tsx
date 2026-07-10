@@ -82,7 +82,7 @@ export default function ForumPage() {
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
+          <h1 className="font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary">
             Fórum
           </h1>
           <p className="max-w-2xl text-content-secondary dark:text-content-dark-secondary">

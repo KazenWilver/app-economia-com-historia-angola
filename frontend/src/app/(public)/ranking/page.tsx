@@ -114,12 +114,12 @@ export default function RankingPage() {
         Voltar aos quizzes
       </Link>
 
-      <header className="mb-8 space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-3 py-1 text-xs font-semibold text-gold dark:bg-gold-dark/15 dark:text-gold-dark">
+      <header className="mb-10 space-y-3">
+        <div className="inline-flex items-center gap-2 rounded-full bg-gold/15 px-3 py-1 font-display text-xs font-semibold tracking-display text-gold dark:bg-gold-dark/15 dark:text-gold-dark">
           <Trophy className="h-3.5 w-3.5" strokeWidth={1.5} />
           Ranking
         </div>
-        <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
+        <h1 className="font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary">
           Classificação
         </h1>
         <p className="max-w-2xl text-content-secondary dark:text-content-dark-secondary">

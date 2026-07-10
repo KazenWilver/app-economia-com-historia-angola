@@ -21,6 +21,7 @@ import {
 import {
   Badge,
   type BadgeType,
+  Button,
   Card,
   CardContent,
   Skeleton,
@@ -137,26 +138,23 @@ export default function ContentDetailPage() {
           <Skeleton className="h-40 w-full" />
         </div>
       ) : requiresAuth ? (
-        <Card>
+        <Card hoverLift={false}>
           <CardContent className="space-y-4 py-10 text-center">
-            <p className="font-display text-xl font-bold text-content-primary dark:text-content-dark-primary">
+            <p className="font-display text-xl font-bold tracking-display text-content-primary dark:text-content-dark-primary">
               Conteúdo exclusivo
             </p>
             <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
               Inicia sessão para aceder a este conteúdo exclusivo.
             </p>
-            <Link
-              href="/login"
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-bordeaux px-4 py-2.5 font-display text-sm font-semibold text-white transition-colors hover:bg-bordeaux/90 dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90"
-            >
-              Iniciar sessão
+            <Link href="/login">
+              <Button type="button">Iniciar sessão</Button>
             </Link>
           </CardContent>
         </Card>
       ) : notFound ? (
-        <Card>
+        <Card hoverLift={false}>
           <CardContent className="py-10 text-center">
-            <p className="font-display text-xl font-bold text-content-primary dark:text-content-dark-primary">
+            <p className="font-display text-xl font-bold tracking-display text-content-primary dark:text-content-dark-primary">
               Conteúdo não encontrado
             </p>
             <p className="mt-2 text-sm text-content-secondary dark:text-content-dark-secondary">
@@ -180,19 +178,18 @@ export default function ContentDetailPage() {
                 {TYPE_LABELS[content.type]}
               </Badge>
               {content.is_exclusive ? (
-                <Badge type="jindungo" className="gap-1 normal-case">
-                  <span aria-hidden>🔒</span>
+                <Badge type="jindungo" className="normal-case">
                   Exclusivo
                 </Badge>
               ) : null}
               {content.category ? (
-                <span className="text-xs font-medium uppercase tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
+                <span className="text-xs font-medium tracking-display text-content-tertiary dark:text-content-dark-tertiary">
                   {content.category.name}
                 </span>
               ) : null}
             </div>
 
-            <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary sm:text-4xl">
+            <h1 className="font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary sm:text-4xl">
               {content.title}
             </h1>
 
@@ -217,7 +214,7 @@ export default function ContentDetailPage() {
           {content.body ? (
             <div
               className={cn(
-                "prose prose-slate max-w-none text-content-secondary dark:text-content-dark-secondary",
+                "prose max-w-none text-content-secondary dark:prose-invert dark:text-content-dark-secondary",
                 "whitespace-pre-wrap leading-7",
               )}
             >

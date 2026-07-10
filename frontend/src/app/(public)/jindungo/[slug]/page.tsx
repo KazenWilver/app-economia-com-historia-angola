@@ -148,13 +148,12 @@ export default function JindungoDetailPage() {
         </Card>
       ) : content ? (
         <article className="space-y-8">
-          <header className="space-y-4 rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/10 to-surface-card p-6 dark:border-gold-dark/20 dark:from-gold-dark/10 dark:to-surface-dark-card">
+          <header className="space-y-4 rounded-2xl border border-gold/20 bg-surface-card p-6 dark:border-gold-dark/20 dark:bg-surface-dark-card">
             <Badge type="jindungo" className="w-fit">
-              <span aria-hidden>🌶️ </span>
               Jindungo Exclusivo
             </Badge>
 
-            <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary sm:text-4xl">
+            <h1 className="font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary sm:text-4xl">
               {content.title}
             </h1>
 

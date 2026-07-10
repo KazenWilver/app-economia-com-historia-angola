@@ -15,7 +15,7 @@ interface RankingFiltersProps {
 }
 
 const selectClassName =
-  "w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm text-content-primary focus:border-bordeaux focus:outline-none focus:ring-2 focus:ring-bordeaux/20 dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary dark:focus:border-bordeaux-dark dark:focus:ring-bordeaux-dark/20";
+  "w-full rounded-xl border border-border bg-surface-card px-3.5 py-2.5 text-sm text-content-primary focus:border-bordeaux focus:outline-none focus:ring-2 focus:ring-bordeaux/15 dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary dark:focus:border-bordeaux-dark dark:focus:ring-bordeaux-dark/20";
 
 export function RankingFilters({
   scope,
@@ -28,19 +28,19 @@ export function RankingFilters({
   onProvinceChange,
 }: RankingFiltersProps) {
   return (
-    <div className="space-y-4 rounded-2xl border border-border bg-white p-4 dark:border-border-dark dark:bg-surface-dark-card">
+    <div className="space-y-4 rounded-2xl border border-border bg-surface-card p-4 dark:border-border-dark dark:bg-surface-dark-card">
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => onScopeChange("national")}
           className={cn(
-            "rounded-xl border p-4 text-left transition-all",
+            "rounded-2xl border p-4 text-left transition-colors",
             scope === "national"
-              ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
+              ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/20 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/25"
               : "border-border hover:border-bordeaux/40 dark:border-border-dark dark:hover:border-bordeaux-dark/40",
           )}
         >
-          <span className="inline-flex items-center gap-2 font-display font-bold text-content-primary dark:text-content-dark-primary">
+          <span className="inline-flex items-center gap-2 font-display font-bold tracking-display text-content-primary dark:text-content-dark-primary">
             <Globe className="h-5 w-5 text-bordeaux dark:text-bordeaux-dark" strokeWidth={1.5} />
             Nacional
           </span>
@@ -53,13 +53,13 @@ export function RankingFilters({
           type="button"
           onClick={() => onScopeChange("region")}
           className={cn(
-            "rounded-xl border p-4 text-left transition-all",
+            "rounded-2xl border p-4 text-left transition-colors",
             scope === "region"
-              ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/30 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/30"
+              ? "border-bordeaux bg-bordeaux/5 ring-2 ring-bordeaux/20 dark:border-bordeaux-dark dark:bg-bordeaux-dark/10 dark:ring-bordeaux-dark/25"
               : "border-border hover:border-bordeaux/40 dark:border-border-dark dark:hover:border-bordeaux-dark/40",
           )}
         >
-          <span className="inline-flex items-center gap-2 font-display font-bold text-content-primary dark:text-content-dark-primary">
+          <span className="inline-flex items-center gap-2 font-display font-bold tracking-display text-content-primary dark:text-content-dark-primary">
             <MapPin className="h-5 w-5 text-bordeaux dark:text-bordeaux-dark" strokeWidth={1.5} />
             Por região
           </span>

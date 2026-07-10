@@ -16,6 +16,7 @@ import { apiFetch, getStoredToken } from "@/lib/api";
 import {
   Badge,
   type BadgeType,
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -153,12 +154,12 @@ export default function ExplorarPage() {
   const showSkeleton = isFetching && allContents.length === 0;
 
   return (
-    <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8 space-y-3">
-        <p className="font-display text-sm font-semibold uppercase tracking-wide text-bordeaux dark:text-bordeaux-dark">
+    <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <header className="mb-10 space-y-3">
+        <p className="font-display text-sm font-semibold tracking-display text-bordeaux dark:text-bordeaux-dark">
           Biblioteca
         </p>
-        <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary sm:text-4xl">
           Explorar Conteúdos
         </h1>
         <p className="max-w-2xl text-content-secondary dark:text-content-dark-secondary">
@@ -196,17 +197,17 @@ export default function ExplorarPage() {
       </div>
 
       {requiresAuth && (
-        <Card className="mb-8 border-bordeaux/30 bg-bordeaux/5 dark:border-bordeaux-dark/30 dark:bg-bordeaux-dark/10">
+        <Card
+          hoverLift={false}
+          className="mb-8 border-bordeaux/30 bg-bordeaux/5 dark:border-bordeaux-dark/30 dark:bg-bordeaux-dark/10"
+        >
           <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-content-primary dark:text-content-dark-primary">
               Os conteúdos Jindungo são exclusivos. Inicia sessão para os
               explorar.
             </p>
-            <Link
-              href="/login"
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-bordeaux px-4 py-2.5 font-display text-sm font-semibold text-white transition-all duration-200 hover:bg-bordeaux/90 dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90"
-            >
-              Iniciar sessão
+            <Link href="/login">
+              <Button type="button">Iniciar sessão</Button>
             </Link>
           </CardContent>
         </Card>
@@ -262,7 +263,10 @@ export default function ExplorarPage() {
                 href={`/explorar/${content.slug}`}
                 className="block h-full"
               >
-                <Card className="flex h-full flex-col overflow-hidden transition-transform duration-150 hover:-translate-y-0.5">
+                <Card
+                  hoverLift
+                  className="flex h-full flex-col overflow-hidden"
+                >
                   {cardImageUrl ? (
                     <div className="aspect-[16/9] w-full overflow-hidden border-b border-border dark:border-border-dark">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -296,7 +300,7 @@ export default function ExplorarPage() {
                       {content.title}
                     </CardTitle>
                     {content.category && (
-                      <p className="text-xs font-medium uppercase tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
+                      <p className="text-xs font-medium tracking-display text-content-tertiary dark:text-content-dark-tertiary">
                         {content.category.name}
                       </p>
                     )}

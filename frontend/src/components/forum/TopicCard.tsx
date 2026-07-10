@@ -24,7 +24,7 @@ export function TopicCard({ topic, className }: TopicCardProps) {
           </div>
 
           <div className="space-y-2">
-            <h2 className="font-display text-xl font-semibold text-content-primary transition-colors group-hover:text-bordeaux dark:text-content-dark-primary dark:group-hover:text-bordeaux-dark">
+            <h2 className="font-display text-xl font-semibold tracking-display text-content-primary transition-colors group-hover:text-bordeaux dark:text-content-dark-primary dark:group-hover:text-bordeaux-dark">
               {topic.title}
             </h2>
             {topic.description ? (

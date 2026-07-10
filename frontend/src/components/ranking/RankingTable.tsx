@@ -57,7 +57,7 @@ export function RankingTable({ entries }: RankingTableProps) {
 
   return (
     <>
-      <div className="hidden overflow-hidden rounded-2xl border border-border bg-white dark:border-border-dark dark:bg-surface-dark-card md:block">
+      <div className="hidden overflow-hidden rounded-2xl border border-border bg-surface-card dark:border-border-dark dark:bg-surface-dark-card md:block">
         <table className="min-w-full divide-y divide-border dark:divide-border-dark">
           <thead className="bg-surface-secondary dark:bg-surface-dark-secondary">
             <tr>
@@ -66,7 +66,7 @@ export function RankingTable({ entries }: RankingTableProps) {
                   <th
                     key={heading}
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-content-secondary dark:text-content-dark-secondary"
+                    className="px-4 py-3 text-left text-xs font-semibold tracking-display text-content-secondary dark:text-content-dark-secondary"
                   >
                     {heading}
                   </th>
@@ -147,15 +147,15 @@ export function RankingTable({ entries }: RankingTableProps) {
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
+                  <p className="text-xs tracking-display text-content-tertiary dark:text-content-dark-tertiary">
                     Pontuação
                   </p>
-                  <p className="font-display text-xl font-bold text-content-primary dark:text-content-dark-primary">
+                  <p className="font-display text-xl font-bold tracking-display text-content-primary dark:text-content-dark-primary">
                     {entry.best_score}%
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
+                  <p className="text-xs tracking-display text-content-tertiary dark:text-content-dark-tertiary">
                     Acertos
                   </p>
                   <p className="font-semibold text-content-primary dark:text-content-dark-primary">
@@ -163,7 +163,7 @@ export function RankingTable({ entries }: RankingTableProps) {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
+                  <p className="text-xs tracking-display text-content-tertiary dark:text-content-dark-tertiary">
                     Tentativas
                   </p>
                   <p className="font-semibold text-content-primary dark:text-content-dark-primary">
@@ -171,7 +171,7 @@ export function RankingTable({ entries }: RankingTableProps) {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
+                  <p className="text-xs tracking-display text-content-tertiary dark:text-content-dark-tertiary">
                     Tempo
                   </p>
                   <p className="font-mono font-semibold text-content-primary dark:text-content-dark-primary">

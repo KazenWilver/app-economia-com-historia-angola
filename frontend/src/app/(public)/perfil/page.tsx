@@ -130,11 +130,11 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-bordeaux/10 px-3 py-1 text-xs font-semibold text-bordeaux dark:bg-bordeaux-dark/15 dark:text-bordeaux-dark">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-bordeaux/10 px-3 py-1 font-display text-xs font-semibold tracking-display text-bordeaux dark:bg-bordeaux-dark/15 dark:text-bordeaux-dark">
               <User className="h-3.5 w-3.5" strokeWidth={1.5} />
               Perfil
             </div>
-            <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
+            <h1 className="font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary">
               Olá, {getFirstName(user.name)}
             </h1>
             <p className="mt-1 text-content-secondary dark:text-content-dark-secondary">
