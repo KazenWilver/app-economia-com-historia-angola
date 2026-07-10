@@ -123,6 +123,17 @@ export default function ExplorarScreen() {
         </View>
       ) : null}
 
+      {isAuthenticated ? (
+        <Pressable
+          onPress={() => router.push("/jindungo" as never)}
+          style={styles.jindungoLink}
+        >
+          <Text style={styles.jindungoLinkText}>
+            Abrir biblioteca Jindungo →
+          </Text>
+        </Pressable>
+      ) : null}
+
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
       ) : error ? (
@@ -267,6 +278,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: colors.bordeaux,
+  },
+  jindungoLink: {
+    marginBottom: 12,
+    alignSelf: "flex-start",
+  },
+  jindungoLinkText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.goldDark,
   },
   error: {
     marginTop: 16,

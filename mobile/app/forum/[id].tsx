@@ -16,6 +16,7 @@ import type {
 import { Card, Field, PrimaryButton, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/lib/api";
+import { formatPtDate } from "@/lib/format";
 import { colors } from "@/lib/theme";
 
 function ReplyTree({
@@ -40,6 +41,11 @@ function ReplyTree({
         >
           <Card>
             <Text style={styles.replyAuthor}>{reply.user.name}</Text>
+            {formatPtDate(reply.created_at) ? (
+              <Text style={styles.replyDate}>
+                {formatPtDate(reply.created_at)}
+              </Text>
+            ) : null}
             <Text style={styles.replyBody}>{reply.body}</Text>
             <View style={styles.replyActions}>
               <Pressable onPress={() => onReply(reply.id)}>
@@ -338,6 +344,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     color: colors.bordeaux,
+    marginBottom: 2,
+  },
+  replyDate: {
+    fontSize: 11,
+    color: colors.contentTertiary,
     marginBottom: 6,
   },
   replyBody: {

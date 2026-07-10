@@ -4,6 +4,7 @@ import type { CommentItem, CommentsResponse } from "@shared/types";
 import { Field, PrimaryButton } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/lib/api";
+import { formatPtDate } from "@/lib/format";
 import { colors } from "@/lib/theme";
 
 function CommentTree({
@@ -27,6 +28,9 @@ function CommentTree({
           style={[styles.comment, depth > 0 && { marginLeft: 14 }]}
         >
           <Text style={styles.author}>{comment.user.name}</Text>
+          {formatPtDate(comment.created_at) ? (
+            <Text style={styles.date}>{formatPtDate(comment.created_at)}</Text>
+          ) : null}
           <Text style={styles.body}>{comment.body}</Text>
           <View style={styles.actions}>
             <Pressable onPress={() => onReply(comment.id)}>
@@ -216,7 +220,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     color: colors.bordeaux,
-    marginBottom: 4,
+    marginBottom: 2,
+  },
+  date: {
+    fontSize: 11,
+    color: colors.contentTertiary,
+    marginBottom: 6,
   },
   body: {
     fontSize: 14,
