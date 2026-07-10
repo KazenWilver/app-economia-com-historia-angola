@@ -10,6 +10,12 @@
     @apply min-h-full bg-surface text-content-primary antialiased dark:bg-surface-dark dark:text-content-dark-primary;
   }
 
+  h1,
+  h2,
+  .font-display {
+    letter-spacing: -0.02em;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

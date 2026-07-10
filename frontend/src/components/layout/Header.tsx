@@ -20,11 +20,11 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface-card/95 shadow-md backdrop-blur-md dark:border-border-dark dark:bg-surface-dark-card/95">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-surface-card/80 shadow-chrome backdrop-blur-xl dark:border-border-dark/80 dark:bg-surface-dark-card/80">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link
           href="/"
-          className="font-display text-lg font-extrabold text-bordeaux transition-opacity hover:opacity-90 dark:text-bordeaux-dark sm:text-xl"
+          className="font-display text-lg font-extrabold tracking-display text-bordeaux transition-opacity hover:opacity-90 dark:text-bordeaux-dark sm:text-xl"
         >
           <span aria-hidden>🌶️ </span>
           Jindungo
@@ -39,7 +39,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <ThemeToggle />
           {!isLoading && isAuthenticated && user ? (
             <>
@@ -51,7 +51,7 @@ export function Header() {
               </span>
               <Link
                 href="/perfil"
-                className="hidden min-h-11 items-center gap-2 rounded-lg px-3 font-display text-sm font-semibold text-content-primary transition-colors hover:bg-surface-secondary hover:text-bordeaux focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux md:inline-flex dark:text-content-dark-primary dark:hover:bg-surface-dark-secondary dark:hover:text-bordeaux-dark dark:focus-visible:outline-bordeaux-dark"
+                className="hidden min-h-11 items-center gap-2 rounded-full px-3 font-display text-sm font-semibold tracking-display text-content-primary transition-colors hover:bg-surface-secondary hover:text-bordeaux focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux md:inline-flex dark:text-content-dark-primary dark:hover:bg-surface-dark-secondary dark:hover:text-bordeaux-dark dark:focus-visible:outline-bordeaux-dark"
                 aria-label="Perfil"
               >
                 <User className="h-4 w-4" strokeWidth={1.5} />
@@ -70,13 +70,18 @@ export function Header() {
           ) : !isLoading ? (
             <Link
               href="/login"
-              className="hidden min-h-11 items-center rounded-lg bg-bordeaux px-4 font-display text-sm font-semibold text-white transition-colors hover:bg-bordeaux/90 md:inline-flex dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90"
+              className="hidden min-h-11 items-center rounded-full bg-bordeaux px-5 font-display text-sm font-semibold tracking-display text-white transition-colors hover:bg-bordeaux/90 md:inline-flex dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90"
             >
               Entrar
             </Link>
           ) : null}
 
-          <Navigation links={mainNavLinks} isAuthenticated={isAuthenticated} userName={user ? getFirstName(user.name) : null} onLogout={() => void handleLogout()} />
+          <Navigation
+            links={mainNavLinks}
+            isAuthenticated={isAuthenticated}
+            userName={user ? getFirstName(user.name) : null}
+            onLogout={() => void handleLogout()}
+          />
         </div>
       </div>
     </header>

@@ -22,8 +22,8 @@ export function NavLink({ item, className, onClick }: NavLinkProps) {
       onClick={onClick}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "relative font-display text-sm font-semibold transition-colors",
-        "after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:bg-bordeaux after:transition-all after:duration-200",
+        "relative font-display text-sm font-semibold tracking-display transition-colors",
+        "after:absolute after:-bottom-1 after:left-0 after:h-px after:bg-bordeaux after:transition-all after:duration-200",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-bordeaux",
         "dark:after:bg-bordeaux-dark dark:focus-visible:outline-bordeaux-dark",
         isActive

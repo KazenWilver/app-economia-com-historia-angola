@@ -19,7 +19,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       aria-label={isDark ? "Activar modo claro" : "Activar modo escuro"}
       title={isDark ? "Modo claro" : "Modo escuro"}
       className={cn(
-        "inline-flex h-11 w-11 items-center justify-center rounded-lg text-content-secondary transition-colors",
+        "inline-flex h-11 w-11 items-center justify-center rounded-full text-content-secondary transition-colors",
         "hover:bg-surface-secondary hover:text-content-primary",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux",
         "dark:text-content-dark-secondary dark:hover:bg-surface-dark-secondary dark:hover:text-content-dark-primary",

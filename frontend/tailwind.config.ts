@@ -22,9 +22,9 @@ const config: Config = {
         },
         terracotta: "#DD6B20",
         surface: {
-          DEFAULT: "#F8FAFC",
+          DEFAULT: "#F5F5F7",
           card: "#FFFFFF",
-          secondary: "#EDF2F7",
+          secondary: "#EEEEF0",
           dark: "#0F172A",
           "dark-card": "#1E293B",
           "dark-secondary": "#334155",
@@ -38,7 +38,7 @@ const config: Config = {
           "dark-tertiary": "#64748B",
         },
         border: {
-          DEFAULT: "#E2E8F0",
+          DEFAULT: "#E5E5EA",
           dark: "#334155",
         },
         success: {
@@ -59,9 +59,14 @@ const config: Config = {
         display: ["var(--font-plus-jakarta)", "sans-serif"],
         mono: ["var(--font-jetbrains)", "monospace"],
       },
+      letterSpacing: {
+        display: "-0.02em",
+      },
       boxShadow: {
-        "card-hover": "0 12px 24px -8px rgb(138 21 56 / 0.15)",
-        glass: "0 8px 32px rgb(15 23 42 / 0.12)",
+        chrome: "0 1px 0 rgb(15 23 42 / 0.04)",
+        soft: "0 4px 16px -4px rgb(15 23 42 / 0.08)",
+        "card-hover": "0 8px 24px -8px rgb(138 21 56 / 0.12)",
+        glass: "0 8px 32px rgb(15 23 42 / 0.10)",
       },
       keyframes: {
         shimmer: {
@@ -69,7 +74,7 @@ const config: Config = {
           "100%": { backgroundPosition: "200% 0" },
         },
         "scale-in": {
-          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "0%": { opacity: "0", transform: "scale(0.97)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
       },

@@ -60,7 +60,7 @@ export function Navigation({
             <button
               type="button"
               aria-label="Fechar menu"
-              className="absolute inset-0 bg-slate-900/50 dark:bg-slate-950/70"
+              className="absolute inset-0 bg-content-primary/35 backdrop-blur-sm dark:bg-black/55"
               onClick={closeDrawer}
             />
 
@@ -71,14 +71,14 @@ export function Navigation({
               aria-labelledby={titleId}
               className={cn(
                 "absolute right-0 top-0 flex h-dvh w-[min(100%,20rem)] flex-col",
-                "border-l border-border bg-white shadow-xl",
-                "dark:border-border-dark dark:bg-surface-dark-card",
+                "border-l border-border bg-surface-card/95 shadow-glass backdrop-blur-xl",
+                "dark:border-border-dark dark:bg-surface-dark-card/95",
               )}
             >
-              <div className="flex shrink-0 items-center justify-between border-b border-border bg-white px-5 py-4 dark:border-border-dark dark:bg-surface-dark-card">
+              <div className="flex shrink-0 items-center justify-between border-b border-border/80 bg-surface-card/95 px-5 py-4 dark:border-border-dark/80 dark:bg-surface-dark-card/95">
                 <p
                   id={titleId}
-                  className="font-display text-lg font-bold text-bordeaux dark:text-bordeaux-dark"
+                  className="font-display text-lg font-bold tracking-display text-bordeaux dark:text-bordeaux-dark"
                 >
                   Menu
                 </p>
@@ -94,7 +94,7 @@ export function Navigation({
               </div>
 
               <nav
-                className="flex flex-1 flex-col gap-1 overflow-y-auto bg-white px-3 py-4 dark:bg-surface-dark-card"
+                className="flex flex-1 flex-col gap-1 overflow-y-auto bg-surface-card/95 px-3 py-4 dark:bg-surface-dark-card/95"
                 aria-label="Navegação principal"
               >
                 {links.map((item) => (
@@ -103,7 +103,7 @@ export function Navigation({
                     href={item.href}
                     onClick={closeDrawer}
                     className={cn(
-                      "flex min-h-11 items-center rounded-lg px-3 font-display text-base font-semibold",
+                      "flex min-h-11 items-center rounded-full px-3 font-display text-base font-semibold tracking-display",
                       "text-content-primary transition-colors",
                       "hover:bg-surface-secondary hover:text-bordeaux",
                       "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux",
@@ -115,7 +115,7 @@ export function Navigation({
                 ))}
               </nav>
 
-              <div className="shrink-0 space-y-3 border-t border-border bg-white px-5 py-5 dark:border-border-dark dark:bg-surface-dark-card">
+              <div className="shrink-0 space-y-3 border-t border-border/80 bg-surface-card/95 px-5 py-5 dark:border-border-dark/80 dark:bg-surface-dark-card/95">
                 {isAuthenticated ? (
                   <>
                     {userName ? (
@@ -131,7 +131,7 @@ export function Navigation({
                       href="/perfil"
                       onClick={closeDrawer}
                       className={cn(
-                        "inline-flex min-h-11 w-full items-center gap-2 rounded-lg px-3 font-display text-sm font-semibold",
+                        "inline-flex min-h-11 w-full items-center gap-2 rounded-full px-3 font-display text-sm font-semibold tracking-display",
                         "text-content-primary transition-colors",
                         "hover:bg-surface-secondary hover:text-bordeaux",
                         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux",
@@ -160,8 +160,8 @@ export function Navigation({
                     href="/login"
                     onClick={closeDrawer}
                     className={cn(
-                      "inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-bordeaux px-4",
-                      "font-display text-sm font-semibold text-white transition-colors hover:bg-bordeaux/90",
+                      "inline-flex min-h-11 w-full items-center justify-center rounded-full bg-bordeaux px-4",
+                      "font-display text-sm font-semibold tracking-display text-white transition-colors hover:bg-bordeaux/90",
                       "dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90",
                     )}
                   >

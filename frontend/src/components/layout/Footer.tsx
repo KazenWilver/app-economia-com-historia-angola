@@ -3,11 +3,11 @@ import { mainNavLinks } from "@/components/layout/nav-links";
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-border bg-surface-secondary dark:border-border-dark dark:bg-surface-dark-secondary">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <footer className="mt-auto border-t border-border/80 bg-surface dark:border-border-dark/80 dark:bg-surface-dark">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex flex-col items-center gap-6 text-center">
           <div>
-            <p className="font-display text-sm font-semibold text-content-primary dark:text-content-dark-primary">
+            <p className="font-display text-sm font-semibold tracking-display text-content-primary dark:text-content-dark-primary">
               Jindungo — Economia com História, Angola
             </p>
             <p className="mt-2 text-sm text-content-secondary dark:text-content-dark-secondary">
@@ -26,7 +26,7 @@ export function Footer() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="font-display text-sm font-semibold text-content-secondary transition-colors hover:text-bordeaux dark:text-content-dark-secondary dark:hover:text-bordeaux-dark"
+                className="font-display text-sm font-semibold tracking-display text-content-secondary transition-colors hover:text-bordeaux dark:text-content-dark-secondary dark:hover:text-bordeaux-dark"
               >
                 {item.label}
               </Link>

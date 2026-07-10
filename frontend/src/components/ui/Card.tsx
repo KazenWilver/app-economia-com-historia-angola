@@ -6,14 +6,14 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, hoverLift = true, children, ...props }, ref) => {
+  ({ className, hoverLift = false, children, ...props }, ref) => {
     return (
       <div
         ref={ref}
         className={cn(
-          "rounded-xl border border-border bg-surface-card p-6 text-content-primary dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary",
+          "rounded-2xl border border-border bg-surface-card p-6 text-content-primary dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary",
           hoverLift &&
-            "transition-all duration-200 hover:-translate-y-1 hover:border-bordeaux hover:shadow-card-hover dark:hover:border-bordeaux-dark",
+            "transition-colors duration-200 hover:border-bordeaux/40 hover:shadow-soft dark:hover:border-bordeaux-dark/40",
           className,
         )}
         {...props}
@@ -45,7 +45,7 @@ export const CardTitle = forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("font-display text-lg font-bold", className)}
+    className={cn("font-display text-lg font-bold tracking-display", className)}
     {...props}
   />
 ));
@@ -56,7 +56,14 @@ export const CardContent = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("text-sm text-content-secondary dark:text-content-dark-secondary", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn(
+      "text-sm text-content-secondary dark:text-content-dark-secondary",
+      className,
+    )}
+    {...props}
+  />
 ));
 
 CardContent.displayName = "CardContent";

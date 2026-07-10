@@ -12,7 +12,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:
     "bg-bordeaux text-white hover:bg-bordeaux/90 focus-visible:outline-bordeaux dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90 dark:focus-visible:outline-bordeaux-dark",
   secondary:
-    "bg-petrol text-white hover:bg-petrol/90 focus-visible:outline-petrol dark:bg-petrol-dark dark:hover:bg-petrol-dark/90 dark:focus-visible:outline-petrol-dark",
+    "border border-petrol/30 bg-transparent text-petrol hover:bg-petrol/10 focus-visible:outline-petrol dark:border-petrol-dark/40 dark:text-petrol-dark dark:hover:bg-petrol-dark/10 dark:focus-visible:outline-petrol-dark",
   ghost:
     "bg-transparent text-identity-gray hover:bg-surface-secondary hover:text-content-primary focus-visible:outline-bordeaux dark:text-content-dark-secondary dark:hover:bg-surface-dark-secondary dark:hover:text-content-dark-primary dark:focus-visible:outline-bordeaux-dark",
   destructive:
@@ -39,9 +39,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         aria-busy={isLoading}
         className={cn(
-          "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-display text-sm font-semibold transition-all duration-200",
+          "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2.5 font-display text-sm font-semibold tracking-display transition-colors duration-200",
           "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-          "active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100",
+          "active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
           variantStyles[variant],
           className,
         )}

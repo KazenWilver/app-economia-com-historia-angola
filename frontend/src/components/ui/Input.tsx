@@ -18,7 +18,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={inputId}
             className={cn(
-              "font-display text-sm font-semibold text-content-primary dark:text-content-dark-primary",
+              "font-display text-sm font-semibold tracking-display text-content-primary dark:text-content-dark-primary",
               labelClassName,
             )}
           >
@@ -34,8 +34,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
           }
           className={cn(
-            "min-h-11 w-full rounded-lg border border-border bg-surface-card px-3 py-2 text-sm text-content-primary transition-colors duration-200",
-            "placeholder:text-content-tertiary focus:border-bordeaux focus:outline-none focus:ring-2 focus:ring-bordeaux/20",
+            "min-h-11 w-full rounded-xl border border-border bg-surface-card px-3.5 py-2.5 text-sm text-content-primary transition-colors duration-200",
+            "placeholder:text-content-tertiary focus:border-bordeaux focus:outline-none focus:ring-2 focus:ring-bordeaux/15",
             "dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary dark:placeholder:text-content-dark-tertiary",
             "dark:focus:border-bordeaux-dark dark:focus:ring-bordeaux-dark/20",
             error &&

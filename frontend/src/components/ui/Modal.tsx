@@ -56,7 +56,7 @@ export function Modal({
       <button
         type="button"
         aria-label="Fechar modal"
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm dark:bg-slate-950/60"
+        className="absolute inset-0 bg-content-primary/30 backdrop-blur-sm dark:bg-black/55"
         onClick={onClose}
       />
 
@@ -65,15 +65,15 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "relative z-10 w-full max-w-lg animate-scale-in rounded-2xl border border-white/20 bg-white/80 p-6 shadow-glass backdrop-blur-xl",
-          "dark:border-border-dark dark:bg-surface-dark-card/90",
+          "relative z-10 w-full max-w-lg animate-scale-in rounded-2xl border border-border bg-surface-card/95 p-6 shadow-glass backdrop-blur-xl",
+          "dark:border-border-dark dark:bg-surface-dark-card/95",
           className,
         )}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <h2
             id={titleId}
-            className="font-display text-xl font-bold text-content-primary dark:text-content-dark-primary"
+            className="font-display text-xl font-bold tracking-display text-content-primary dark:text-content-dark-primary"
           >
             {title}
           </h2>
@@ -82,7 +82,7 @@ export function Modal({
             type="button"
             variant="ghost"
             aria-label="Fechar"
-            className="min-h-10 px-2 py-2"
+            className="min-h-10 rounded-full px-2 py-2"
             onClick={onClose}
           >
             <X className="h-5 w-5" strokeWidth={1.5} />
