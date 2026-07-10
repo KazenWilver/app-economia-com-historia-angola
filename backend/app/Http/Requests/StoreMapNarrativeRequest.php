@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ValidatesUniqueNarrativeDisplayOrder;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreMapNarrativeRequest extends FormRequest
 {
+    use ValidatesUniqueNarrativeDisplayOrder;
+
     public function authorize(): bool
     {
         return true;
@@ -23,6 +27,13 @@ class StoreMapNarrativeRequest extends FormRequest
             'period' => ['nullable', 'string', 'max:255'],
             'display_order' => ['nullable', 'integer', 'min:0'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $this->validateUniqueDisplayOrder($validator);
+        });
     }
 
     /**

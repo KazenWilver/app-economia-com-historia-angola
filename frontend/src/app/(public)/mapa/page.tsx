@@ -1,11 +1,20 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import {
+  Crosshair,
+  LocateFixed,
+  MapPinned,
+  RotateCcw,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { InteractiveMapHandle } from "@/components/mapa/InteractiveMap";
 import { ProvinceDetailPanel } from "@/components/mapa/ProvinceDetailPanel";
-import type { MapProvinceDetail, MapProvinceDetailResponse } from "@/components/mapa/map-types";
+import type {
+  MapProvinceDetail,
+  MapProvinceDetailResponse,
+} from "@/components/mapa/map-types";
+import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
 import { apiFetch } from "@/lib/api";
@@ -17,58 +26,19 @@ const InteractiveMap = dynamic(
     ),
   {
     ssr: false,
-    loading: () => (
-      <Skeleton className="h-[min(70vh,640px)] w-full rounded-2xl" />
-    ),
+    loading: () => <Skeleton className="h-full w-full" />,
   },
 );
 
-gsap.registerPlugin(useGSAP);
-
 export default function MapPage() {
-  const headerRef = useRef<HTMLDivElement>(null);
-  const mapSectionRef = useRef<HTMLDivElement>(null);
+  const mapHandleRef = useRef<InteractiveMapHandle | null>(null);
   const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(
     null,
   );
   const [province, setProvince] = useState<MapProvinceDetail | null>(null);
   const [isLoadingProvince, setIsLoadingProvince] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useGSAP(
-    () => {
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-
-      if (prefersReducedMotion) {
-        gsap.set(headerRef.current, {
-          opacity: 1,
-          y: 0,
-        });
-        return;
-      }
-
-      // Não animar transform no contentor do Leaflet — causa erros _leaflet_pos.
-      gsap.set(headerRef.current, { opacity: 0, y: 24 });
-      gsap.set(mapSectionRef.current, { opacity: 0 });
-
-      gsap
-        .timeline({ defaults: { ease: "power2.out" } })
-        .to(headerRef.current, { opacity: 1, y: 0, duration: 0.7 })
-        .to(
-          mapSectionRef.current,
-          {
-            opacity: 1,
-            duration: 0.85,
-            ease: "power3.out",
-            clearProps: "transform",
-          },
-          "-=0.35",
-        );
-    },
-    { scope: headerRef },
-  );
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
   const loadProvince = useCallback(async (provinceId: number) => {
     setIsLoadingProvince(true);
@@ -106,43 +76,119 @@ export default function MapPage() {
     setProvince(null);
   };
 
+  const handleReset = () => {
+    mapHandleRef.current?.resetView();
+    setInfoMessage("Vista reposta para Angola.");
+  };
+
+  const handleLocate = () => {
+    if (!navigator.geolocation) {
+      setErrorMessage("A geolocalização não está disponível neste browser.");
+      return;
+    }
+    mapHandleRef.current?.locateUser();
+    setInfoMessage("A obter a tua localização…");
+  };
+
+  const handleCenterSelection = () => {
+    if (selectedProvinceId === null) {
+      setInfoMessage("Selecciona primeiro uma província no mapa.");
+      return;
+    }
+    mapHandleRef.current?.centerOnSelection();
+  };
+
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <header ref={headerRef} className="mb-8 space-y-2">
-        <h1 className="font-display text-3xl font-bold text-content-primary dark:text-content-dark-primary">
-          Mapa Interactivo
-        </h1>
-        <p className="max-w-3xl text-content-secondary dark:text-content-dark-secondary">
-          Explora as 21 províncias de Angola e descobre narrativas sobre economia,
-          história e território. As províncias com narrativas disponíveis aparecem
-          com maior destaque no mapa.
-        </p>
-      </header>
-
-      {errorMessage ? (
-        <div className="mb-6">
-          <Toast
-            variant="error"
-            message={errorMessage}
-            onClose={() => setErrorMessage(null)}
-          />
+    <div className="relative flex h-[calc(100dvh-4.5rem)] min-h-[560px] w-full flex-col bg-surface-secondary dark:bg-surface-dark-secondary">
+      {/* Barra de ferramentas */}
+      <div className="z-[600] flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-card/95 px-4 py-3 backdrop-blur-md dark:border-border-dark dark:bg-surface-dark-card/95 sm:px-6">
+        <div className="min-w-0">
+          <h1 className="font-display text-lg font-bold text-content-primary dark:text-content-dark-primary sm:text-xl">
+            Mapa Interactivo
+          </h1>
+          <p className="truncate text-xs text-content-secondary dark:text-content-dark-secondary sm:text-sm">
+            21 províncias · navegação limitada a Angola
+          </p>
         </div>
-      ) : null}
 
-      <div
-        ref={mapSectionRef}
-        className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]"
-      >
-        <InteractiveMap
-          selectedProvinceId={selectedProvinceId}
-          onProvinceSelect={handleProvinceSelect}
-        />
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            className="min-h-9 px-3 text-xs sm:text-sm"
+            onClick={handleReset}
+          >
+            <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+            <span className="hidden sm:inline">Repor</span>
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            className="min-h-9 px-3 text-xs sm:text-sm"
+            onClick={handleLocate}
+          >
+            <LocateFixed className="h-4 w-4" strokeWidth={1.5} />
+            <span className="hidden sm:inline">Localizar</span>
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="min-h-9 px-3 text-xs sm:text-sm"
+            onClick={handleCenterSelection}
+          >
+            <Crosshair className="h-4 w-4" strokeWidth={1.5} />
+            <span className="hidden sm:inline">Centrar</span>
+          </Button>
+        </div>
+      </div>
 
-        <ProvinceDetailPanel
-          province={province}
-          isLoading={isLoadingProvince}
-          onClose={handleClosePanel}
-        />
+      {(errorMessage || infoMessage) && (
+        <div className="absolute left-1/2 top-20 z-[700] w-[min(92vw,28rem)] -translate-x-1/2 space-y-2">
+          {errorMessage ? (
+            <Toast
+              variant="error"
+              message={errorMessage}
+              onClose={() => setErrorMessage(null)}
+            />
+          ) : null}
+          {infoMessage ? (
+            <Toast
+              variant="info"
+              message={infoMessage}
+              onClose={() => setInfoMessage(null)}
+            />
+          ) : null}
+        </div>
+      )}
+
+      {/* Área principal: mapa + painel */}
+      <div className="relative grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,400px)]">
+        <div className="relative min-h-[45vh] lg:min-h-0">
+          <InteractiveMap
+            selectedProvinceId={selectedProvinceId}
+            onProvinceSelect={handleProvinceSelect}
+            onReady={(handle) => {
+              mapHandleRef.current = handle;
+            }}
+            className="absolute inset-0 h-full w-full rounded-none border-0"
+          />
+
+          <div className="pointer-events-none absolute left-3 top-3 z-[500] flex items-center gap-2 rounded-full border border-border/80 bg-surface-card/90 px-3 py-1.5 text-xs font-medium text-content-secondary shadow-sm backdrop-blur dark:border-border-dark dark:bg-surface-dark-card/90 dark:text-content-dark-secondary">
+            <MapPinned
+              className="h-3.5 w-3.5 text-petrol dark:text-petrol-dark"
+              strokeWidth={1.5}
+            />
+            Foco: Angola
+          </div>
+        </div>
+
+        <aside className="flex min-h-[40vh] flex-col border-t border-border bg-surface-card dark:border-border-dark dark:bg-surface-dark-card lg:min-h-0 lg:border-l lg:border-t-0">
+          <ProvinceDetailPanel
+            province={province}
+            isLoading={isLoadingProvince}
+            onClose={handleClosePanel}
+          />
+        </aside>
       </div>
     </div>
   );

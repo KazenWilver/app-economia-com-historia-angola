@@ -46,12 +46,15 @@ class ProvinceSeederTest extends TestCase
         $this->assertIsArray($geometry);
         $this->assertContains($geometry['type'] ?? null, ['Polygon', 'MultiPolygon']);
 
-        $this->assertDatabaseCount('map_narratives', 21);
+        $this->assertDatabaseCount('map_narratives', 42);
         $this->assertDatabaseHas('map_narratives', [
-            'title' => 'Cabinda: Enclave, petróleo e Mayombe',
+            'title' => 'Cabinda: Simulambuco e identidade Bakongo',
         ]);
         $this->assertDatabaseHas('map_narratives', [
-            'title' => 'Ícolo e Bengo: Catete, Quiminha e berço de Neto',
+            'title' => 'Ícolo e Bengo: Catete e berço de Agostinho Neto',
+        ]);
+        $this->assertDatabaseHas('map_narratives', [
+            'title' => 'Cuando: Lei 14/24 e Terras do Fim do Mundo',
         ]);
     }
 }

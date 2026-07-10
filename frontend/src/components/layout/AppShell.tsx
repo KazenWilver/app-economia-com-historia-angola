@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
+  const isMapRoute = pathname === "/mapa" || pathname.startsWith("/mapa/");
 
   if (isAdminRoute) {
     return <>{children}</>;
@@ -21,10 +22,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         Saltar para o conteúdo
       </a>
       <Header />
-      <main id="conteudo-principal" className="flex flex-1 flex-col" tabIndex={-1}>
+      <main
+        id="conteudo-principal"
+        className={
+          isMapRoute
+            ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+            : "flex flex-1 flex-col"
+        }
+        tabIndex={-1}
+      >
         {children}
       </main>
-      <Footer />
+      {isMapRoute ? null : <Footer />}
     </>
   );
 }

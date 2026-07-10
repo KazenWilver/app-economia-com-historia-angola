@@ -200,4 +200,28 @@ class MapNarrativeTest extends TestCase
 
         $response->assertForbidden();
     }
+
+    public function test_cannot_create_duplicate_display_order_for_same_province(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $province = $this->createProvince();
+        Sanctum::actingAs($admin);
+
+        MapNarrative::query()->create([
+            'province_id' => $province->id,
+            'title' => 'Primeira',
+            'narrative_text' => 'Texto um.',
+            'display_order' => 2,
+        ]);
+
+        $response = $this->postJson('/api/map-narratives', [
+            'province_id' => $province->id,
+            'title' => 'Segunda',
+            'narrative_text' => 'Texto dois.',
+            'display_order' => 2,
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['display_order']);
+    }
 }

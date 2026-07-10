@@ -94,7 +94,9 @@ class MapNarrativeController extends Controller
     public function provinceShow(Province $province): ProvinceResource
     {
         $province->load([
-            'narratives' => fn ($query) => $query->orderBy('display_order'),
+            'narratives' => fn ($query) => $query
+                ->orderBy('display_order')
+                ->orderBy('id'),
         ]);
 
         return new ProvinceResource($province);
@@ -105,6 +107,7 @@ class MapNarrativeController extends Controller
         $narratives = MapNarrative::query()
             ->with('province:id,name,code')
             ->orderBy('display_order')
+            ->orderBy('id')
             ->orderBy('title')
             ->get();
 
