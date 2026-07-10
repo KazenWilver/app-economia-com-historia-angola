@@ -1,6 +1,6 @@
 # Jindungo Mobile — MVP
 
-App Expo (SDK 57) que consome a API Laravel do projecto.
+App Expo (SDK 54) que consome a API Laravel do projecto.
 
 ## Arranque
 
@@ -12,7 +12,7 @@ cd mobile
 npm start
 ```
 
-3. Abre no Expo Go (telemóvel) ou emulador.
+3. Abre no **Expo Go** (SDK 54) no telemóvel — actualiza a app se ainda tiveres uma versão antiga.
 
 ## URL da API
 
