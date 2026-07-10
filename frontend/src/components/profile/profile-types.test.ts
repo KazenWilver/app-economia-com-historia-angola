@@ -13,6 +13,8 @@ describe("validateProfileForm", () => {
       phone: "+244900000000",
       provinceId: "5",
       avatarUrl: "https://cdn.jindungo.ao/avatar.png",
+      avatarFile: null,
+      avatarPreviewUrl: null,
     });
 
     expect(errors).toEqual({});
@@ -25,6 +27,8 @@ describe("validateProfileForm", () => {
       phone: "",
       provinceId: "",
       avatarUrl: "",
+      avatarFile: null,
+      avatarPreviewUrl: null,
     });
 
     expect(errors.name).toBe("O nome é obrigatório.");
@@ -39,6 +43,8 @@ describe("validateProfileForm", () => {
       phone: "",
       provinceId: "1",
       avatarUrl: "avatar-sem-protocolo",
+      avatarFile: null,
+      avatarPreviewUrl: null,
     });
 
     expect(errors.email).toBe("O email deve ser válido.");
@@ -62,6 +68,8 @@ describe("buildProfileFormValues / buildProfileUpdatePayload", () => {
       phone: "",
       provinceId: "3",
       avatarUrl: "",
+      avatarFile: null,
+      avatarPreviewUrl: null,
     });
   });
 
@@ -73,6 +81,8 @@ describe("buildProfileFormValues / buildProfileUpdatePayload", () => {
         phone: " ",
         provinceId: "7",
         avatarUrl: " https://cdn.jindungo.ao/a.png ",
+        avatarFile: null,
+        avatarPreviewUrl: null,
       }),
     ).toEqual({
       name: "Ana",
@@ -80,6 +90,30 @@ describe("buildProfileFormValues / buildProfileUpdatePayload", () => {
       phone: null,
       province_id: 7,
       avatar_url: "https://cdn.jindungo.ao/a.png",
+      avatar: null,
+    });
+  });
+
+  it("prioriza o ficheiro de avatar no payload", () => {
+    const file = new File(["avatar"], "foto.png", { type: "image/png" });
+
+    expect(
+      buildProfileUpdatePayload({
+        name: "Ana",
+        email: "ana@jindungo.ao",
+        phone: "",
+        provinceId: "2",
+        avatarUrl: "https://cdn.jindungo.ao/a.png",
+        avatarFile: file,
+        avatarPreviewUrl: "blob:preview",
+      }),
+    ).toEqual({
+      name: "Ana",
+      email: "ana@jindungo.ao",
+      phone: null,
+      province_id: 2,
+      avatar_url: undefined,
+      avatar: file,
     });
   });
 });

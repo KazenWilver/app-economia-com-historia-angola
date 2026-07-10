@@ -228,15 +228,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("Sessão inválida.");
       }
 
-      const response = await fetch(`${API_URL}/auth/profile`, {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${activeToken}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const hasAvatarFile = payload.avatar instanceof File;
+      let response: Response;
+
+      if (hasAvatarFile) {
+        const formData = new FormData();
+        formData.append("_method", "PUT");
+
+        if (payload.name !== undefined) {
+          formData.append("name", payload.name);
+        }
+        if (payload.email !== undefined) {
+          formData.append("email", payload.email);
+        }
+        if (payload.phone !== undefined) {
+          formData.append("phone", payload.phone ?? "");
+        }
+        if (payload.province_id !== undefined) {
+          formData.append("province_id", String(payload.province_id));
+        }
+        if (payload.avatar_url !== undefined && payload.avatar_url !== null) {
+          formData.append("avatar_url", payload.avatar_url);
+        }
+        formData.append("avatar", payload.avatar as File);
+
+        response = await fetch(`${API_URL}/auth/profile`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${activeToken}`,
+          },
+          body: formData,
+        });
+      } else {
+        const jsonPayload: Record<string, unknown> = { ...payload };
+        delete jsonPayload.avatar;
+
+        response = await fetch(`${API_URL}/auth/profile`, {
+          method: "PUT",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${activeToken}`,
+          },
+          body: JSON.stringify(jsonPayload),
+        });
+      }
 
       if (!response.ok) {
         throw new Error(await parseErrorMessage(response));

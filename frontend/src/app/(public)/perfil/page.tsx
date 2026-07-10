@@ -13,6 +13,7 @@ import {
   type ProfileFormValues,
 } from "@/components/profile/profile-types";
 import type { ProvincesResponse } from "@/components/ranking/ranking-types";
+import { resolveMediaUrl } from "@/components/content/media-player-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/hooks/useAuth";
@@ -81,9 +82,13 @@ export default function ProfilePage() {
   }, [user]);
 
   const avatarPreview = useMemo(() => {
-    const url = values?.avatarUrl.trim();
-    return url || user?.avatar_url || null;
-  }, [user?.avatar_url, values?.avatarUrl]);
+    if (values?.avatarPreviewUrl) {
+      return values.avatarPreviewUrl;
+    }
+
+    const url = values?.avatarUrl.trim() || user?.avatar_url || null;
+    return url ? resolveMediaUrl(url) : null;
+  }, [user?.avatar_url, values?.avatarPreviewUrl, values?.avatarUrl]);
 
   const handleSubmit = async (
     payload: Parameters<typeof updateProfile>[0],

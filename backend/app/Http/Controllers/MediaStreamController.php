@@ -12,7 +12,10 @@ class MediaStreamController extends Controller
     {
         $normalizedPath = str_replace(['..', '\\'], ['', '/'], $path);
 
-        if (! str_starts_with($normalizedPath, 'contents/')) {
+        $isAllowed = str_starts_with($normalizedPath, 'contents/')
+            || str_starts_with($normalizedPath, 'avatars/');
+
+        if (! $isAllowed) {
             abort(404);
         }
 

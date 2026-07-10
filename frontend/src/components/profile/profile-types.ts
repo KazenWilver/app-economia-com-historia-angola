@@ -4,6 +4,8 @@ export interface ProfileFormValues {
   phone: string;
   provinceId: string;
   avatarUrl: string;
+  avatarFile: File | null;
+  avatarPreviewUrl: string | null;
 }
 
 export interface ProfileFormErrors {
@@ -12,8 +14,17 @@ export interface ProfileFormErrors {
   phone?: string;
   provinceId?: string;
   avatarUrl?: string;
+  avatarFile?: string;
   form?: string;
 }
+
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 
 export function buildProfileFormValues(user: {
   name: string;
@@ -28,6 +39,8 @@ export function buildProfileFormValues(user: {
     phone: user.phone ?? "",
     provinceId: user.province_id ? String(user.province_id) : "",
     avatarUrl: user.avatar_url ?? "",
+    avatarFile: null,
+    avatarPreviewUrl: null,
   };
 }
 
@@ -48,8 +61,20 @@ export function validateProfileForm(values: ProfileFormValues): ProfileFormError
     errors.provinceId = "A província é obrigatória.";
   }
 
-  if (values.avatarUrl.trim() && !/^https?:\/\/.+/i.test(values.avatarUrl.trim())) {
+  if (
+    !values.avatarFile &&
+    values.avatarUrl.trim() &&
+    !/^https?:\/\/.+/i.test(values.avatarUrl.trim())
+  ) {
     errors.avatarUrl = "O avatar deve ser um URL válido.";
+  }
+
+  if (values.avatarFile) {
+    if (!ALLOWED_AVATAR_TYPES.has(values.avatarFile.type)) {
+      errors.avatarFile = "A fotografia deve ser JPG, PNG, WEBP ou GIF.";
+    } else if (values.avatarFile.size > MAX_AVATAR_BYTES) {
+      errors.avatarFile = "A fotografia não pode exceder 2 MB.";
+    }
   }
 
   return errors;
@@ -61,6 +86,7 @@ export function buildProfileUpdatePayload(values: ProfileFormValues) {
     email: values.email.trim(),
     phone: values.phone.trim() || null,
     province_id: Number(values.provinceId),
-    avatar_url: values.avatarUrl.trim() || null,
+    avatar_url: values.avatarFile ? undefined : values.avatarUrl.trim() || null,
+    avatar: values.avatarFile,
   };
 }

@@ -4,6 +4,8 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -62,5 +64,61 @@ class ProfileTest extends TestCase
             'phone' => '+244900000099',
             'avatar_url' => 'https://cdn.jindungo.ao/avatars/user.png',
         ]);
+    }
+
+    public function test_profile_update_accepts_avatar_upload(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create([
+            'avatar_url' => null,
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $file = UploadedFile::fake()->create('avatar.jpg', 100, 'image/jpeg');
+
+        $payload = [
+            '_method' => 'PUT',
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $file,
+        ];
+
+        if ($user->province_id !== null) {
+            $payload['province_id'] = $user->province_id;
+        }
+
+        $response = $this->post('/api/auth/profile', $payload, [
+            'Accept' => 'application/json',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('message', 'Perfil actualizado com sucesso.');
+
+        $user->refresh();
+
+        $this->assertNotNull($user->avatar_url);
+        $this->assertStringContainsString('/storage/avatars/', $user->avatar_url);
+        Storage::disk('public')->assertExists('avatars/'.$file->hashName());
+    }
+
+    public function test_profile_update_rejects_non_image_avatar(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
+        $response = $this->post('/api/auth/profile', [
+            '_method' => 'PUT',
+            'avatar' => UploadedFile::fake()->create('documento.pdf', 100, 'application/pdf'),
+        ], [
+            'Accept' => 'application/json',
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['avatar']);
     }
 }

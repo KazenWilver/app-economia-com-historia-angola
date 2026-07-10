@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
+use App\Services\AvatarMediaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        private readonly AvatarMediaService $avatarMediaService,
+    ) {}
+
     /**
      * Devolver o utilizador autenticado.
      */
@@ -26,7 +31,17 @@ class ProfileController extends Controller
     public function update(UpdateProfileRequest $request): JsonResponse
     {
         $user = $request->user();
-        $user->update($request->safe()->only(['name', 'email', 'phone', 'avatar_url', 'province_id']));
+        $data = $request->safe()->only(['name', 'email', 'phone', 'avatar_url', 'province_id']);
+
+        if ($request->hasFile('avatar')) {
+            if ($this->avatarMediaService->isManagedAvatar($user->avatar_url)) {
+                $this->avatarMediaService->delete($user->avatar_url);
+            }
+
+            $data['avatar_url'] = $this->avatarMediaService->store($request->file('avatar'));
+        }
+
+        $user->update($data);
 
         return response()->json([
             'message' => 'Perfil actualizado com sucesso.',

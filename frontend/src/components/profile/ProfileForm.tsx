@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useEffect, useId, useRef } from "react";
+import { ImagePlus } from "lucide-react";
 import { ProvinceSelectField } from "@/components/auth/ProvinceSelectField";
 import type { ProvinceOption } from "@/components/auth/ProvinceSelectField";
 import {
@@ -34,9 +35,58 @@ export function ProfileForm({
   onErrorsChange,
   onSubmit,
 }: ProfileFormProps) {
+  const fileInputId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    };
+  }, []);
+
   const handleFieldChange = (field: keyof ProfileFormValues, value: string) => {
     onChange({ ...values, [field]: value });
     onErrorsChange({ ...errors, [field]: undefined, form: undefined });
+  };
+
+  const handleAvatarFileChange = (file: File | null) => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+
+    if (!file) {
+      onChange({
+        ...values,
+        avatarFile: null,
+        avatarPreviewUrl: null,
+      });
+      onErrorsChange({
+        ...errors,
+        avatarFile: undefined,
+        form: undefined,
+      });
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    objectUrlRef.current = previewUrl;
+
+    onChange({
+      ...values,
+      avatarFile: file,
+      avatarPreviewUrl: previewUrl,
+      avatarUrl: "",
+    });
+    onErrorsChange({
+      ...errors,
+      avatarFile: undefined,
+      avatarUrl: undefined,
+      form: undefined,
+    });
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -99,13 +149,70 @@ export function ProfileForm({
         onChange={(value) => handleFieldChange("provinceId", value)}
       />
 
+      <div className="flex flex-col gap-1.5">
+        <span className="font-display text-sm font-semibold tracking-display text-content-primary dark:text-content-dark-primary">
+          Fotografia de perfil
+        </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            ref={fileInputRef}
+            id={fileInputId}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0] ?? null;
+              handleAvatarFileChange(file);
+            }}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <ImagePlus className="h-4 w-4" strokeWidth={1.5} />
+            Escolher do dispositivo
+          </Button>
+          {values.avatarFile ? (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = "";
+                }
+                handleAvatarFileChange(null);
+              }}
+            >
+              Remover ficheiro
+            </Button>
+          ) : null}
+        </div>
+        {values.avatarFile ? (
+          <p className="text-xs text-content-secondary dark:text-content-dark-secondary">
+            Seleccionado: {values.avatarFile.name}
+          </p>
+        ) : (
+          <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
+            JPG, PNG, WEBP ou GIF · máximo 2 MB
+          </p>
+        )}
+        {errors.avatarFile ? (
+          <p className="text-xs text-error-light dark:text-error-dark" role="alert">
+            {errors.avatarFile}
+          </p>
+        ) : null}
+      </div>
+
       <Input
-        label="URL do avatar"
+        label="URL do avatar (opcional)"
         name="avatarUrl"
         type="url"
         value={values.avatarUrl}
         error={errors.avatarUrl}
         placeholder="https://exemplo.ao/avatar.png"
+        hint="Usado apenas se não escolheres uma fotografia do dispositivo."
+        disabled={Boolean(values.avatarFile)}
         onChange={(event) => handleFieldChange("avatarUrl", event.target.value)}
       />
 

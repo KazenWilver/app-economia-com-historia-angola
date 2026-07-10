@@ -24,6 +24,7 @@ export interface UpdateProfilePayload {
   email?: string;
   phone?: string | null;
   avatar_url?: string | null;
+  avatar?: File | null;
   province_id?: number;
 }
 
