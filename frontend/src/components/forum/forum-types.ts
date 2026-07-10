@@ -33,13 +33,16 @@ export function createTopicPayload(
   forumId: number,
   values: CreateTopicFormValues,
 ) {
+  const isPrivate = values.visibility === "private";
+
   return {
     forum_id: forumId,
     title: values.title.trim(),
     description: values.description.trim() || null,
     theme: values.theme.trim() || null,
-    is_private: values.visibility === "private",
-    is_visible: true,
+    // Privado = só autor/admin; não pode ser is_visible + is_private ao mesmo tempo.
+    is_private: isPrivate,
+    is_visible: !isPrivate,
   };
 }
 

@@ -33,6 +33,7 @@ trait ValidatesTopicVisibility
                 && $this->user()?->role !== 'admin'
                 && $this->has('is_visible')
                 && ! $isVisible
+                && ! $isPrivate
             ) {
                 $validator->errors()->add(
                     'is_visible',

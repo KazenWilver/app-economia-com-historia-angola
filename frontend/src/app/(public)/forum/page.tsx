@@ -32,25 +32,50 @@ export default function ForumPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadTopics = useCallback(async () => {
-    setIsLoading(true);
+  const loadTopics = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setIsLoading(true);
+    }
     setErrorMessage(null);
 
     try {
       const data = await apiFetch<PublicTopicsResponse>("/topics", {
-        cacheTtlMs: 30_000,
+        cacheTtlMs: 15_000,
+        skipCache: Boolean(options?.silent),
       });
       setTopics(data.data);
     } catch {
       setTopics([]);
       setErrorMessage("Não foi possível carregar os debates.");
     } finally {
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     void loadTopics();
+  }, [loadTopics]);
+
+  useEffect(() => {
+    const refresh = () => {
+      void loadTopics({ silent: true });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refresh();
+      }
+    };
+
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [loadTopics]);
 
   return (

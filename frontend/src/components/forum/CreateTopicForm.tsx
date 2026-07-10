@@ -26,7 +26,8 @@ const visibilityOptions: Array<{
   {
     value: "private",
     label: "Privado",
-    description: "Só tu consegues aceder ao tópico pelo link directo.",
+    description:
+      "Fica fora da lista pública. Só tu e a administração conseguem aceder.",
   },
 ];
 

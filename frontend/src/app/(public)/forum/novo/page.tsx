@@ -11,17 +11,51 @@ import {
   parseApiErrorMessage,
   type CreateTopicFormValues,
   type ForumsResponse,
+  type PublicTopic,
   type TopicMutationResponse,
 } from "@/components/forum/forum-types";
 import { useAuth } from "@/hooks/useAuth";
-import { API_URL, buildAuthHeaders, getStoredToken } from "@/lib/api";
+import {
+  API_URL,
+  buildAuthHeaders,
+  getStoredToken,
+  invalidateMemoryCache,
+} from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
+
+function resolveCreatedTopic(payload: unknown): PublicTopic | null {
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+
+  const root = payload as Record<string, unknown>;
+  const topicCandidate = root.topic;
+
+  if (!topicCandidate || typeof topicCandidate !== "object") {
+    return null;
+  }
+
+  const topic = topicCandidate as Record<string, unknown>;
+
+  // Laravel JsonResource pode envolver em { data: {...} }.
+  if (topic.data && typeof topic.data === "object") {
+    return topic.data as PublicTopic;
+  }
+
+  if (typeof topic.id === "number") {
+    return topic as unknown as PublicTopic;
+  }
+
+  return null;
+}
 
 export default function CreateForumTopicPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const [values, setValues] = useState<CreateTopicFormValues>(emptyCreateTopicForm());
+  const [values, setValues] = useState<CreateTopicFormValues>(
+    emptyCreateTopicForm(),
+  );
   const [forumId, setForumId] = useState<number | null>(null);
   const [isLoadingForum, setIsLoadingForum] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,8 +71,15 @@ export default function CreateForumTopicPage() {
       }
 
       const data = (await response.json()) as ForumsResponse;
-      setForumId(data.data[0]?.id ?? null);
+      const firstForumId = data.data[0]?.id ?? null;
+
+      if (firstForumId === null) {
+        setErrorMessage("Não existe nenhum fórum disponível.");
+      }
+
+      setForumId(firstForumId);
     } catch {
+      setForumId(null);
       setErrorMessage("Não foi possível carregar o fórum.");
     } finally {
       setIsLoadingForum(false);
@@ -57,8 +98,13 @@ export default function CreateForumTopicPage() {
 
   const handleSubmit = async () => {
     const token = getStoredToken();
-    if (!token || forumId === null) {
-      setErrorMessage("Não foi possível validar a tua sessão.");
+    if (!token) {
+      setErrorMessage("Sessão expirada. Inicia sessão novamente.");
+      return;
+    }
+
+    if (forumId === null) {
+      setErrorMessage("Não foi possível identificar o fórum. Recarrega a página.");
       return;
     }
 
@@ -76,19 +122,55 @@ export default function CreateForumTopicPage() {
         headers: {
           ...buildAuthHeaders(token),
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(createTopicPayload(forumId, values)),
       });
 
+      const rawPayload: unknown = await response.json().catch(() => null);
+
       if (!response.ok) {
+        if (rawPayload && typeof rawPayload === "object") {
+          const errorBody = rawPayload as {
+            message?: string;
+            errors?: Record<string, string[]>;
+          };
+          if (errorBody.message) {
+            setErrorMessage(errorBody.message);
+            return;
+          }
+          if (errorBody.errors) {
+            setErrorMessage(Object.values(errorBody.errors).flat().join(" "));
+            return;
+          }
+        }
+
         setErrorMessage(await parseApiErrorMessage(response));
         return;
       }
 
-      const data = (await response.json()) as TopicMutationResponse;
-      router.push(`/forum/${data.topic.id}`);
-    } catch {
-      setErrorMessage("Não foi possível criar o tópico.");
+      const topic =
+        resolveCreatedTopic(rawPayload) ??
+        (rawPayload as TopicMutationResponse | null)?.topic ??
+        null;
+
+      if (!topic?.id) {
+        setErrorMessage(
+          "O tópico foi criado, mas a resposta da API foi inválida. Abre o fórum para confirmar.",
+        );
+        invalidateMemoryCache("GET:/topics");
+        router.replace("/forum");
+        return;
+      }
+
+      invalidateMemoryCache("GET:/topics");
+      router.replace(`/forum/${topic.id}`);
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Não foi possível criar o tópico.";
+      setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }

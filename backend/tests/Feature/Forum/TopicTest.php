@@ -190,6 +190,33 @@ class TopicTest extends TestCase
         ]);
     }
 
+    public function test_authenticated_user_can_create_private_topic(): void
+    {
+        $user = User::factory()->create();
+        $forum = $this->createForum();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/topics', [
+            'forum_id' => $forum->id,
+            'title' => 'Debate privado',
+            'description' => 'Só o autor e a administração.',
+            'is_private' => true,
+            'is_visible' => false,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('topic.title', 'Debate privado')
+            ->assertJsonPath('topic.is_private', true)
+            ->assertJsonPath('topic.is_visible', false);
+
+        $this->assertDatabaseHas('topics', [
+            'title' => 'Debate privado',
+            'user_id' => $user->id,
+            'is_private' => true,
+            'is_visible' => false,
+        ]);
+    }
+
     public function test_author_can_hide_own_topic(): void
     {
         $user = User::factory()->create();

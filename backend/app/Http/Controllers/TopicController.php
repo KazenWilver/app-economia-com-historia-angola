@@ -93,10 +93,11 @@ class TopicController extends Controller
         ]);
 
         $topic->load(['forum', 'user']);
+        $topic->loadCount('replies');
 
         return response()->json([
             'message' => 'Tópico criado com sucesso.',
-            'topic' => new TopicResource($topic),
+            'topic' => (new TopicResource($topic))->resolve(),
         ], 201);
     }
 
@@ -104,10 +105,11 @@ class TopicController extends Controller
     {
         $topic->update($request->validated());
         $topic->load(['forum', 'user']);
+        $topic->loadCount('replies');
 
         return response()->json([
             'message' => 'Tópico actualizado com sucesso.',
-            'topic' => new TopicResource($topic),
+            'topic' => (new TopicResource($topic))->resolve(),
         ]);
     }
 

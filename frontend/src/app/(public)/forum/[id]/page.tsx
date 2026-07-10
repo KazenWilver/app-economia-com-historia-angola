@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Lock, Trash2 } from "lucide-react";
+import { AdminConfirmDeleteModal } from "@/components/admin/AdminConfirmDeleteModal";
 import { ReplySection } from "@/components/forum/ReplySection";
 import {
   formatForumDate,
@@ -11,7 +12,7 @@ import {
   type PublicTopicResponse,
 } from "@/components/forum/forum-types";
 import { useAuth } from "@/hooks/useAuth";
-import { API_URL, buildAuthHeaders, getStoredToken } from "@/lib/api";
+import { apiFetch, invalidateMemoryCache } from "@/lib/api";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -27,6 +28,7 @@ export default function ForumTopicDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const loadTopic = useCallback(async () => {
     if (!Number.isFinite(topicId)) {
@@ -39,25 +41,13 @@ export default function ForumTopicDetailPage() {
     setErrorMessage(null);
 
     try {
-      const response = await fetch(`${API_URL}/topics/${topicId}`, {
-        headers: buildAuthHeaders(getStoredToken()),
+      const data = await apiFetch<PublicTopicResponse>(`/topics/${topicId}`, {
+        skipCache: true,
       });
-
-      if (response.status === 404) {
-        setTopic(null);
-        setErrorMessage("Tópico não encontrado ou sem permissão para o ver.");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to load topic");
-      }
-
-      const data = (await response.json()) as PublicTopicResponse;
       setTopic(data.data);
     } catch {
       setTopic(null);
-      setErrorMessage("Não foi possível carregar o tópico.");
+      setErrorMessage("Tópico não encontrado ou sem permissão para o ver.");
     } finally {
       setIsLoading(false);
     }
@@ -73,24 +63,20 @@ export default function ForumTopicDetailPage() {
     (user?.id === topic.author?.id || user?.role === "admin");
 
   const handleDeleteTopic = async () => {
-    const token = getStoredToken();
-    if (!token || !topic) {
+    if (!topic) {
       return;
     }
 
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`${API_URL}/topics/${topic.id}`, {
+      await apiFetch<{ message: string }>(`/topics/${topic.id}`, {
         method: "DELETE",
-        headers: buildAuthHeaders(token),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete topic");
-      }
-
-      router.push("/forum");
+      invalidateMemoryCache("GET:/topics");
+      setIsConfirmOpen(false);
+      router.replace("/forum");
+      router.refresh();
     } catch {
       setErrorMessage("Não foi possível eliminar o tópico.");
       setIsDeleting(false);
@@ -183,8 +169,7 @@ export default function ForumTopicDetailPage() {
                 type="button"
                 variant="ghost"
                 className="text-error-light dark:text-error-dark"
-                isLoading={isDeleting}
-                onClick={() => void handleDeleteTopic()}
+                onClick={() => setIsConfirmOpen(true)}
               >
                 <Trash2 className="h-4 w-4" strokeWidth={1.5} />
                 Eliminar tópico
@@ -195,6 +180,21 @@ export default function ForumTopicDetailPage() {
       </Card>
 
       <ReplySection topicId={topic.id} />
+
+      <AdminConfirmDeleteModal
+        isOpen={isConfirmOpen}
+        title="Eliminar tópico"
+        message="Tens a certeza de que queres eliminar este tópico? As respostas também serão removidas."
+        itemLabel={topic.title}
+        itemDetail={topic.theme ?? undefined}
+        isLoading={isDeleting}
+        onCancel={() => {
+          if (!isDeleting) {
+            setIsConfirmOpen(false);
+          }
+        }}
+        onConfirm={() => void handleDeleteTopic()}
+      />
     </div>
   );
 }

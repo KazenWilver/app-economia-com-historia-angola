@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { MessageSquare, Reply, Trash2 } from "lucide-react";
+import { AdminConfirmDeleteModal } from "@/components/admin/AdminConfirmDeleteModal";
 import type { ForumReply } from "@/components/forum/forum-types";
 import {
   formatForumDate,
@@ -117,6 +118,7 @@ function ReplyThread({
 }: ReplyThreadProps) {
   const [isReplying, setIsReplying] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const canDelete = currentUserId !== null && reply.user.id === currentUserId;
   const nestedReplies = reply.replies ?? [];
 
@@ -124,6 +126,7 @@ function ReplyThread({
     setIsDeleting(true);
     try {
       await onDelete(reply.id);
+      setIsConfirmOpen(false);
     } finally {
       setIsDeleting(false);
     }
@@ -171,8 +174,7 @@ function ReplyThread({
               type="button"
               variant="ghost"
               className="min-h-9 px-3 py-1.5 text-error-light dark:text-error-dark"
-              isLoading={isDeleting}
-              onClick={() => void handleDelete()}
+              onClick={() => setIsConfirmOpen(true)}
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.5} />
               Eliminar
@@ -194,6 +196,21 @@ function ReplyThread({
           </div>
         ) : null}
       </article>
+
+      <AdminConfirmDeleteModal
+        isOpen={isConfirmOpen}
+        title="Eliminar resposta"
+        message="Tens a certeza de que queres eliminar esta resposta?"
+        itemLabel={reply.user.name}
+        itemDetail={reply.body.slice(0, 120)}
+        isLoading={isDeleting}
+        onCancel={() => {
+          if (!isDeleting) {
+            setIsConfirmOpen(false);
+          }
+        }}
+        onConfirm={() => void handleDelete()}
+      />
 
       {nestedReplies.length > 0 ? (
         <div className="mt-4 space-y-4">
