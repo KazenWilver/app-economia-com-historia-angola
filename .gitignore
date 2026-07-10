@@ -57,3 +57,7 @@ docker/mysql/data/
 
 # Ajudas
 ajudas/
+
+# Cursor (regras locais da equipa — não versionar)
+.cursorrules
+.cursor/
