@@ -23,9 +23,9 @@ import {
   Title,
 } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
 import { resolveMediaUrl } from "@/lib/media";
-import { colors } from "@/lib/theme";
 
 type AvatarAsset = {
   uri: string;
@@ -35,6 +35,7 @@ type AvatarAsset = {
 
 export default function PerfilScreen() {
   const { user, token, isAuthenticated, logout, updateProfile } = useAuth();
+  const colors = useThemeColors();
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
@@ -205,7 +206,7 @@ export default function PerfilScreen() {
           subtitle="Inicia sessão para gerir a conta e ver recomendações."
         />
         <Card>
-          <Text style={styles.hint}>
+          <Text style={[styles.hint, { color: colors.contentTertiary }]}>
             Como convidado podes explorar conteúdos públicos, o mapa e o fórum.
             Para quizzes, comentários e perfil completo, cria uma conta.
           </Text>
@@ -220,7 +221,11 @@ export default function PerfilScreen() {
           />
         </Card>
 
-        <Text style={styles.sectionTitle}>Atalhos</Text>
+        <Text
+          style={[styles.sectionTitle, { color: colors.contentPrimary }]}
+        >
+          Atalhos
+        </Text>
         <View style={styles.shortcuts}>
           <PrimaryButton
             label="Explorar conteúdos"
@@ -261,10 +266,19 @@ export default function PerfilScreen() {
       <Card>
         <View style={styles.avatarBlock}>
           {previewUri ? (
-            <Image source={{ uri: previewUri }} style={styles.avatar} />
+            <Image
+              source={{ uri: previewUri }}
+              style={[styles.avatar, { backgroundColor: colors.bordeauxMuted }]}
+            />
           ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarInitial}>
+            <View
+              style={[
+                styles.avatar,
+                styles.avatarPlaceholder,
+                { backgroundColor: colors.bordeauxMuted },
+              ]}
+            >
+              <Text style={[styles.avatarInitial, { color: colors.bordeaux }]}>
                 {(user?.name ?? "?").charAt(0).toUpperCase()}
               </Text>
             </View>
@@ -277,13 +291,11 @@ export default function PerfilScreen() {
 
         <Field
           label="Nome"
-          variant="light"
           value={name}
           onChangeText={setName}
         />
         <Field
           label="Email"
-          variant="light"
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
@@ -291,14 +303,17 @@ export default function PerfilScreen() {
         />
         <Field
           label="Telefone"
-          variant="light"
           keyboardType="phone-pad"
           value={phone}
           onChangeText={setPhone}
           placeholder="Opcional"
         />
 
-        <Text style={styles.provinceLabel}>Província</Text>
+        <Text
+          style={[styles.provinceLabel, { color: colors.contentSecondary }]}
+        >
+          Província
+        </Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -308,13 +323,22 @@ export default function PerfilScreen() {
             onPress={() => setProvinceId("")}
             style={[
               styles.provinceChip,
-              !provinceId && styles.provinceChipActive,
+              {
+                borderColor: !provinceId ? colors.bordeaux : colors.border,
+                backgroundColor: !provinceId
+                  ? colors.bordeauxMuted
+                  : colors.surface,
+              },
             ]}
           >
             <Text
               style={[
                 styles.provinceChipText,
-                !provinceId && styles.provinceChipTextActive,
+                {
+                  color: !provinceId
+                    ? colors.bordeaux
+                    : colors.contentSecondary,
+                },
               ]}
             >
               Nenhuma
@@ -328,13 +352,22 @@ export default function PerfilScreen() {
                 onPress={() => setProvinceId(String(province.id))}
                 style={[
                   styles.provinceChip,
-                  active && styles.provinceChipActive,
+                  {
+                    borderColor: active ? colors.bordeaux : colors.border,
+                    backgroundColor: active
+                      ? colors.bordeauxMuted
+                      : colors.surface,
+                  },
                 ]}
               >
                 <Text
                   style={[
                     styles.provinceChipText,
-                    active && styles.provinceChipTextActive,
+                    {
+                      color: active
+                        ? colors.bordeaux
+                        : colors.contentSecondary,
+                    },
                   ]}
                 >
                   {province.name}
@@ -345,15 +378,21 @@ export default function PerfilScreen() {
         </ScrollView>
 
         {user?.province?.name ? (
-          <Text style={styles.hint}>Actual: {user.province.name}</Text>
+          <Text style={[styles.hint, { color: colors.contentTertiary }]}>
+            Actual: {user.province.name}
+          </Text>
         ) : null}
 
         {user?.role ? (
-          <Text style={styles.role}>Papel: {user.role}</Text>
+          <Text style={[styles.role, { color: colors.contentSecondary }]}>
+            Papel: {user.role}
+          </Text>
         ) : null}
       </Card>
 
-      <Text style={styles.sectionTitle}>Atalhos</Text>
+      <Text style={[styles.sectionTitle, { color: colors.contentPrimary }]}>
+        Atalhos
+      </Text>
       <View style={styles.shortcuts}>
         <PrimaryButton
           label="Explorar conteúdos"
@@ -396,9 +435,13 @@ export default function PerfilScreen() {
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Recomendações</Text>
+      <Text style={[styles.sectionTitle, { color: colors.contentPrimary }]}>
+        Recomendações
+      </Text>
       {recommendations.length === 0 ? (
-        <Text style={styles.hint}>Ainda não tens recomendações.</Text>
+        <Text style={[styles.hint, { color: colors.contentTertiary }]}>
+          Ainda não tens recomendações.
+        </Text>
       ) : (
         recommendations.map((item) => (
           <Card
@@ -410,19 +453,29 @@ export default function PerfilScreen() {
               }
             }}
           >
-            <Text style={styles.recTitle}>{item.content?.title}</Text>
+            <Text style={[styles.recTitle, { color: colors.contentPrimary }]}>
+              {item.content?.title}
+            </Text>
             {item.reason ? (
-              <Text style={styles.hint}>{item.reason}</Text>
+              <Text style={[styles.hint, { color: colors.contentTertiary }]}>
+                {item.reason}
+              </Text>
             ) : null}
-            <Text style={styles.recMeta}>
+            <Text style={[styles.recMeta, { color: colors.petrol }]}>
               {item.is_read ? "Lida" : "Nova"}
             </Text>
           </Card>
         ))
       )}
 
-      {message ? <Text style={styles.success}>{message}</Text> : null}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {message ? (
+        <Text style={[styles.success, { color: colors.success }]}>
+          {message}
+        </Text>
+      ) : null}
+      {error ? (
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+      ) : null}
 
       <View style={styles.actions}>
         <PrimaryButton
@@ -452,7 +505,6 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: colors.bordeauxMuted,
   },
   avatarPlaceholder: {
     alignItems: "center",
@@ -461,12 +513,10 @@ const styles = StyleSheet.create({
   avatarInitial: {
     fontSize: 36,
     fontWeight: "800",
-    color: colors.bordeaux,
   },
   provinceLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.contentSecondary,
     marginBottom: 8,
   },
   provinceRow: {
@@ -475,34 +525,22 @@ const styles = StyleSheet.create({
   },
   provinceChip: {
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  provinceChipActive: {
-    borderColor: colors.bordeaux,
-    backgroundColor: colors.bordeauxMuted,
-  },
   provinceChipText: {
     fontSize: 13,
-    color: colors.contentSecondary,
     fontWeight: "600",
-  },
-  provinceChipTextActive: {
-    color: colors.bordeaux,
   },
   hint: {
     fontSize: 12,
     lineHeight: 18,
-    color: colors.contentTertiary,
     marginBottom: 8,
   },
   role: {
     marginTop: 4,
     fontSize: 13,
-    color: colors.contentSecondary,
     fontWeight: "600",
   },
   sectionTitle: {
@@ -510,32 +548,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 18,
     fontWeight: "800",
-    color: colors.contentPrimary,
   },
   shortcuts: { marginBottom: 8 },
   recTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: colors.contentPrimary,
     marginBottom: 4,
   },
   recMeta: {
     marginTop: 6,
     fontSize: 12,
     fontWeight: "700",
-    color: colors.petrol,
   },
   actions: { marginTop: 8 },
   spacer: { height: 12 },
   success: {
     marginBottom: 8,
-    color: colors.success,
     fontSize: 14,
     fontWeight: "600",
   },
   error: {
     marginBottom: 8,
-    color: colors.error,
     fontSize: 14,
   },
 });

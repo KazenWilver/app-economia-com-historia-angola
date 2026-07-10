@@ -13,9 +13,9 @@ import {
 } from "react-native";
 import type { ProvincesResponse, PublicQuizzesResponse } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
 import { resolveMediaUrl } from "@/lib/media";
-import { colors } from "@/lib/theme";
 
 interface RankingUser {
   id: number;
@@ -79,6 +79,7 @@ function buildRankingsQuery(params: {
 }
 
 export default function RankingScreen() {
+  const colors = useThemeColors();
   const [entries, setEntries] = useState<RankingEntry[]>([]);
   const [quizzes, setQuizzes] = useState<PublicQuizzesResponse["data"]>([]);
   const [provinces, setProvinces] = useState<ProvincesResponse["data"]>([]);
@@ -146,7 +147,9 @@ export default function RankingScreen() {
         subtitle="Melhores pontuações nos quizzes da plataforma."
       />
 
-      <Text style={styles.filterLabel}>Quiz</Text>
+      <Text style={[styles.filterLabel, { color: colors.contentTertiary }]}>
+        Quiz
+      </Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -154,12 +157,23 @@ export default function RankingScreen() {
       >
         <Pressable
           onPress={() => setQuizId("all")}
-          style={[styles.chip, quizId === "all" && styles.chipActive]}
+          style={[
+            styles.chip,
+            {
+              borderColor:
+                quizId === "all" ? colors.bordeaux : colors.border,
+              backgroundColor:
+                quizId === "all" ? colors.bordeauxMuted : colors.surfaceCard,
+            },
+          ]}
         >
           <Text
             style={[
               styles.chipText,
-              quizId === "all" && styles.chipTextActive,
+              {
+                color:
+                  quizId === "all" ? colors.bordeaux : colors.contentSecondary,
+              },
             ]}
           >
             Todos
@@ -171,10 +185,25 @@ export default function RankingScreen() {
             <Pressable
               key={quiz.id}
               onPress={() => setQuizId(String(quiz.id))}
-              style={[styles.chip, active && styles.chipActive]}
+              style={[
+                styles.chip,
+                {
+                  borderColor: active ? colors.bordeaux : colors.border,
+                  backgroundColor: active
+                    ? colors.bordeauxMuted
+                    : colors.surfaceCard,
+                },
+              ]}
             >
               <Text
-                style={[styles.chipText, active && styles.chipTextActive]}
+                style={[
+                  styles.chipText,
+                  {
+                    color: active
+                      ? colors.bordeaux
+                      : colors.contentSecondary,
+                  },
+                ]}
                 numberOfLines={1}
               >
                 {quiz.title}
@@ -184,7 +213,9 @@ export default function RankingScreen() {
         })}
       </ScrollView>
 
-      <Text style={styles.filterLabel}>Província</Text>
+      <Text style={[styles.filterLabel, { color: colors.contentTertiary }]}>
+        Província
+      </Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -192,12 +223,27 @@ export default function RankingScreen() {
       >
         <Pressable
           onPress={() => setProvinceId("all")}
-          style={[styles.chip, provinceId === "all" && styles.chipActive]}
+          style={[
+            styles.chip,
+            {
+              borderColor:
+                provinceId === "all" ? colors.bordeaux : colors.border,
+              backgroundColor:
+                provinceId === "all"
+                  ? colors.bordeauxMuted
+                  : colors.surfaceCard,
+            },
+          ]}
         >
           <Text
             style={[
               styles.chipText,
-              provinceId === "all" && styles.chipTextActive,
+              {
+                color:
+                  provinceId === "all"
+                    ? colors.bordeaux
+                    : colors.contentSecondary,
+              },
             ]}
           >
             Nacional
@@ -209,9 +255,26 @@ export default function RankingScreen() {
             <Pressable
               key={province.id}
               onPress={() => setProvinceId(String(province.id))}
-              style={[styles.chip, active && styles.chipActive]}
+              style={[
+                styles.chip,
+                {
+                  borderColor: active ? colors.bordeaux : colors.border,
+                  backgroundColor: active
+                    ? colors.bordeauxMuted
+                    : colors.surfaceCard,
+                },
+              ]}
             >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
+              <Text
+                style={[
+                  styles.chipText,
+                  {
+                    color: active
+                      ? colors.bordeaux
+                      : colors.contentSecondary,
+                  },
+                ]}
+              >
                 {province.name}
               </Text>
             </Pressable>
@@ -222,9 +285,10 @@ export default function RankingScreen() {
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
       ) : error ? (
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
       ) : (
         <FlatList
+          style={{ flex: 1 }}
           data={entries}
           keyExtractor={(item) => `${item.user.id}-${item.position}`}
           refreshControl={
@@ -256,17 +320,40 @@ export default function RankingScreen() {
                     #{item.position}
                   </Text>
                   {avatar ? (
-                    <Image source={{ uri: avatar }} style={styles.avatar} />
+                    <Image
+                      source={{ uri: avatar }}
+                      style={[
+                        styles.avatar,
+                        { backgroundColor: colors.bordeauxMuted },
+                      ]}
+                    />
                   ) : (
-                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                      <Text style={styles.avatarInitial}>
+                    <View
+                      style={[
+                        styles.avatar,
+                        styles.avatarPlaceholder,
+                        { backgroundColor: colors.bordeauxMuted },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.avatarInitial,
+                          { color: colors.bordeaux },
+                        ]}
+                      >
                         {item.user.name.charAt(0).toUpperCase()}
                       </Text>
                     </View>
                   )}
                   <View style={styles.info}>
-                    <Text style={styles.name}>{item.user.name}</Text>
-                    <Text style={styles.meta}>
+                    <Text
+                      style={[styles.name, { color: colors.contentPrimary }]}
+                    >
+                      {item.user.name}
+                    </Text>
+                    <Text
+                      style={[styles.meta, { color: colors.contentTertiary }]}
+                    >
                       {item.user.province?.name ?? "Sem província"}
                       {" · "}
                       {item.correct_answers}/{item.total_questions}
@@ -274,7 +361,9 @@ export default function RankingScreen() {
                       {formatRankingTime(item.time_spent_seconds)}
                     </Text>
                   </View>
-                  <Text style={styles.score}>{item.best_score}%</Text>
+                  <Text style={[styles.score, { color: colors.petrol }]}>
+                    {item.best_score}%
+                  </Text>
                 </View>
               </Card>
             );
@@ -289,7 +378,6 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.contentTertiary,
     marginBottom: 8,
     textTransform: "uppercase",
   },
@@ -299,24 +387,14 @@ const styles = StyleSheet.create({
   },
   chip: {
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceCard,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
     maxWidth: 180,
   },
-  chipActive: {
-    borderColor: colors.bordeaux,
-    backgroundColor: colors.bordeauxMuted,
-  },
   chipText: {
     fontSize: 13,
-    color: colors.contentSecondary,
     fontWeight: "600",
-  },
-  chipTextActive: {
-    color: colors.bordeaux,
   },
   list: { paddingBottom: 32 },
   row: {
@@ -333,7 +411,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.bordeauxMuted,
   },
   avatarPlaceholder: {
     alignItems: "center",
@@ -342,27 +419,22 @@ const styles = StyleSheet.create({
   avatarInitial: {
     fontSize: 16,
     fontWeight: "800",
-    color: colors.bordeaux,
   },
   info: { flex: 1 },
   name: {
     fontSize: 15,
     fontWeight: "700",
-    color: colors.contentPrimary,
   },
   meta: {
     marginTop: 2,
     fontSize: 12,
-    color: colors.contentTertiary,
   },
   score: {
     fontSize: 16,
     fontWeight: "800",
-    color: colors.petrol,
   },
   error: {
     marginTop: 16,
-    color: colors.error,
     fontSize: 14,
   },
 });

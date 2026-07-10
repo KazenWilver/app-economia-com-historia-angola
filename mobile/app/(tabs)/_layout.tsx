@@ -7,11 +7,13 @@ import {
   User,
 } from "lucide-react-native";
 import { ActivityIndicator, View } from "react-native";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { colors } from "@/lib/theme";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function TabsLayout() {
   const { isLoading } = useAuth();
+  const { colors } = useTheme();
 
   if (isLoading) {
     return (
@@ -31,14 +33,27 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.surfaceDark },
-        headerTintColor: colors.contentDarkPrimary,
-        headerTitleStyle: { fontWeight: "700" },
+        headerStyle: { backgroundColor: colors.surfaceCard },
+        headerTintColor: colors.contentPrimary,
+        headerTitleStyle: { fontWeight: "700", color: colors.contentPrimary },
+        headerShadowVisible: false,
+        headerRight: () => (
+          <View style={{ marginRight: 12 }}>
+            <ThemeToggle size={40} />
+          </View>
+        ),
         tabBarActiveTintColor: colors.bordeaux,
-        tabBarInactiveTintColor: colors.contentSecondary,
+        tabBarInactiveTintColor: colors.contentTertiary,
         tabBarStyle: {
-          backgroundColor: colors.surfaceElevated,
+          backgroundColor: colors.surfaceCard,
           borderTopColor: colors.border,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
         },
       }}
     >

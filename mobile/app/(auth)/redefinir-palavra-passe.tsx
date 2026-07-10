@@ -8,11 +8,13 @@ import {
   Text,
   View,
 } from "react-native";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Field, PrimaryButton } from "@/components/ui";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
 
 export default function RedefinirPalavraPasseScreen() {
+  const colors = useThemeColors();
   const params = useLocalSearchParams<{ email?: string; token?: string }>();
   const [email, setEmail] = useState(params.email ?? "");
   const [token, setToken] = useState(params.token ?? "");
@@ -65,20 +67,35 @@ export default function RedefinirPalavraPasseScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.surface }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.brand}>🌶️ Jindungo</Text>
-        <Text style={styles.title}>Nova palavra-passe</Text>
-        <Text style={styles.subtitle}>
+        <View style={styles.topRow}>
+          <Text style={[styles.brand, { color: colors.bordeaux }]}>
+            🌶️ Jindungo
+          </Text>
+          <ThemeToggle size={40} />
+        </View>
+        <Text style={[styles.title, { color: colors.contentPrimary }]}>
+          Nova palavra-passe
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.contentSecondary }]}>
           Define uma nova palavra-passe para a tua conta.
         </Text>
 
-        <View style={styles.form}>
+        <View
+          style={[
+            styles.form,
+            {
+              backgroundColor: colors.surfaceCard,
+              borderColor: colors.border,
+            },
+          ]}
+        >
           <Field
             label="Email"
             autoCapitalize="none"
@@ -105,8 +122,14 @@ export default function RedefinirPalavraPasseScreen() {
             onChangeText={setPasswordConfirmation}
           />
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          {success ? <Text style={styles.success}>{success}</Text> : null}
+          {error ? (
+            <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+          ) : null}
+          {success ? (
+            <Text style={[styles.success, { color: colors.success }]}>
+              {success}
+            </Text>
+          ) : null}
 
           <PrimaryButton
             label="Guardar"
@@ -114,7 +137,10 @@ export default function RedefinirPalavraPasseScreen() {
             isLoading={submitting}
           />
 
-          <Link href="/(auth)/login" style={styles.link}>
+          <Link
+            href="/(auth)/login"
+            style={[styles.link, { color: colors.bordeaux }]}
+          >
             Voltar ao login
           </Link>
         </View>
@@ -124,53 +150,50 @@ export default function RedefinirPalavraPasseScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.surfaceDark },
+  flex: { flex: 1 },
   container: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 24,
+    padding: 20,
   },
-  brand: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.bordeauxDark,
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
-  title: {
-    fontSize: 32,
+  brand: {
+    fontSize: 26,
     fontWeight: "800",
-    color: colors.contentDarkPrimary,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: "800",
     letterSpacing: -0.5,
   },
   subtitle: {
     marginTop: 8,
-    marginBottom: 28,
+    marginBottom: 24,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.contentDarkSecondary,
   },
   form: {
-    backgroundColor: colors.surfaceDarkCard,
     borderRadius: 20,
-    padding: 20,
+    padding: 18,
     borderWidth: 1,
-    borderColor: colors.borderDark,
   },
   error: {
-    color: colors.error,
     marginBottom: 12,
     fontSize: 13,
   },
   success: {
-    color: colors.success,
     marginBottom: 12,
     fontSize: 13,
     fontWeight: "600",
   },
   link: {
-    marginTop: 18,
+    marginTop: 16,
     textAlign: "center",
-    color: colors.bordeauxDark,
     fontWeight: "700",
   },
 });

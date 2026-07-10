@@ -5,10 +5,6 @@ function getApiOrigin(): string {
   return API_URL.replace(/\/api$/, "");
 }
 
-/**
- * Reescreve URLs com localhost/127.0.0.1 para o host actual da API
- * (necessário no telemóvel quando a BD guarda APP_URL=localhost).
- */
 function rewriteLocalhostHost(url: string): string {
   const match = url.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i);
   if (!match) {
@@ -31,7 +27,6 @@ function extractStoragePath(url: string): string | null {
       return normalized.split("/api/media/")[1] ?? null;
     }
 
-    // Qualquer /storage/ noutro host (ex. Docker interno)
     const storageIdx = normalized.indexOf("/storage/");
     if (storageIdx !== -1) {
       return normalized.slice(storageIdx + "/storage/".length);
@@ -75,12 +70,26 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
   return normalized;
 }
 
+function stripUrlNoise(url: string): string {
+  return url.split("#")[0]?.split("?")[0] ?? url;
+}
+
+/** Como na web: tipo audio/podcast manda; URL só como fallback. */
 export function isAudioType(type: ContentType, url: string): boolean {
   if (type === "audio" || type === "podcast") {
     return true;
   }
 
-  return /\.(mp3|m4a|aac|wav|ogg)(\?|$)/i.test(url);
+  if (type === "video") {
+    return false;
+  }
+
+  const clean = stripUrlNoise(url).toLowerCase();
+  if (/\/(audio|podcast|audios)\//i.test(clean)) {
+    return true;
+  }
+
+  return /\.(mp3|m4a|aac|wav|ogg)$/i.test(clean);
 }
 
 export function isVideoType(type: ContentType, url: string): boolean {
@@ -88,11 +97,25 @@ export function isVideoType(type: ContentType, url: string): boolean {
     return true;
   }
 
-  return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url);
+  if (type === "audio" || type === "podcast") {
+    return false;
+  }
+
+  const clean = stripUrlNoise(url).toLowerCase();
+  if (/\/videos?\//i.test(clean)) {
+    return true;
+  }
+
+  return /\.(mp4|webm|mov|m4v)$/i.test(clean);
 }
 
 export function isImageUrl(url: string): boolean {
-  return /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url) || url.includes("/avatars/");
+  const clean = stripUrlNoise(url).toLowerCase();
+  return (
+    /\.(jpe?g|png|gif|webp)$/i.test(clean) ||
+    clean.includes("/avatars/") ||
+    /\/images?\//i.test(clean)
+  );
 }
 
 export function formatMediaTime(seconds: number): string {

@@ -15,20 +15,23 @@ import type {
 } from "@shared/types";
 import { Card, Field, PrimaryButton, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
 import { formatPtDate } from "@/lib/format";
-import { colors } from "@/lib/theme";
+import type { ThemeColors } from "@/lib/theme";
 
 function ReplyTree({
   replies,
   depth = 0,
   currentUserId,
+  colors,
   onReply,
   onDelete,
 }: {
   replies: ForumReply[];
   depth?: number;
   currentUserId?: number;
+  colors: ThemeColors;
   onReply: (parentId: number) => void;
   onDelete: (replyId: number) => void;
 }) {
@@ -40,20 +43,28 @@ function ReplyTree({
           style={[styles.replyWrap, depth > 0 && { marginLeft: 12 }]}
         >
           <Card>
-            <Text style={styles.replyAuthor}>{reply.user.name}</Text>
+            <Text style={[styles.replyAuthor, { color: colors.bordeaux }]}>
+              {reply.user.name}
+            </Text>
             {formatPtDate(reply.created_at) ? (
-              <Text style={styles.replyDate}>
+              <Text
+                style={[styles.replyDate, { color: colors.contentTertiary }]}
+              >
                 {formatPtDate(reply.created_at)}
               </Text>
             ) : null}
-            <Text style={styles.replyBody}>{reply.body}</Text>
+            <Text style={[styles.replyBody, { color: colors.contentPrimary }]}>
+              {reply.body}
+            </Text>
             <View style={styles.replyActions}>
               <Pressable onPress={() => onReply(reply.id)}>
-                <Text style={styles.replyAction}>Responder</Text>
+                <Text style={[styles.replyAction, { color: colors.petrol }]}>
+                  Responder
+                </Text>
               </Pressable>
               {currentUserId === reply.user.id ? (
                 <Pressable onPress={() => onDelete(reply.id)}>
-                  <Text style={[styles.replyAction, styles.deleteAction]}>
+                  <Text style={[styles.replyAction, { color: colors.error }]}>
                     Eliminar
                   </Text>
                 </Pressable>
@@ -65,6 +76,7 @@ function ReplyTree({
               replies={reply.replies}
               depth={depth + 1}
               currentUserId={currentUserId}
+              colors={colors}
               onReply={onReply}
               onDelete={onDelete}
             />
@@ -78,6 +90,7 @@ function ReplyTree({
 export default function ForumTopicScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, token, isAuthenticated } = useAuth();
+  const colors = useThemeColors();
   const [topic, setTopic] = useState<PublicTopicResponse["data"] | null>(null);
   const [replies, setReplies] = useState<ForumReply[]>([]);
   const [body, setBody] = useState("");
@@ -220,7 +233,7 @@ export default function ForumTopicScreen() {
   if (error && !topic) {
     return (
       <Screen>
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
       </Screen>
     );
   }
@@ -228,15 +241,19 @@ export default function ForumTopicScreen() {
   if (!topic) {
     return (
       <Screen>
-        <Text style={styles.error}>Tópico não encontrado.</Text>
+        <Text style={[styles.error, { color: colors.error }]}>
+          Tópico não encontrado.
+        </Text>
       </Screen>
     );
   }
 
   return (
     <Screen scroll>
-      <Text style={styles.title}>{topic.title}</Text>
-      <Text style={styles.meta}>
+      <Text style={[styles.title, { color: colors.contentPrimary }]}>
+        {topic.title}
+      </Text>
+      <Text style={[styles.meta, { color: colors.contentTertiary }]}>
         {topic.author?.name ?? "Autor"}
         {topic.theme ? ` · ${topic.theme}` : ""}
         {topic.is_private ? " · Privado" : ""}
@@ -253,17 +270,26 @@ export default function ForumTopicScreen() {
       ) : null}
       {topic.description ? (
         <Card>
-          <Text style={styles.description}>{topic.description}</Text>
+          <Text
+            style={[styles.description, { color: colors.contentSecondary }]}
+          >
+            {topic.description}
+          </Text>
         </Card>
       ) : null}
 
-      <Text style={styles.section}>Respostas</Text>
+      <Text style={[styles.section, { color: colors.contentPrimary }]}>
+        Respostas
+      </Text>
       {replies.length === 0 ? (
-        <Text style={styles.empty}>Ainda não há respostas.</Text>
+        <Text style={[styles.empty, { color: colors.contentSecondary }]}>
+          Ainda não há respostas.
+        </Text>
       ) : (
         <ReplyTree
           replies={replies}
           currentUserId={user?.id}
+          colors={colors}
           onReply={(replyId) => {
             setParentId(replyId);
             setError(null);
@@ -276,23 +302,31 @@ export default function ForumTopicScreen() {
         <Card>
           {parentId ? (
             <View style={styles.replyingTo}>
-              <Text style={styles.replyingToText}>
+              <Text
+                style={[
+                  styles.replyingToText,
+                  { color: colors.contentSecondary },
+                ]}
+              >
                 A responder à mensagem #{parentId}
               </Text>
               <Pressable onPress={() => setParentId(null)}>
-                <Text style={styles.replyAction}>Cancelar</Text>
+                <Text style={[styles.replyAction, { color: colors.petrol }]}>
+                  Cancelar
+                </Text>
               </Pressable>
             </View>
           ) : null}
           <Field
             label="A tua resposta"
-            variant="light"
             value={body}
             onChangeText={setBody}
             multiline
             style={styles.replyInput}
           />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? (
+            <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+          ) : null}
           <PrimaryButton
             label={parentId ? "Publicar resposta aninhada" : "Publicar resposta"}
             onPress={() => void handleReply()}
@@ -300,7 +334,9 @@ export default function ForumTopicScreen() {
           />
         </Card>
       ) : (
-        <Text style={styles.empty}>Inicia sessão para responder.</Text>
+        <Text style={[styles.empty, { color: colors.contentSecondary }]}>
+          Inicia sessão para responder.
+        </Text>
       )}
     </Screen>
   );
@@ -310,12 +346,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "800",
-    color: colors.contentPrimary,
     marginBottom: 8,
   },
   meta: {
     fontSize: 13,
-    color: colors.contentTertiary,
     marginBottom: 16,
     fontWeight: "600",
   },
@@ -325,36 +359,30 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 15,
     lineHeight: 22,
-    color: colors.contentSecondary,
   },
   section: {
     marginTop: 8,
     marginBottom: 12,
     fontSize: 18,
     fontWeight: "800",
-    color: colors.contentPrimary,
   },
   empty: {
     marginBottom: 16,
     fontSize: 14,
-    color: colors.contentSecondary,
   },
   replyWrap: { marginBottom: 4 },
   replyAuthor: {
     fontSize: 13,
     fontWeight: "700",
-    color: colors.bordeaux,
     marginBottom: 2,
   },
   replyDate: {
     fontSize: 11,
-    color: colors.contentTertiary,
     marginBottom: 6,
   },
   replyBody: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.contentPrimary,
   },
   replyActions: {
     flexDirection: "row",
@@ -364,10 +392,6 @@ const styles = StyleSheet.create({
   replyAction: {
     fontSize: 13,
     fontWeight: "700",
-    color: colors.petrol,
-  },
-  deleteAction: {
-    color: colors.error,
   },
   replyingTo: {
     flexDirection: "row",
@@ -377,7 +401,6 @@ const styles = StyleSheet.create({
   },
   replyingToText: {
     fontSize: 13,
-    color: colors.contentSecondary,
     fontWeight: "600",
   },
   replyInput: {
@@ -387,7 +410,6 @@ const styles = StyleSheet.create({
   },
   error: {
     marginBottom: 12,
-    color: colors.error,
     fontSize: 14,
   },
 });

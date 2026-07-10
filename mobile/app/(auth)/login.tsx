@@ -8,12 +8,14 @@ import {
   Text,
   View,
 } from "react-native";
-import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Field, PrimaryButton } from "@/components/ui";
-import { colors } from "@/lib/theme";
+import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 
 export default function LoginScreen() {
   const { login, isAuthenticated, isLoading } = useAuth();
+  const colors = useThemeColors();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -45,20 +47,35 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.surface }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.brand}>🌶️ Jindungo</Text>
-        <Text style={styles.title}>Entrar</Text>
-        <Text style={styles.subtitle}>
+        <View style={styles.topRow}>
+          <Text style={[styles.brand, { color: colors.bordeaux }]}>
+            🌶️ Jindungo
+          </Text>
+          <ThemeToggle size={40} />
+        </View>
+        <Text style={[styles.title, { color: colors.contentPrimary }]}>
+          Entrar
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.contentSecondary }]}>
           Continua a explorar a economia e a história de Angola.
         </Text>
 
-        <View style={styles.form}>
+        <View
+          style={[
+            styles.form,
+            {
+              backgroundColor: colors.surfaceCard,
+              borderColor: colors.border,
+            },
+          ]}
+        >
           <Field
             label="Email"
             autoCapitalize="none"
@@ -77,7 +94,9 @@ export default function LoginScreen() {
             placeholder="••••••••"
           />
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? (
+            <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+          ) : null}
 
           <PrimaryButton
             label="Entrar"
@@ -85,15 +104,24 @@ export default function LoginScreen() {
             isLoading={submitting}
           />
 
-          <Link href={"/(auth)/recuperar-palavra-passe" as never} style={styles.link}>
+          <Link
+            href={"/(auth)/recuperar-palavra-passe" as never}
+            style={[styles.link, { color: colors.bordeaux }]}
+          >
             Esqueceste a palavra-passe?
           </Link>
 
-          <Link href="/(auth)/registar" style={styles.link}>
+          <Link
+            href="/(auth)/registar"
+            style={[styles.link, { color: colors.bordeaux }]}
+          >
             Ainda não tens conta? Registar
           </Link>
 
-          <Link href="/(tabs)/explorar" style={styles.guestLink}>
+          <Link
+            href="/(tabs)/explorar"
+            style={[styles.guestLink, { color: colors.contentSecondary }]}
+          >
             Continuar sem conta
           </Link>
         </View>
@@ -103,53 +131,50 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.surfaceDark },
+  flex: { flex: 1 },
   container: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 24,
+    padding: 20,
   },
-  brand: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.bordeauxDark,
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
-  title: {
-    fontSize: 32,
+  brand: {
+    fontSize: 26,
     fontWeight: "800",
-    color: colors.contentDarkPrimary,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: "800",
     letterSpacing: -0.5,
   },
   subtitle: {
     marginTop: 8,
-    marginBottom: 28,
+    marginBottom: 24,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.contentDarkSecondary,
   },
   form: {
-    backgroundColor: colors.surfaceDarkCard,
     borderRadius: 20,
-    padding: 20,
+    padding: 18,
     borderWidth: 1,
-    borderColor: colors.borderDark,
   },
   error: {
-    color: colors.error,
     marginBottom: 12,
     fontSize: 13,
   },
   link: {
-    marginTop: 18,
+    marginTop: 16,
     textAlign: "center",
-    color: colors.bordeauxDark,
     fontWeight: "700",
   },
   guestLink: {
     marginTop: 12,
     textAlign: "center",
-    color: colors.contentDarkSecondary,
     fontWeight: "600",
     fontSize: 13,
   },

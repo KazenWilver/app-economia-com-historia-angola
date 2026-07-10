@@ -3,11 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text } from "react-native";
 import type { MapProvinceDetailResponse } from "@shared/types";
 import { Card, Screen } from "@/components/ui";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
 
 export default function ProvinciaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const colors = useThemeColors();
   const [province, setProvince] = useState<
     MapProvinceDetailResponse["data"] | null
   >(null);
@@ -53,33 +54,45 @@ export default function ProvinciaDetailScreen() {
   if (error || !province) {
     return (
       <Screen>
-        <Text style={styles.error}>{error ?? "Província não encontrada."}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>
+          {error ?? "Província não encontrada."}
+        </Text>
       </Screen>
     );
   }
 
   return (
     <Screen scroll>
-      <Text style={styles.title}>{province.name}</Text>
-      <Text style={styles.meta}>
+      <Text style={[styles.title, { color: colors.contentPrimary }]}>
+        {province.name}
+      </Text>
+      <Text style={[styles.meta, { color: colors.contentSecondary }]}>
         Código {province.code}
         {province.capital ? ` · Capital: ${province.capital}` : ""}
       </Text>
 
       {province.narratives.length === 0 ? (
         <Card>
-          <Text style={styles.empty}>
+          <Text style={[styles.empty, { color: colors.contentSecondary }]}>
             Ainda não há narrativas para esta província.
           </Text>
         </Card>
       ) : (
         province.narratives.map((narrative) => (
           <Card key={narrative.id}>
-            <Text style={styles.narrativeTitle}>{narrative.title}</Text>
+            <Text
+              style={[styles.narrativeTitle, { color: colors.contentPrimary }]}
+            >
+              {narrative.title}
+            </Text>
             {narrative.period ? (
-              <Text style={styles.period}>{narrative.period}</Text>
+              <Text style={[styles.period, { color: colors.bordeaux }]}>
+                {narrative.period}
+              </Text>
             ) : null}
-            <Text style={styles.body}>{narrative.narrative_text}</Text>
+            <Text style={[styles.body, { color: colors.contentSecondary }]}>
+              {narrative.narrative_text}
+            </Text>
           </Card>
         ))
       )}
@@ -91,38 +104,31 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: "800",
-    color: colors.contentPrimary,
     marginBottom: 8,
   },
   meta: {
     fontSize: 14,
-    color: colors.contentSecondary,
     marginBottom: 20,
   },
   narrativeTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: colors.contentPrimary,
     marginBottom: 6,
   },
   period: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.bordeaux,
     marginBottom: 8,
   },
   body: {
     fontSize: 15,
     lineHeight: 22,
-    color: colors.contentSecondary,
   },
   empty: {
     fontSize: 14,
-    color: colors.contentSecondary,
   },
   error: {
     marginTop: 24,
-    color: colors.error,
     fontSize: 14,
   },
 });

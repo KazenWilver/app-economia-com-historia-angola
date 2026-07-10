@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { colors } from "@/lib/theme";
+import { useThemeColors } from "@/contexts/ThemeContext";
 
 function formatLabel(key: string): string {
   return key
@@ -8,6 +8,7 @@ function formatLabel(key: string): string {
 }
 
 export function ContentStatistics({ data }: { data: string }) {
+  const colors = useThemeColors();
   const trimmed = data.trim();
 
   if (!trimmed) {
@@ -26,15 +27,30 @@ export function ContentStatistics({ data }: { data: string }) {
   }
 
   if (!parsed) {
-    return <Text style={styles.raw}>{trimmed}</Text>;
+    return (
+      <Text style={[styles.raw, { color: colors.contentPrimary }]}>
+        {trimmed}
+      </Text>
+    );
   }
 
   return (
     <View style={styles.grid}>
       {Object.entries(parsed).map(([key, value]) => (
-        <View key={key} style={styles.item}>
-          <Text style={styles.label}>{formatLabel(key)}</Text>
-          <Text style={styles.value}>
+        <View
+          key={key}
+          style={[
+            styles.item,
+            {
+              borderColor: colors.border,
+              backgroundColor: colors.surfaceSecondary,
+            },
+          ]}
+        >
+          <Text style={[styles.label, { color: colors.contentTertiary }]}>
+            {formatLabel(key)}
+          </Text>
+          <Text style={[styles.value, { color: colors.bordeaux }]}>
             {typeof value === "object" ? JSON.stringify(value) : String(value)}
           </Text>
         </View>
@@ -49,26 +65,21 @@ const styles = StyleSheet.create({
   },
   item: {
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: 12,
     padding: 12,
-    backgroundColor: colors.surface,
   },
   label: {
     fontSize: 11,
     fontWeight: "700",
-    color: colors.contentTertiary,
     textTransform: "uppercase",
     marginBottom: 4,
   },
   value: {
     fontSize: 16,
     fontWeight: "800",
-    color: colors.bordeaux,
   },
   raw: {
     fontSize: 15,
     lineHeight: 24,
-    color: colors.contentPrimary,
   },
 });

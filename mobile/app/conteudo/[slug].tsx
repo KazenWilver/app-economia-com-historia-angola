@@ -7,12 +7,14 @@ import { ContentMediaPlayer } from "@/components/ContentMediaPlayer";
 import { ContentStatistics } from "@/components/ContentStatistics";
 import { Card, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors, TYPE_LABELS } from "@/lib/theme";
+import { TYPE_LABELS } from "@/lib/theme";
 
 export default function ConteudoDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { token } = useAuth();
+  const colors = useThemeColors();
   const [content, setContent] = useState<ContentDetailResponse["data"] | null>(
     null,
   );
@@ -58,29 +60,47 @@ export default function ConteudoDetailScreen() {
   if (error || !content) {
     return (
       <Screen>
-        <Text style={styles.error}>{error ?? "Conteúdo não encontrado."}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>
+          {error ?? "Conteúdo não encontrado."}
+        </Text>
       </Screen>
     );
   }
 
   return (
     <Screen scroll>
-      <Text style={styles.title}>{content.title}</Text>
+      <Text style={[styles.title, { color: colors.contentPrimary }]}>
+        {content.title}
+      </Text>
 
       <View style={styles.meta}>
-        <Text style={styles.badge}>
+        <Text
+          style={[
+            styles.badge,
+            {
+              color: colors.bordeaux,
+              backgroundColor: colors.bordeauxMuted,
+            },
+          ]}
+        >
           {TYPE_LABELS[content.type] ?? content.type}
         </Text>
         {content.category?.name ? (
-          <Text style={styles.type}>{content.category.name}</Text>
+          <Text style={[styles.type, { color: colors.contentTertiary }]}>
+            {content.category.name}
+          </Text>
         ) : null}
         {content.is_exclusive ? (
-          <Text style={styles.exclusive}>Exclusivo</Text>
+          <Text style={[styles.exclusive, { color: colors.gold }]}>
+            Exclusivo
+          </Text>
         ) : null}
       </View>
 
       {content.author?.name ? (
-        <Text style={styles.author}>Por {content.author.name}</Text>
+        <Text style={[styles.author, { color: colors.contentSecondary }]}>
+          Por {content.author.name}
+        </Text>
       ) : null}
 
       {content.media_url ? (
@@ -90,17 +110,29 @@ export default function ConteudoDetailScreen() {
             contentType={content.type}
           />
         </Card>
-      ) : null}
+      ) : (
+        (content.type === "audio" || content.type === "podcast") && (
+          <Card>
+            <Text style={[styles.author, { color: colors.error }]}>
+              Este conteúdo de áudio não tem ficheiro associado.
+            </Text>
+          </Card>
+        )
+      )}
 
       {content.body ? (
         <Card>
-          <Text style={styles.body}>{content.body}</Text>
+          <Text style={[styles.body, { color: colors.contentPrimary }]}>
+            {content.body}
+          </Text>
         </Card>
       ) : null}
 
       {content.statistics_data ? (
         <Card>
-          <Text style={styles.mediaLabel}>Dados estatísticos</Text>
+          <Text style={[styles.mediaLabel, { color: colors.contentTertiary }]}>
+            Dados estatísticos
+          </Text>
           <ContentStatistics data={content.statistics_data} />
         </Card>
       ) : null}
@@ -114,9 +146,8 @@ export default function ConteudoDetailScreen() {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "800",
-    color: colors.contentPrimary,
     letterSpacing: -0.4,
     marginBottom: 12,
   },
@@ -130,8 +161,6 @@ const styles = StyleSheet.create({
   badge: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.bordeaux,
-    backgroundColor: colors.bordeauxMuted,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
@@ -139,33 +168,27 @@ const styles = StyleSheet.create({
   },
   type: {
     fontSize: 12,
-    color: colors.contentTertiary,
   },
   exclusive: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.gold,
   },
   author: {
     marginBottom: 16,
     fontSize: 14,
-    color: colors.contentSecondary,
   },
   body: {
     fontSize: 15,
     lineHeight: 24,
-    color: colors.contentPrimary,
   },
   mediaLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "700",
-    color: colors.contentTertiary,
     marginBottom: 8,
     textTransform: "uppercase",
   },
   error: {
     marginTop: 24,
-    color: colors.error,
     fontSize: 14,
   },
 });

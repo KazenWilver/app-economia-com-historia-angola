@@ -6,18 +6,24 @@ import {
   Text,
   View,
 } from "react-native";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { colors } from "@/lib/theme";
+import { useThemeColors } from "@/contexts/ThemeContext";
 
 export default function IndexScreen() {
   const { isAuthenticated, isLoading } = useAuth();
+  const colors = useThemeColors();
 
   if (isLoading) {
     return (
-      <View style={styles.splash}>
-        <Text style={styles.brand}>🌶️ Jindungo</Text>
-        <Text style={styles.tagline}>Economia com História – Angola</Text>
-        <ActivityIndicator color={colors.bordeauxDark} style={styles.loader} />
+      <View style={[styles.splash, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.brand, { color: colors.bordeaux }]}>
+          🌶️ Jindungo
+        </Text>
+        <Text style={[styles.tagline, { color: colors.contentSecondary }]}>
+          Economia com História – Angola
+        </Text>
+        <ActivityIndicator color={colors.bordeaux} style={styles.loader} />
       </View>
     );
   }
@@ -27,30 +33,49 @@ export default function IndexScreen() {
   }
 
   return (
-    <View style={styles.splash}>
-      <Text style={styles.brand}>🌶️ Jindungo</Text>
-      <Text style={styles.tagline}>Economia com História – Angola</Text>
-      <Text style={styles.copy}>
+    <View style={[styles.splash, { backgroundColor: colors.surface }]}>
+      <View style={styles.topRow}>
+        <View />
+        <ThemeToggle size={40} />
+      </View>
+      <Text style={[styles.brand, { color: colors.bordeaux }]}>
+        🌶️ Jindungo
+      </Text>
+      <Text style={[styles.tagline, { color: colors.contentSecondary }]}>
+        Economia com História – Angola
+      </Text>
+      <Text style={[styles.copy, { color: colors.contentSecondary }]}>
         Explora conteúdos, quizzes, o fórum e o mapa interactivo das
         províncias.
       </Text>
 
       <Pressable
-        style={styles.primaryCta}
+        style={[styles.primaryCta, { backgroundColor: colors.bordeaux }]}
         onPress={() => router.push("/(tabs)/explorar")}
       >
-        <Text style={styles.primaryCtaText}>Explorar</Text>
+        <Text style={[styles.primaryCtaText, { color: colors.white }]}>
+          Explorar
+        </Text>
       </Pressable>
 
       <Pressable
-        style={styles.secondaryCta}
+        style={[
+          styles.secondaryCta,
+          { borderColor: colors.border, backgroundColor: colors.surfaceCard },
+        ]}
         onPress={() => router.push("/(auth)/login")}
       >
-        <Text style={styles.secondaryCtaText}>Entrar</Text>
+        <Text
+          style={[styles.secondaryCtaText, { color: colors.contentPrimary }]}
+        >
+          Entrar
+        </Text>
       </Pressable>
 
       <Pressable onPress={() => router.push("/(auth)/registar")}>
-        <Text style={styles.link}>Criar conta</Text>
+        <Text style={[styles.link, { color: colors.bordeaux }]}>
+          Criar conta
+        </Text>
       </Pressable>
     </View>
   );
@@ -59,21 +84,26 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   splash: {
     flex: 1,
-    backgroundColor: colors.surfaceDark,
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
   },
+  topRow: {
+    position: "absolute",
+    top: 56,
+    right: 20,
+    left: 20,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
   brand: {
-    fontSize: 36,
+    fontSize: 34,
     fontWeight: "800",
-    color: colors.bordeauxDark,
     letterSpacing: -0.5,
   },
   tagline: {
     marginTop: 12,
     fontSize: 16,
-    color: colors.contentDarkSecondary,
     textAlign: "center",
   },
   copy: {
@@ -82,7 +112,6 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.contentDarkSecondary,
     textAlign: "center",
   },
   loader: {
@@ -93,13 +122,11 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     minHeight: 48,
     borderRadius: 999,
-    backgroundColor: colors.bordeaux,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
   },
   primaryCtaText: {
-    color: colors.white,
     fontSize: 16,
     fontWeight: "700",
   },
@@ -109,18 +136,15 @@ const styles = StyleSheet.create({
     minHeight: 48,
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: colors.borderDark,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 18,
   },
   secondaryCtaText: {
-    color: colors.contentDarkPrimary,
     fontSize: 16,
     fontWeight: "700",
   },
   link: {
-    color: colors.bordeauxDark,
     fontWeight: "700",
     fontSize: 14,
   },

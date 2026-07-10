@@ -4,11 +4,12 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { ForumsResponse, TopicMutationResponse } from "@shared/types";
 import { Card, Field, PrimaryButton, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
 
 export default function NovoTopicoScreen() {
   const { token, isAuthenticated } = useAuth();
+  const colors = useThemeColors();
   const [forumId, setForumId] = useState<number | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -42,7 +43,9 @@ export default function NovoTopicoScreen() {
   if (!isAuthenticated) {
     return (
       <Screen>
-        <Text style={styles.error}>Inicia sessão para criar um tópico.</Text>
+        <Text style={[styles.error, { color: colors.error }]}>
+          Inicia sessão para criar um tópico.
+        </Text>
         <PrimaryButton
           label="Ir para login"
           onPress={() => router.replace("/(auth)/login")}
@@ -94,17 +97,17 @@ export default function NovoTopicoScreen() {
 
   return (
     <Screen scroll>
-      <Text style={styles.title}>Novo tópico</Text>
+      <Text style={[styles.title, { color: colors.contentPrimary }]}>
+        Novo tópico
+      </Text>
       <Card>
         <Field
           label="Título"
-          variant="light"
           value={title}
           onChangeText={setTitle}
         />
         <Field
           label="Descrição"
-          variant="light"
           value={description}
           onChangeText={setDescription}
           multiline
@@ -112,7 +115,6 @@ export default function NovoTopicoScreen() {
         />
         <Field
           label="Tema (opcional)"
-          variant="light"
           value={theme}
           onChangeText={setTheme}
         />
@@ -120,16 +122,36 @@ export default function NovoTopicoScreen() {
           onPress={() => setIsPrivate((value) => !value)}
           style={styles.privacyRow}
         >
-          <View style={[styles.checkbox, isPrivate && styles.checkboxOn]} />
+          <View
+            style={[
+              styles.checkbox,
+              {
+                borderColor: colors.border,
+                backgroundColor: colors.surfaceCard,
+              },
+              isPrivate && {
+                backgroundColor: colors.bordeaux,
+                borderColor: colors.bordeaux,
+              },
+            ]}
+          />
           <View style={styles.privacyText}>
-            <Text style={styles.privacyTitle}>Tópico privado</Text>
-            <Text style={styles.privacyHint}>
+            <Text
+              style={[styles.privacyTitle, { color: colors.contentPrimary }]}
+            >
+              Tópico privado
+            </Text>
+            <Text
+              style={[styles.privacyHint, { color: colors.contentTertiary }]}
+            >
               Só tu e administradores o conseguem ver. Não aparece na lista
               pública.
             </Text>
           </View>
         </Pressable>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? (
+          <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+        ) : null}
         <View style={styles.actions}>
           <PrimaryButton
             label="Publicar"
@@ -146,7 +168,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: "800",
-    color: colors.contentPrimary,
     marginBottom: 16,
   },
   multiline: {
@@ -165,30 +186,21 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: colors.border,
     marginTop: 2,
-    backgroundColor: colors.surfaceCard,
-  },
-  checkboxOn: {
-    backgroundColor: colors.bordeaux,
-    borderColor: colors.bordeaux,
   },
   privacyText: { flex: 1 },
   privacyTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: colors.contentPrimary,
   },
   privacyHint: {
     marginTop: 4,
     fontSize: 12,
     lineHeight: 18,
-    color: colors.contentTertiary,
   },
   actions: { marginTop: 4 },
   error: {
     marginBottom: 12,
-    color: colors.error,
     fontSize: 14,
   },
 });

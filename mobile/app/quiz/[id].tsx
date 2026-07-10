@@ -18,8 +18,8 @@ import type {
 } from "@shared/types";
 import { Card, PrimaryButton, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
 
 interface QuizAttemptResponse {
   message: string;
@@ -48,6 +48,7 @@ function formatTimer(seconds: number): string {
 export default function QuizPlayScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, token, isAuthenticated, updateProfile } = useAuth();
+  const colors = useThemeColors();
   const [quiz, setQuiz] = useState<PublicQuiz | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +71,144 @@ export default function QuizPlayScreen() {
   const [savingProvince, setSavingProvince] = useState(false);
   const submitLockRef = useRef(false);
   const timeExpiredRef = useRef(false);
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        title: {
+          fontSize: 26,
+          fontWeight: "800",
+          color: colors.contentPrimary,
+          marginBottom: 12,
+        },
+        description: {
+          fontSize: 15,
+          lineHeight: 22,
+          color: colors.contentSecondary,
+          marginBottom: 12,
+        },
+        meta: {
+          fontSize: 13,
+          fontWeight: "600",
+          color: colors.contentTertiary,
+          marginBottom: 16,
+        },
+        actions: { marginTop: 8 },
+        progressRow: {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 12,
+        },
+        timer: {
+          fontSize: 16,
+          fontWeight: "800",
+          color: colors.bordeaux,
+          fontVariant: ["tabular-nums"],
+        },
+        question: {
+          fontSize: 18,
+          fontWeight: "700",
+          color: colors.contentPrimary,
+          marginBottom: 16,
+          lineHeight: 26,
+        },
+        option: {
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.surfaceCard,
+          borderRadius: 14,
+          padding: 14,
+          marginBottom: 10,
+        },
+        optionSelected: {
+          borderColor: colors.bordeaux,
+          backgroundColor: colors.bordeauxMuted,
+        },
+        optionCorrect: {
+          borderColor: colors.success,
+          backgroundColor: "#DCFCE7",
+        },
+        optionWrong: {
+          borderColor: colors.error,
+          backgroundColor: "#FEE2E2",
+        },
+        optionText: {
+          fontSize: 15,
+          color: colors.contentPrimary,
+        },
+        optionTextSelected: {
+          fontWeight: "700",
+          color: colors.bordeaux,
+        },
+        navRow: {
+          marginTop: 16,
+          gap: 10,
+        },
+        score: {
+          fontSize: 40,
+          fontWeight: "800",
+          color: colors.bordeaux,
+        },
+        answerLine: {
+          fontSize: 14,
+          marginTop: 6,
+          color: colors.contentSecondary,
+        },
+        correct: { color: colors.success, fontWeight: "700" },
+        incorrect: { color: colors.error, fontWeight: "700" },
+        explanation: {
+          marginTop: 8,
+          fontSize: 13,
+          lineHeight: 20,
+          color: colors.contentTertiary,
+        },
+        sectionTitle: {
+          marginTop: 8,
+          marginBottom: 8,
+          fontSize: 18,
+          fontWeight: "800",
+          color: colors.contentPrimary,
+        },
+        recLink: {
+          marginTop: 8,
+          fontSize: 13,
+          fontWeight: "700",
+          color: colors.bordeaux,
+        },
+        error: {
+          marginTop: 12,
+          marginBottom: 12,
+          color: colors.error,
+          fontSize: 14,
+        },
+        provinceRow: {
+          gap: 8,
+          paddingBottom: 4,
+        },
+        provinceChip: {
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.surface,
+          borderRadius: 999,
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+        },
+        provinceChipActive: {
+          borderColor: colors.bordeaux,
+          backgroundColor: colors.bordeauxMuted,
+        },
+        provinceChipText: {
+          fontSize: 13,
+          color: colors.contentSecondary,
+          fontWeight: "600",
+        },
+        provinceChipTextActive: {
+          color: colors.bordeaux,
+        },
+      }),
+    [colors],
+  );
 
   const questions = useMemo(() => quiz?.questions ?? [], [quiz]);
   const needsProvince = isAuthenticated && !user?.province_id;
@@ -571,137 +710,3 @@ export default function QuizPlayScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 26,
-    fontWeight: "800",
-    color: colors.contentPrimary,
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.contentSecondary,
-    marginBottom: 12,
-  },
-  meta: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.contentTertiary,
-    marginBottom: 16,
-  },
-  actions: { marginTop: 8 },
-  progressRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  timer: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: colors.bordeaux,
-    fontVariant: ["tabular-nums"],
-  },
-  question: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.contentPrimary,
-    marginBottom: 16,
-    lineHeight: 26,
-  },
-  option: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceCard,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-  },
-  optionSelected: {
-    borderColor: colors.bordeaux,
-    backgroundColor: colors.bordeauxMuted,
-  },
-  optionCorrect: {
-    borderColor: colors.success,
-    backgroundColor: "#DCFCE7",
-  },
-  optionWrong: {
-    borderColor: colors.error,
-    backgroundColor: "#FEE2E2",
-  },
-  optionText: {
-    fontSize: 15,
-    color: colors.contentPrimary,
-  },
-  optionTextSelected: {
-    fontWeight: "700",
-    color: colors.bordeaux,
-  },
-  navRow: {
-    marginTop: 16,
-    gap: 10,
-  },
-  score: {
-    fontSize: 40,
-    fontWeight: "800",
-    color: colors.bordeaux,
-  },
-  answerLine: {
-    fontSize: 14,
-    marginTop: 6,
-    color: colors.contentSecondary,
-  },
-  correct: { color: colors.success, fontWeight: "700" },
-  incorrect: { color: colors.error, fontWeight: "700" },
-  explanation: {
-    marginTop: 8,
-    fontSize: 13,
-    lineHeight: 20,
-    color: colors.contentTertiary,
-  },
-  sectionTitle: {
-    marginTop: 8,
-    marginBottom: 8,
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.contentPrimary,
-  },
-  recLink: {
-    marginTop: 8,
-    fontSize: 13,
-    fontWeight: "700",
-    color: colors.bordeaux,
-  },
-  error: {
-    marginTop: 12,
-    marginBottom: 12,
-    color: colors.error,
-    fontSize: 14,
-  },
-  provinceRow: {
-    gap: 8,
-    paddingBottom: 4,
-  },
-  provinceChip: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  provinceChipActive: {
-    borderColor: colors.bordeaux,
-    backgroundColor: colors.bordeauxMuted,
-  },
-  provinceChipText: {
-    fontSize: 13,
-    color: colors.contentSecondary,
-    fontWeight: "600",
-  },
-  provinceChipTextActive: {
-    color: colors.bordeaux,
-  },
-});

@@ -15,8 +15,8 @@ import {
   type ProvincePolygon,
 } from "@/components/ProvinceMap";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
 
 interface ProvincesMapResponse {
   data: MapProvinceSummary[];
@@ -94,6 +94,7 @@ function geometryToRings(geometry: GeoJsonFeature["geometry"]): LatLng[][] {
 }
 
 export default function MapaScreen() {
+  const colors = useThemeColors();
   const [items, setItems] = useState<MapProvinceSummary[]>([]);
   const [polygons, setPolygons] = useState<ProvincePolygon[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -173,7 +174,7 @@ export default function MapaScreen() {
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
       ) : error ? (
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
       ) : (
         <>
           <ProvinceMap
@@ -185,6 +186,7 @@ export default function MapaScreen() {
           />
 
           <FlatList
+            style={{ flex: 1 }}
             data={items}
             keyExtractor={(item) => String(item.id)}
             refreshControl={
@@ -204,8 +206,14 @@ export default function MapaScreen() {
                   router.push(`/provincia/${item.id}` as never)
                 }
               >
-                <Text style={styles.cardTitle}>{item.name}</Text>
-                <Text style={styles.cardBody}>
+                <Text
+                  style={[styles.cardTitle, { color: colors.contentPrimary }]}
+                >
+                  {item.name}
+                </Text>
+                <Text
+                  style={[styles.cardBody, { color: colors.contentSecondary }]}
+                >
                   {item.capital ? `Capital: ${item.capital}` : item.code}
                   {typeof item.narratives_count === "number"
                     ? ` · ${item.narratives_count} narrativas`
@@ -225,16 +233,13 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: colors.contentPrimary,
     marginBottom: 4,
   },
   cardBody: {
     fontSize: 13,
-    color: colors.contentSecondary,
   },
   error: {
     marginTop: 16,
-    color: colors.error,
     fontSize: 14,
   },
 });

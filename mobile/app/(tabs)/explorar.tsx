@@ -14,9 +14,10 @@ import {
 import type { ContentItem, ContentsResponse, ContentType } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
 import { isImageUrl, resolveMediaUrl } from "@/lib/media";
-import { colors, TYPE_LABELS } from "@/lib/theme";
+import { TYPE_LABELS } from "@/lib/theme";
 
 const FILTERS: { value: ContentType | null; label: string }[] = [
   { value: null, label: "Todos" },
@@ -29,6 +30,7 @@ const FILTERS: { value: ContentType | null; label: string }[] = [
 
 export default function ExplorarScreen() {
   const { token, isAuthenticated } = useAuth();
+  const colors = useThemeColors();
   const [items, setItems] = useState<ContentItem[]>([]);
   const [activeFilter, setActiveFilter] = useState<ContentType | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -102,9 +104,22 @@ export default function ExplorarScreen() {
             <Pressable
               key={filter.label}
               onPress={() => setActiveFilter(filter.value)}
-              style={[styles.chip, active && styles.chipActive]}
+              style={[
+                styles.chip,
+                {
+                  borderColor: active ? colors.bordeaux : colors.border,
+                  backgroundColor: active
+                    ? colors.bordeaux
+                    : colors.surfaceCard,
+                },
+              ]}
             >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
+              <Text
+                style={[
+                  styles.chipText,
+                  { color: active ? colors.white : colors.contentSecondary },
+                ]}
+              >
                 {filter.label}
               </Text>
             </Pressable>
@@ -113,12 +128,22 @@ export default function ExplorarScreen() {
       </ScrollView>
 
       {!isAuthenticated && activeFilter === "jindungo" ? (
-        <View style={styles.guestBanner}>
-          <Text style={styles.guestText}>
+        <View
+          style={[
+            styles.guestBanner,
+            {
+              borderColor: colors.border,
+              backgroundColor: colors.bordeauxMuted,
+            },
+          ]}
+        >
+          <Text style={[styles.guestText, { color: colors.contentSecondary }]}>
             Os conteúdos Jindungo são exclusivos. Inicia sessão para os ver.
           </Text>
           <Pressable onPress={() => router.push("/(auth)/login" as never)}>
-            <Text style={styles.guestLink}>Entrar →</Text>
+            <Text style={[styles.guestLink, { color: colors.bordeaux }]}>
+              Entrar →
+            </Text>
           </Pressable>
         </View>
       ) : null}
@@ -128,7 +153,7 @@ export default function ExplorarScreen() {
           onPress={() => router.push("/jindungo" as never)}
           style={styles.jindungoLink}
         >
-          <Text style={styles.jindungoLinkText}>
+          <Text style={[styles.jindungoLinkText, { color: colors.goldAccent }]}>
             Abrir biblioteca Jindungo →
           </Text>
         </Pressable>
@@ -137,9 +162,10 @@ export default function ExplorarScreen() {
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
       ) : error ? (
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
       ) : (
         <FlatList
+          style={styles.list}
           data={visibleItems}
           keyExtractor={(item) => String(item.id)}
           refreshControl={
@@ -152,9 +178,9 @@ export default function ExplorarScreen() {
           ListEmptyComponent={
             <EmptyState message="Ainda não há conteúdos neste filtro." />
           }
-          contentContainerStyle={styles.list}
+          contentContainerStyle={styles.listContent}
           renderItem={({ item }) => {
-            const imageUri =
+            const thumb =
               item.media_url && isImageUrl(item.media_url)
                 ? resolveMediaUrl(item.media_url)
                 : null;
@@ -165,24 +191,54 @@ export default function ExplorarScreen() {
                   router.push(`/conteudo/${item.slug}` as never)
                 }
               >
-                {imageUri ? (
-                  <Image source={{ uri: imageUri }} style={styles.thumb} />
+                {thumb ? (
+                  <Image
+                    source={{ uri: thumb }}
+                    style={[
+                      styles.thumb,
+                      { backgroundColor: colors.bordeauxMuted },
+                    ]}
+                  />
                 ) : null}
-                <Text style={styles.cardTitle}>{item.title}</Text>
-                {item.excerpt ? (
-                  <Text style={styles.cardBody} numberOfLines={3}>
-                    {item.excerpt}
+                <Text
+                  style={[styles.cardTitle, { color: colors.contentPrimary }]}
+                >
+                  {item.title}
+                </Text>
+                {item.body ? (
+                  <Text
+                    style={[styles.cardBody, { color: colors.contentSecondary }]}
+                    numberOfLines={3}
+                  >
+                    {item.body}
                   </Text>
                 ) : null}
                 <View style={styles.meta}>
-                  <Text style={styles.badge}>
+                  <Text
+                    style={[
+                      styles.badge,
+                      {
+                        color: colors.bordeaux,
+                        backgroundColor: colors.bordeauxMuted,
+                      },
+                    ]}
+                  >
                     {TYPE_LABELS[item.type] ?? item.type}
                   </Text>
                   {item.category?.name ? (
-                    <Text style={styles.metaText}>{item.category.name}</Text>
+                    <Text
+                      style={[
+                        styles.metaText,
+                        { color: colors.contentTertiary },
+                      ]}
+                    >
+                      {item.category.name}
+                    </Text>
                   ) : null}
                   {item.is_exclusive ? (
-                    <Text style={styles.exclusive}>Exclusivo</Text>
+                    <Text style={[styles.exclusive, { color: colors.gold }]}>
+                      Exclusivo
+                    </Text>
                   ) : null}
                 </View>
               </Card>
@@ -195,44 +251,34 @@ export default function ExplorarScreen() {
 }
 
 const styles = StyleSheet.create({
-  filtersScroll: { maxHeight: 44, marginBottom: 12 },
+  filtersScroll: { maxHeight: 44, marginBottom: 12, flexGrow: 0 },
   filters: { gap: 8, paddingRight: 8 },
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceCard,
-  },
-  chipActive: {
-    backgroundColor: colors.bordeaux,
-    borderColor: colors.bordeaux,
   },
   chipText: {
     fontSize: 13,
     fontWeight: "700",
-    color: colors.contentSecondary,
   },
-  chipTextActive: { color: colors.white },
-  list: { paddingBottom: 32 },
+  list: { flex: 1 },
+  listContent: { paddingBottom: 32, flexGrow: 1 },
   thumb: {
     width: "100%",
     height: 140,
     borderRadius: 12,
     marginBottom: 12,
-    backgroundColor: colors.bordeauxMuted,
   },
   cardTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: colors.contentPrimary,
     marginBottom: 6,
   },
   cardBody: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.contentSecondary,
     marginBottom: 10,
   },
   meta: {
@@ -244,8 +290,6 @@ const styles = StyleSheet.create({
   badge: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.bordeaux,
-    backgroundColor: colors.bordeauxMuted,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
@@ -253,31 +297,25 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: colors.contentTertiary,
   },
   exclusive: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.gold,
   },
   guestBanner: {
     marginBottom: 12,
     padding: 14,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bordeauxMuted,
   },
   guestText: {
     fontSize: 13,
     lineHeight: 18,
-    color: colors.contentSecondary,
     marginBottom: 8,
   },
   guestLink: {
     fontSize: 14,
     fontWeight: "700",
-    color: colors.bordeaux,
   },
   jindungoLink: {
     marginBottom: 12,
@@ -286,11 +324,9 @@ const styles = StyleSheet.create({
   jindungoLinkText: {
     fontSize: 14,
     fontWeight: "700",
-    color: colors.goldDark,
   },
   error: {
     marginTop: 16,
-    color: colors.error,
     fontSize: 14,
   },
 });

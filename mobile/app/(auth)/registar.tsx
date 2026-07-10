@@ -10,13 +10,15 @@ import {
   View,
 } from "react-native";
 import type { ProvincesResponse } from "@shared/types";
-import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Field, PrimaryButton } from "@/components/ui";
+import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
 
 export default function RegisterScreen() {
   const { register, isAuthenticated, isLoading } = useAuth();
+  const colors = useThemeColors();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -85,20 +87,35 @@ export default function RegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.surface }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.brand}>🌶️ Jindungo</Text>
-        <Text style={styles.title}>Criar conta</Text>
-        <Text style={styles.subtitle}>
+        <View style={styles.topRow}>
+          <Text style={[styles.brand, { color: colors.bordeaux }]}>
+            🌶️ Jindungo
+          </Text>
+          <ThemeToggle size={40} />
+        </View>
+        <Text style={[styles.title, { color: colors.contentPrimary }]}>
+          Criar conta
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.contentSecondary }]}>
           Junta-te à comunidade e explora conteúdos, quizzes e o mapa.
         </Text>
 
-        <View style={styles.form}>
+        <View
+          style={[
+            styles.form,
+            {
+              backgroundColor: colors.surfaceCard,
+              borderColor: colors.border,
+            },
+          ]}
+        >
           <Field label="Nome" value={name} onChangeText={setName} />
           <Field
             label="Email"
@@ -120,7 +137,11 @@ export default function RegisterScreen() {
             onChangeText={setPasswordConfirmation}
           />
 
-          <Text style={styles.provinceLabel}>Província</Text>
+          <Text
+            style={[styles.provinceLabel, { color: colors.contentSecondary }]}
+          >
+            Província
+          </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -134,13 +155,22 @@ export default function RegisterScreen() {
                   onPress={() => setProvinceId(String(province.id))}
                   style={[
                     styles.provinceChip,
-                    active && styles.provinceChipActive,
+                    {
+                      borderColor: active ? colors.bordeaux : colors.border,
+                      backgroundColor: active
+                        ? colors.bordeauxMuted
+                        : colors.surface,
+                    },
                   ]}
                 >
                   <Text
                     style={[
                       styles.provinceChipText,
-                      active && styles.provinceChipTextActive,
+                      {
+                        color: active
+                          ? colors.bordeaux
+                          : colors.contentSecondary,
+                      },
                     ]}
                   >
                     {province.name}
@@ -150,7 +180,9 @@ export default function RegisterScreen() {
             })}
           </ScrollView>
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? (
+            <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+          ) : null}
 
           <PrimaryButton
             label="Registar"
@@ -158,21 +190,24 @@ export default function RegisterScreen() {
             isLoading={submitting}
           />
 
-          <Link href="/(auth)/login" style={styles.link}>
+          <Link
+            href="/(auth)/login"
+            style={[styles.link, { color: colors.bordeaux }]}
+          >
             Já tens conta? Entrar
           </Link>
 
-          <Text style={styles.legal}>
+          <Text style={[styles.legal, { color: colors.contentSecondary }]}>
             Ao registar-te, aceitas os{" "}
             <Text
-              style={styles.legalLink}
+              style={[styles.legalLink, { color: colors.bordeaux }]}
               onPress={() => router.push("/termos" as never)}
             >
               Termos
             </Text>{" "}
             e a{" "}
             <Text
-              style={styles.legalLink}
+              style={[styles.legalLink, { color: colors.bordeaux }]}
               onPress={() => router.push("/privacidade" as never)}
             >
               Privacidade
@@ -186,42 +221,41 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.surfaceDark },
+  flex: { flex: 1 },
   container: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 24,
+    padding: 20,
   },
-  brand: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: colors.bordeauxDark,
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
-  title: {
-    fontSize: 32,
+  brand: {
+    fontSize: 26,
     fontWeight: "800",
-    color: colors.contentDarkPrimary,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: "800",
     letterSpacing: -0.5,
   },
   subtitle: {
     marginTop: 8,
-    marginBottom: 28,
+    marginBottom: 24,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.contentDarkSecondary,
   },
   form: {
-    backgroundColor: colors.surfaceDarkCard,
     borderRadius: 20,
-    padding: 20,
+    padding: 18,
     borderWidth: 1,
-    borderColor: colors.borderDark,
   },
   provinceLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.contentDarkSecondary,
     marginBottom: 8,
   },
   provinceRow: {
@@ -230,44 +264,30 @@ const styles = StyleSheet.create({
   },
   provinceChip: {
     borderWidth: 1,
-    borderColor: colors.borderDark,
-    backgroundColor: colors.surfaceDark,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  provinceChipActive: {
-    borderColor: colors.bordeauxDark,
-    backgroundColor: "rgba(225, 29, 72, 0.15)",
-  },
   provinceChipText: {
     fontSize: 13,
-    color: colors.contentDarkSecondary,
     fontWeight: "600",
   },
-  provinceChipTextActive: {
-    color: colors.bordeauxDark,
-  },
   error: {
-    color: colors.error,
     marginBottom: 12,
     fontSize: 13,
   },
   link: {
-    marginTop: 18,
+    marginTop: 16,
     textAlign: "center",
-    color: colors.bordeauxDark,
     fontWeight: "700",
   },
   legal: {
     marginTop: 16,
     fontSize: 12,
     lineHeight: 18,
-    color: colors.contentDarkSecondary,
     textAlign: "center",
   },
   legalLink: {
-    color: colors.bordeauxDark,
     fontWeight: "700",
   },
 });

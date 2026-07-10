@@ -11,11 +11,12 @@ import {
 import type { PublicTopicsResponse } from "@shared/types";
 import { Card, EmptyState, PrimaryButton, Screen, Title } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
 
 export default function ForumScreen() {
   const { token, isAuthenticated } = useAuth();
+  const colors = useThemeColors();
   const [items, setItems] = useState<PublicTopicsResponse["data"]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +68,9 @@ export default function ForumScreen() {
         />
       ) : (
         <View style={styles.authHint}>
-          <Text style={styles.authHintText}>
+          <Text
+            style={[styles.authHintText, { color: colors.contentSecondary }]}
+          >
             Inicia sessão para criar tópicos e ver conteúdos privados.
           </Text>
           <PrimaryButton
@@ -80,7 +83,7 @@ export default function ForumScreen() {
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
       ) : error ? (
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
       ) : (
         <FlatList
           data={items}
@@ -99,13 +102,20 @@ export default function ForumScreen() {
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <Card onPress={() => router.push(`/forum/${item.id}` as never)}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text
+                style={[styles.cardTitle, { color: colors.contentPrimary }]}
+              >
+                {item.title}
+              </Text>
               {item.description ? (
-                <Text style={styles.cardBody} numberOfLines={2}>
+                <Text
+                  style={[styles.cardBody, { color: colors.contentSecondary }]}
+                  numberOfLines={2}
+                >
                   {item.description}
                 </Text>
               ) : null}
-              <Text style={styles.meta}>
+              <Text style={[styles.meta, { color: colors.contentTertiary }]}>
                 {item.author?.name ?? "Autor"}
                 {typeof item.replies_count === "number"
                   ? ` · ${item.replies_count} respostas`
@@ -129,30 +139,25 @@ const styles = StyleSheet.create({
   authHintText: {
     fontSize: 13,
     lineHeight: 18,
-    color: colors.contentSecondary,
   },
   list: { marginTop: 16, flex: 1 },
   listContent: { paddingBottom: 32 },
   cardTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: colors.contentPrimary,
     marginBottom: 6,
   },
   cardBody: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.contentSecondary,
     marginBottom: 8,
   },
   meta: {
     fontSize: 12,
-    color: colors.contentTertiary,
     fontWeight: "600",
   },
   error: {
     marginTop: 16,
-    color: colors.error,
     fontSize: 14,
   },
 });

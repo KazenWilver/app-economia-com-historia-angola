@@ -6,9 +6,9 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { API_URL } from "@/lib/api";
 import { parsePasswordResetLink } from "@/lib/password-reset";
-import { colors } from "@/lib/theme";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,7 +28,9 @@ function handleIncomingUrl(url: string | null) {
   } as never);
 }
 
-export default function RootLayout() {
+function RootNavigator() {
+  const { colors, isDark } = useTheme();
+
   useEffect(() => {
     if (__DEV__) {
       console.log("[Jindungo] API_URL =", API_URL);
@@ -45,13 +47,17 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <AuthProvider>
-      <StatusBar style="light" />
+    <>
+      <StatusBar style={isDark ? "light" : "dark"} />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: colors.surfaceDark },
-          headerTintColor: colors.contentDarkPrimary,
-          headerTitleStyle: { fontWeight: "700" },
+          headerStyle: { backgroundColor: colors.surfaceCard },
+          headerTintColor: colors.bordeaux,
+          headerTitleStyle: {
+            fontWeight: "700",
+            color: colors.contentPrimary,
+          },
+          headerShadowVisible: false,
           contentStyle: { backgroundColor: colors.surface },
         }}
       >
@@ -96,6 +102,16 @@ export default function RootLayout() {
         />
         <Stack.Screen name="+not-found" options={{ title: "Não encontrado" }} />
       </Stack>
-    </AuthProvider>
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

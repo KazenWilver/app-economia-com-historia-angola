@@ -11,10 +11,11 @@ import {
 } from "react-native";
 import type { PublicQuizzesResponse } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
-import { colors } from "@/lib/theme";
 
 export default function QuizScreen() {
+  const colors = useThemeColors();
   const [items, setItems] = useState<PublicQuizzesResponse["data"]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,15 +65,18 @@ export default function QuizScreen() {
         onPress={() => router.push("/ranking" as never)}
         style={styles.rankingLink}
       >
-        <Text style={styles.rankingLinkText}>Ver ranking nacional →</Text>
+        <Text style={[styles.rankingLinkText, { color: colors.bordeaux }]}>
+          Ver ranking nacional →
+        </Text>
       </Pressable>
 
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
       ) : error ? (
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
       ) : (
         <FlatList
+          style={{ flex: 1 }}
           data={items}
           keyExtractor={(item) => String(item.id)}
           refreshControl={
@@ -90,13 +94,20 @@ export default function QuizScreen() {
             <Card
               onPress={() => router.push(`/quiz/${item.id}` as never)}
             >
-              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text
+                style={[styles.cardTitle, { color: colors.contentPrimary }]}
+              >
+                {item.title}
+              </Text>
               {item.description ? (
-                <Text style={styles.cardBody} numberOfLines={3}>
+                <Text
+                  style={[styles.cardBody, { color: colors.contentSecondary }]}
+                  numberOfLines={3}
+                >
                   {item.description}
                 </Text>
               ) : null}
-              <Text style={styles.meta}>
+              <Text style={[styles.meta, { color: colors.contentTertiary }]}>
                 {item.questions_count ?? "—"} perguntas
                 {item.time_limit_seconds
                   ? ` · ${Math.round(item.time_limit_seconds / 60)} min`
@@ -120,29 +131,24 @@ const styles = StyleSheet.create({
   rankingLinkText: {
     fontSize: 14,
     fontWeight: "700",
-    color: colors.bordeaux,
   },
   list: { paddingBottom: 32 },
   cardTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: colors.contentPrimary,
     marginBottom: 6,
   },
   cardBody: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.contentSecondary,
     marginBottom: 10,
   },
   meta: {
     fontSize: 12,
-    color: colors.contentTertiary,
     fontWeight: "600",
   },
   error: {
     marginTop: 16,
-    color: colors.error,
     fontSize: 14,
   },
 });

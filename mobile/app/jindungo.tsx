@@ -12,12 +12,13 @@ import {
 import type { ContentItem, ContentsResponse } from "@shared/types";
 import { Card, EmptyState, PrimaryButton, Screen, Title } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
 import { isImageUrl, resolveMediaUrl } from "@/lib/media";
-import { colors } from "@/lib/theme";
 
 export default function JindungoScreen() {
   const { token, isAuthenticated } = useAuth();
+  const colors = useThemeColors();
   const [items, setItems] = useState<ContentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +74,7 @@ export default function JindungoScreen() {
           subtitle="Textos exclusivos para utilizadores autenticados."
         />
         <Card>
-          <Text style={styles.hint}>
+          <Text style={[styles.hint, { color: colors.contentSecondary }]}>
             Inicia sessão para aceder à biblioteca Jindungo.
           </Text>
           <PrimaryButton
@@ -95,9 +96,10 @@ export default function JindungoScreen() {
       {loading ? (
         <ActivityIndicator color={colors.bordeaux} style={{ marginTop: 24 }} />
       ) : error ? (
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
       ) : (
         <FlatList
+          style={{ flex: 1 }}
           data={items}
           keyExtractor={(item) => String(item.id)}
           refreshControl={
@@ -124,18 +126,46 @@ export default function JindungoScreen() {
                 }
               >
                 {thumb ? (
-                  <Image source={{ uri: thumb }} style={styles.thumb} />
+                  <Image
+                    source={{ uri: thumb }}
+                    style={[
+                      styles.thumb,
+                      { backgroundColor: colors.bordeauxMuted },
+                    ]}
+                  />
                 ) : null}
-                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text
+                  style={[styles.cardTitle, { color: colors.contentPrimary }]}
+                >
+                  {item.title}
+                </Text>
                 {item.body ? (
-                  <Text style={styles.cardBody} numberOfLines={3}>
+                  <Text
+                    style={[
+                      styles.cardBody,
+                      { color: colors.contentSecondary },
+                    ]}
+                    numberOfLines={3}
+                  >
                     {item.body}
                   </Text>
                 ) : null}
                 <View style={styles.meta}>
-                  <Text style={styles.badge}>Jindungo</Text>
+                  <Text
+                    style={[
+                      styles.badge,
+                      {
+                        color: colors.goldDark,
+                        backgroundColor: colors.bordeauxMuted,
+                      },
+                    ]}
+                  >
+                    Jindungo
+                  </Text>
                   {item.is_exclusive ? (
-                    <Text style={styles.exclusive}>Exclusivo</Text>
+                    <Text style={[styles.exclusive, { color: colors.gold }]}>
+                      Exclusivo
+                    </Text>
                   ) : null}
                 </View>
               </Card>
@@ -154,18 +184,15 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: 12,
     marginBottom: 12,
-    backgroundColor: colors.bordeauxMuted,
   },
   cardTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: colors.contentPrimary,
     marginBottom: 6,
   },
   cardBody: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.contentSecondary,
     marginBottom: 10,
   },
   meta: {
@@ -176,8 +203,6 @@ const styles = StyleSheet.create({
   badge: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.goldDark,
-    backgroundColor: "#FEF3C7",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
@@ -186,17 +211,14 @@ const styles = StyleSheet.create({
   exclusive: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.gold,
   },
   hint: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.contentSecondary,
     marginBottom: 12,
   },
   error: {
     marginTop: 16,
-    color: colors.error,
     fontSize: 14,
   },
 });

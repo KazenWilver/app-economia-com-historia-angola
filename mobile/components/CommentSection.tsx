@@ -3,9 +3,9 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { CommentItem, CommentsResponse } from "@shared/types";
 import { Field, PrimaryButton } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
 import { formatPtDate } from "@/lib/format";
-import { colors } from "@/lib/theme";
 
 function CommentTree({
   comments,
@@ -20,25 +20,42 @@ function CommentTree({
   onReply: (parentId: number) => void;
   onDelete: (commentId: number) => void;
 }) {
+  const colors = useThemeColors();
+
   return (
     <>
       {comments.map((comment) => (
         <View
           key={comment.id}
-          style={[styles.comment, depth > 0 && { marginLeft: 14 }]}
+          style={[
+            styles.comment,
+            {
+              borderColor: colors.border,
+              backgroundColor: colors.surfaceSecondary,
+            },
+            depth > 0 && { marginLeft: 12 },
+          ]}
         >
-          <Text style={styles.author}>{comment.user.name}</Text>
+          <Text style={[styles.author, { color: colors.bordeaux }]}>
+            {comment.user.name}
+          </Text>
           {formatPtDate(comment.created_at) ? (
-            <Text style={styles.date}>{formatPtDate(comment.created_at)}</Text>
+            <Text style={[styles.date, { color: colors.contentTertiary }]}>
+              {formatPtDate(comment.created_at)}
+            </Text>
           ) : null}
-          <Text style={styles.body}>{comment.body}</Text>
+          <Text style={[styles.body, { color: colors.contentPrimary }]}>
+            {comment.body}
+          </Text>
           <View style={styles.actions}>
             <Pressable onPress={() => onReply(comment.id)}>
-              <Text style={styles.replyAction}>Responder</Text>
+              <Text style={[styles.replyAction, { color: colors.petrol }]}>
+                Responder
+              </Text>
             </Pressable>
             {currentUserId === comment.user.id ? (
               <Pressable onPress={() => onDelete(comment.id)}>
-                <Text style={[styles.replyAction, styles.deleteAction]}>
+                <Text style={[styles.replyAction, { color: colors.error }]}>
                   Eliminar
                 </Text>
               </Pressable>
@@ -61,6 +78,7 @@ function CommentTree({
 
 export function CommentSection({ contentSlug }: { contentSlug: string }) {
   const { user, token, isAuthenticated } = useAuth();
+  const colors = useThemeColors();
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [body, setBody] = useState("");
   const [parentId, setParentId] = useState<number | null>(null);
@@ -148,12 +166,18 @@ export function CommentSection({ contentSlug }: { contentSlug: string }) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>Comentários</Text>
+      <Text style={[styles.title, { color: colors.contentPrimary }]}>
+        Comentários
+      </Text>
 
       {loading ? (
-        <Text style={styles.hint}>A carregar…</Text>
+        <Text style={[styles.hint, { color: colors.contentSecondary }]}>
+          A carregar…
+        </Text>
       ) : comments.length === 0 ? (
-        <Text style={styles.hint}>Ainda não há comentários.</Text>
+        <Text style={[styles.hint, { color: colors.contentSecondary }]}>
+          Ainda não há comentários.
+        </Text>
       ) : (
         <CommentTree
           comments={comments}
@@ -170,23 +194,26 @@ export function CommentSection({ contentSlug }: { contentSlug: string }) {
         <View style={styles.form}>
           {parentId ? (
             <View style={styles.replyingTo}>
-              <Text style={styles.hint}>
+              <Text style={[styles.hint, { color: colors.contentSecondary }]}>
                 A responder ao comentário #{parentId}
               </Text>
               <Pressable onPress={() => setParentId(null)}>
-                <Text style={styles.replyAction}>Cancelar</Text>
+                <Text style={[styles.replyAction, { color: colors.petrol }]}>
+                  Cancelar
+                </Text>
               </Pressable>
             </View>
           ) : null}
           <Field
             label="O teu comentário"
-            variant="light"
             value={body}
             onChangeText={setBody}
             multiline
             style={styles.input}
           />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? (
+            <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+          ) : null}
           <PrimaryButton
             label={parentId ? "Publicar resposta" : "Publicar"}
             onPress={() => void handleSubmit()}
@@ -194,18 +221,19 @@ export function CommentSection({ contentSlug }: { contentSlug: string }) {
           />
         </View>
       ) : (
-        <Text style={styles.hint}>Inicia sessão para comentar.</Text>
+        <Text style={[styles.hint, { color: colors.contentSecondary }]}>
+          Inicia sessão para comentar.
+        </Text>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginTop: 8 },
+  wrap: { marginTop: 4 },
   title: {
     fontSize: 18,
     fontWeight: "800",
-    color: colors.contentPrimary,
     marginBottom: 12,
   },
   comment: {
@@ -213,24 +241,19 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceCard,
   },
   author: {
     fontSize: 13,
     fontWeight: "700",
-    color: colors.bordeaux,
     marginBottom: 2,
   },
   date: {
     fontSize: 11,
-    color: colors.contentTertiary,
     marginBottom: 6,
   },
   body: {
     fontSize: 14,
     lineHeight: 20,
-    color: colors.contentPrimary,
   },
   actions: {
     flexDirection: "row",
@@ -240,10 +263,6 @@ const styles = StyleSheet.create({
   replyAction: {
     fontSize: 13,
     fontWeight: "700",
-    color: colors.petrol,
-  },
-  deleteAction: {
-    color: colors.error,
   },
   replyingTo: {
     flexDirection: "row",
@@ -259,11 +278,9 @@ const styles = StyleSheet.create({
   },
   hint: {
     fontSize: 14,
-    color: colors.contentSecondary,
     marginBottom: 12,
   },
   error: {
-    color: colors.error,
     marginBottom: 8,
     fontSize: 13,
   },
