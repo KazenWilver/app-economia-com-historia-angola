@@ -27,7 +27,7 @@ export function ContentMediaPlayer({
   mediaUrl,
   contentType,
 }: ContentMediaPlayerProps) {
-  const uri = resolveMediaUrl(mediaUrl);
+  const uri = resolveMediaUrl(mediaUrl) ?? mediaUrl;
   const soundRef = useRef<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [positionMs, setPositionMs] = useState(0);

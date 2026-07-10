@@ -1,50 +1,78 @@
 import { API_URL } from "@/lib/api";
 import type { ContentType } from "@shared/types";
 
-function extractStoragePath(url: string): string | null {
-  const apiOrigin = API_URL.replace(/\/api$/, "");
+function getApiOrigin(): string {
+  return API_URL.replace(/\/api$/, "");
+}
 
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    if (url.startsWith(`${apiOrigin}/storage/`)) {
-      return url.slice(`${apiOrigin}/storage/`.length);
+/**
+ * Reescreve URLs com localhost/127.0.0.1 para o host actual da API
+ * (necessário no telemóvel quando a BD guarda APP_URL=localhost).
+ */
+function rewriteLocalhostHost(url: string): string {
+  const match = url.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i);
+  if (!match) {
+    return url;
+  }
+
+  return `${getApiOrigin()}${match[3] ?? ""}`;
+}
+
+function extractStoragePath(url: string): string | null {
+  const apiOrigin = getApiOrigin();
+  const normalized = rewriteLocalhostHost(url);
+
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    if (normalized.startsWith(`${apiOrigin}/storage/`)) {
+      return normalized.slice(`${apiOrigin}/storage/`.length);
     }
 
-    if (url.includes("/api/media/")) {
-      return url.split("/api/media/")[1] ?? null;
+    if (normalized.includes("/api/media/")) {
+      return normalized.split("/api/media/")[1] ?? null;
+    }
+
+    // Qualquer /storage/ noutro host (ex. Docker interno)
+    const storageIdx = normalized.indexOf("/storage/");
+    if (storageIdx !== -1) {
+      return normalized.slice(storageIdx + "/storage/".length);
     }
 
     return null;
   }
 
-  if (url.startsWith("/storage/")) {
-    return url.slice("/storage/".length);
+  if (normalized.startsWith("/storage/")) {
+    return normalized.slice("/storage/".length);
   }
 
-  if (url.startsWith("/api/media/")) {
-    return url.slice("/api/media/".length);
+  if (normalized.startsWith("/api/media/")) {
+    return normalized.slice("/api/media/".length);
   }
 
   return null;
 }
 
-/** Resolve URL de media para stream da API (compatível com telemóvel na LAN). */
-export function resolveMediaUrl(url: string): string {
-  const storagePath = extractStoragePath(url);
+/** Resolve URL de media/avatar para stream da API (compatível com telemóvel na LAN). */
+export function resolveMediaUrl(url: string | null | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+
+  const normalized = rewriteLocalhostHost(url);
+  const storagePath = extractStoragePath(normalized);
 
   if (storagePath) {
     return `${API_URL}/media/${storagePath}`;
   }
 
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    return normalized;
   }
 
-  if (url.startsWith("/")) {
-    const origin = API_URL.replace(/\/api$/, "");
-    return `${origin}${url}`;
+  if (normalized.startsWith("/")) {
+    return `${getApiOrigin()}${normalized}`;
   }
 
-  return url;
+  return normalized;
 }
 
 export function isAudioType(type: ContentType, url: string): boolean {
@@ -64,7 +92,7 @@ export function isVideoType(type: ContentType, url: string): boolean {
 }
 
 export function isImageUrl(url: string): boolean {
-  return /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url);
+  return /\.(jpe?g|png|gif|webp)(\?|$)/i.test(url) || url.includes("/avatars/");
 }
 
 export function formatMediaTime(seconds: number): string {

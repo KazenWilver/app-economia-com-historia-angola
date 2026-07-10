@@ -3,7 +3,9 @@ export const colors = {
   bordeauxDark: "#E11D48",
   bordeauxMuted: "#FCE7F3",
   petrol: "#2C7A7B",
+  petrolDark: "#234E52",
   gold: "#D4AF37",
+  goldDark: "#B8960F",
   surface: "#F5F5F7",
   surfaceCard: "#FFFFFF",
   surfaceElevated: "#FFFFFF",
@@ -11,11 +13,21 @@ export const colors = {
   surfaceDarkCard: "#1E293B",
   contentPrimary: "#1A202C",
   contentSecondary: "#4A5568",
-  contentTertiary: "#718096",
+  contentTertiary: "#A0AEC0",
   contentDarkPrimary: "#F8FAFC",
   contentDarkSecondary: "#CBD5E1",
   border: "#E5E5EA",
   borderDark: "#334155",
   white: "#FFFFFF",
   error: "#DC2626",
+  success: "#16A34A",
+  info: "#2563EB",
 } as const;
+
+export const TYPE_LABELS: Record<string, string> = {
+  texto: "Texto",
+  audio: "Áudio",
+  video: "Vídeo",
+  podcast: "Podcast",
+  jindungo: "Jindungo",
+};
