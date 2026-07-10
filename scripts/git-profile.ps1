@@ -1,9 +1,11 @@
-# Perfis Git — Willfredy e Sulo (mesma máquina)
+# Perfis Git — equipa Jindungo (mesma máquina)
 # Uso: . .\scripts\git-profile.ps1
 #
 # Regra: NUNCA uses git commit --author=... sem activar o perfil antes.
 #        --author só altera o autor; o committer fica no perfil da máquina
 #        e o GitHub mostra "authored by X, committed by Y".
+#
+# Mobile: preferir eduarda / adelino (ver .cursor/rules/mobile-git-eduarda-adelino.mdc).
 
 $script:GitProfiles = @{
   sulo = @{
@@ -14,29 +16,44 @@ $script:GitProfiles = @{
     Name  = "Willfredy Vieira Dias"
     Email = "starkeliude90@gmail.com"
   }
+  eduarda = @{
+    Name  = "Eduarda"
+    Email = "Adraude2694@gmail.com"
+  }
+  adelino = @{
+    Name  = "Adelino"
+    Email = "adelinodo003@gmail.com"
+  }
 }
 
 function Use-Git {
-  param([ValidateSet("willfredy", "sulo")][string]$Who)
+  param([ValidateSet("willfredy", "sulo", "eduarda", "adelino")][string]$Who)
 
   $profile = $script:GitProfiles[$Who]
   git config user.name $profile.Name
   git config user.email $profile.Email
-  $color = if ($Who -eq "sulo") { "Cyan" } else { "Green" }
+  $color = switch ($Who) {
+    "sulo" { "Cyan" }
+    "eduarda" { "Magenta" }
+    "adelino" { "Yellow" }
+    default { "Green" }
+  }
   Write-Host "Perfil Git activo: $($profile.Name) <$($profile.Email)>" -ForegroundColor $color
 }
 
 function Set-GitCommitterEnv {
-  param([ValidateSet("willfredy", "sulo")][string]$Who)
+  param([ValidateSet("willfredy", "sulo", "eduarda", "adelino")][string]$Who)
 
   $profile = $script:GitProfiles[$Who]
+  $env:GIT_AUTHOR_NAME = $profile.Name
+  $env:GIT_AUTHOR_EMAIL = $profile.Email
   $env:GIT_COMMITTER_NAME = $profile.Name
   $env:GIT_COMMITTER_EMAIL = $profile.Email
 }
 
 function Commit-Git {
   param(
-    [ValidateSet("willfredy", "sulo")][string]$Who = "willfredy",
+    [ValidateSet("willfredy", "sulo", "eduarda", "adelino")][string]$Who = "willfredy",
     [Parameter(Mandatory)][string]$Message
   )
 
@@ -47,7 +64,7 @@ function Commit-Git {
 
 function Push-Git {
   param(
-    [ValidateSet("willfredy", "sulo")][string]$Who = "willfredy",
+    [ValidateSet("willfredy", "sulo", "eduarda", "adelino")][string]$Who = "willfredy",
     [switch]$SkipChecks
   )
 
