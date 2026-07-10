@@ -7,6 +7,7 @@ import { mainNavLinks } from "@/components/layout/nav-links";
 import { NavLink } from "@/components/layout/NavLink";
 import { Navigation } from "@/components/layout/Navigation";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
@@ -39,6 +40,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {!isLoading && isAuthenticated && user ? (
             <>
               <span className="hidden text-sm text-content-secondary dark:text-content-dark-secondary md:inline">

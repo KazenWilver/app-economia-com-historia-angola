@@ -45,7 +45,7 @@ export function AuthTransitionScreen({
       className={cn(
         "fixed inset-0 z-50 flex flex-col items-center justify-center px-6 text-center",
         isAdmin
-          ? "bg-[#0F172A] text-[#F8FAFC]"
+          ? "bg-surface text-content-primary dark:bg-surface-dark dark:text-content-dark-primary"
           : "bg-gradient-to-br from-bordeaux via-[#5C1830] to-petrol text-white",
       )}
       role="status"
@@ -65,7 +65,9 @@ export function AuthTransitionScreen({
         <p
           className={cn(
             "font-display text-3xl font-extrabold",
-            isAdmin ? "text-bordeaux-dark" : "text-white",
+            isAdmin
+              ? "text-bordeaux dark:text-bordeaux-dark"
+              : "text-white",
           )}
         >
           <span aria-hidden>🌶️ </span>
@@ -87,7 +89,7 @@ export function AuthTransitionScreen({
             className={cn(
               "h-12 w-12 animate-spin rounded-full border-4 border-transparent",
               isAdmin
-                ? "border-t-bordeaux-dark border-r-bordeaux-dark/30"
+                ? "border-t-bordeaux border-r-bordeaux/30 dark:border-t-bordeaux-dark dark:border-r-bordeaux-dark/30"
                 : "border-t-white border-r-white/30",
             )}
           />
@@ -96,7 +98,9 @@ export function AuthTransitionScreen({
         <p
           className={cn(
             "mt-8 min-h-14 text-base leading-relaxed transition-opacity duration-500",
-            isAdmin ? "text-slate-300" : "text-white/90",
+            isAdmin
+              ? "text-content-secondary dark:text-content-dark-secondary"
+              : "text-white/90",
           )}
         >
           {messages[messageIndex]}

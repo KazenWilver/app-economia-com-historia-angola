@@ -10,5 +10,4 @@ export const adminNavItems: AdminNavItem[] = [
   { href: "/admin/forum", label: "Fórum" },
   { href: "/admin/mapa", label: "Mapa" },
   { href: "/admin/utilizadores", label: "Utilizadores" },
-  { href: "/admin/estatisticas", label: "Estatísticas" },
 ];

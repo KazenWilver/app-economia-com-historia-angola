@@ -1,6 +1,7 @@
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { rootMetadata } from "@/lib/seo";
 import "./globals.css";
 
@@ -22,6 +23,8 @@ const jetbrains = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+const themeInitScript = `(function(){try{var k='jindungo_theme';var t=localStorage.getItem(k);if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`;
+
 export const metadata = rootMetadata;
 
 export default function RootLayout({
@@ -35,13 +38,18 @@ export default function RootLayout({
       className={`${plusJakarta.variable} ${inter.variable} ${jetbrains.variable} h-full`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className="min-h-full flex flex-col font-sans"
         suppressHydrationWarning
       >
-        <AuthProvider>
-          <AppShell>{children}</AppShell>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AppShell>{children}</AppShell>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

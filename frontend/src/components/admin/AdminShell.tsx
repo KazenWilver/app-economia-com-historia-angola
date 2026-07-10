@@ -3,8 +3,8 @@
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 
 /**
- * Isola o painel admin: sessão própria, tema escuro forçado (classe `dark`),
- * sem Header/Footer do site público.
+ * Isola o painel admin: sessão própria, sem Header/Footer do site público.
+ * O tema claro/escuro segue o ThemeProvider global (mesmo toggle do site).
  */
 export function AdminShell({
   children,
@@ -13,7 +13,7 @@ export function AdminShell({
 }>) {
   return (
     <AdminAuthProvider>
-      <div className="dark min-h-screen bg-[#0F172A] text-[#F8FAFC]">
+      <div className="min-h-screen bg-surface text-content-primary dark:bg-surface-dark dark:text-content-dark-primary">
         {children}
       </div>
     </AdminAuthProvider>

@@ -10,4 +10,5 @@ export {
 export { Input, type InputProps } from "@/components/ui/Input";
 export { Modal, type ModalProps } from "@/components/ui/Modal";
 export { Skeleton, type SkeletonProps } from "@/components/ui/Skeleton";
+export { ThemeToggle } from "@/components/ui/ThemeToggle";
 export { Toast, type ToastProps, type ToastVariant } from "@/components/ui/Toast";

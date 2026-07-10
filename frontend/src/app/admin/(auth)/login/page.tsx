@@ -42,9 +42,6 @@ function validateLoginForm(values: LoginForm): LoginErrors {
   return errors;
 }
 
-const inputClassName =
-  "border-slate-600 bg-slate-950 text-[#F8FAFC] placeholder:text-slate-500 focus:border-bordeaux-dark focus:ring-bordeaux-dark/30";
-
 export default function AdminLoginPage() {
   const router = useRouter();
   const { login, isAdmin, isLoading, user } = useAdminAuth();
@@ -105,17 +102,19 @@ export default function AdminLoginPage() {
   return (
     <Card
       hoverLift={false}
-      className="w-full max-w-md border-slate-700 bg-slate-900 text-[#F8FAFC]"
+      className="w-full max-w-md border-border bg-surface-card text-content-primary dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary"
     >
       <CardHeader>
-        <CardTitle className="text-[#F8FAFC]">Entrar no painel</CardTitle>
-        <p className="text-sm text-slate-300">
+        <CardTitle className="text-content-primary dark:text-content-dark-primary">
+          Entrar no painel
+        </CardTitle>
+        <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
           Área reservada a administradores. A sessão do site público não é
           utilizada aqui.
         </p>
       </CardHeader>
 
-      <CardContent className="text-slate-300">
+      <CardContent className="text-content-secondary dark:text-content-dark-secondary">
         {errors.form ? (
           <Toast
             variant="error"
@@ -138,8 +137,6 @@ export default function AdminLoginPage() {
             value={form.email}
             error={errors.email}
             placeholder="admin@jindungo.ao"
-            labelClassName="text-[#F8FAFC]"
-            className={inputClassName}
             onChange={(event) => handleChange("email", event.target.value)}
           />
 
@@ -151,15 +148,13 @@ export default function AdminLoginPage() {
             value={form.password}
             error={errors.password}
             placeholder="••••••••"
-            labelClassName="text-[#F8FAFC]"
-            className={inputClassName}
             onChange={(event) => handleChange("password", event.target.value)}
           />
 
           <div className="text-right">
             <Link
               href="/admin/recuperar-palavra-passe"
-              className="text-sm font-medium text-bordeaux-dark hover:underline"
+              className="text-sm font-medium text-bordeaux hover:underline dark:text-bordeaux-dark"
             >
               Esqueci a palavra-passe
             </Link>
@@ -170,11 +165,11 @@ export default function AdminLoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+        <p className="mt-6 text-center text-sm text-content-tertiary dark:text-content-dark-tertiary">
           Precisas de criar um administrador?{" "}
           <Link
             href="/admin/registar"
-            className="font-semibold text-bordeaux-dark hover:underline"
+            className="font-semibold text-bordeaux hover:underline dark:text-bordeaux-dark"
           >
             Registar administrador
           </Link>

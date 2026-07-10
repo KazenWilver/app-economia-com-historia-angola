@@ -65,9 +65,6 @@ function validateRegisterForm(values: RegisterForm): RegisterErrors {
   return errors;
 }
 
-const inputClassName =
-  "border-slate-600 bg-slate-950 text-[#F8FAFC] placeholder:text-slate-500 focus:border-bordeaux-dark focus:ring-bordeaux-dark/30";
-
 export default function AdminRegisterPage() {
   const router = useRouter();
   const { register, isAdmin, isLoading } = useAdminAuth();
@@ -134,9 +131,9 @@ export default function AdminRegisterPage() {
     return (
       <Card
         hoverLift={false}
-        className="w-full max-w-md border-slate-700 bg-slate-900 text-[#F8FAFC]"
+        className="w-full max-w-md border-border bg-surface-card text-content-primary dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary"
       >
-        <CardContent className="py-10 text-center text-sm text-slate-300">
+        <CardContent className="py-10 text-center text-sm text-content-secondary dark:text-content-dark-secondary">
           A verificar sessão do painel…
         </CardContent>
       </Card>
@@ -146,19 +143,19 @@ export default function AdminRegisterPage() {
   return (
     <Card
       hoverLift={false}
-      className="w-full max-w-md border-slate-700 bg-slate-900 text-[#F8FAFC]"
+      className="w-full max-w-md border-border bg-surface-card text-content-primary dark:border-border-dark dark:bg-surface-dark-card dark:text-content-dark-primary"
     >
       <CardHeader>
-        <CardTitle className="text-[#F8FAFC]">
+        <CardTitle className="text-content-primary dark:text-content-dark-primary">
           Registar administrador
         </CardTitle>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
           Cria uma conta exclusiva do painel. Não afecta a sessão do site
           público.
         </p>
       </CardHeader>
 
-      <CardContent className="text-slate-300">
+      <CardContent className="text-content-secondary dark:text-content-dark-secondary">
         {errors.form ? (
           <Toast
             variant="error"
@@ -180,8 +177,6 @@ export default function AdminRegisterPage() {
             value={form.name}
             error={errors.name}
             placeholder="Nome do administrador"
-            labelClassName="text-[#F8FAFC]"
-            className={inputClassName}
             onChange={(event) => handleChange("name", event.target.value)}
           />
 
@@ -193,8 +188,6 @@ export default function AdminRegisterPage() {
             value={form.email}
             error={errors.email}
             placeholder="admin@jindungo.ao"
-            labelClassName="text-[#F8FAFC]"
-            className={inputClassName}
             onChange={(event) => handleChange("email", event.target.value)}
           />
 
@@ -206,8 +199,6 @@ export default function AdminRegisterPage() {
             value={form.password}
             error={errors.password}
             placeholder="Mínimo 8 caracteres"
-            labelClassName="text-[#F8FAFC]"
-            className={inputClassName}
             onChange={(event) => handleChange("password", event.target.value)}
           />
 
@@ -219,8 +210,6 @@ export default function AdminRegisterPage() {
             value={form.passwordConfirmation}
             error={errors.passwordConfirmation}
             placeholder="Repete a palavra-passe"
-            labelClassName="text-[#F8FAFC]"
-            className={inputClassName}
             onChange={(event) =>
               handleChange("passwordConfirmation", event.target.value)
             }
@@ -234,8 +223,6 @@ export default function AdminRegisterPage() {
             value={form.adminKey}
             error={errors.adminKey}
             placeholder="Chave fornecida pela equipa"
-            labelClassName="text-[#F8FAFC]"
-            className={inputClassName}
             onChange={(event) => handleChange("adminKey", event.target.value)}
           />
 
@@ -244,11 +231,11 @@ export default function AdminRegisterPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+        <p className="mt-6 text-center text-sm text-content-tertiary dark:text-content-dark-tertiary">
           Já tens conta?{" "}
           <Link
             href="/admin/login"
-            className="font-semibold text-bordeaux-dark hover:underline"
+            className="font-semibold text-bordeaux hover:underline dark:text-bordeaux-dark"
           >
             Entrar no painel
           </Link>

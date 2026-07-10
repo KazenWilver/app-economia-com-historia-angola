@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3,
   BookOpen,
   LayoutDashboard,
   Map,
@@ -21,7 +20,6 @@ const iconByHref: Record<string, typeof LayoutDashboard> = {
   "/admin/forum": MessageSquare,
   "/admin/mapa": Map,
   "/admin/utilizadores": Users,
-  "/admin/estatisticas": BarChart3,
 };
 
 function isActivePath(pathname: string, href: string): boolean {
@@ -36,16 +34,16 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-full flex-col border-b border-border-dark bg-[#0F172A] md:h-screen md:w-64 md:border-b-0 md:border-r">
-      <div className="border-b border-border-dark px-5 py-5">
+    <aside className="flex w-full flex-col border-b border-border bg-surface-card md:h-screen md:w-64 md:border-b-0 md:border-r dark:border-border-dark dark:bg-surface-dark">
+      <div className="border-b border-border px-5 py-5 dark:border-border-dark">
         <Link
           href="/admin"
-          className="font-display text-lg font-extrabold text-bordeaux-dark"
+          className="font-display text-lg font-extrabold text-bordeaux dark:text-bordeaux-dark"
         >
           <span aria-hidden>🌶️ </span>
           Jindungo Admin
         </Link>
-        <p className="mt-1 text-xs text-content-dark-tertiary">
+        <p className="mt-1 text-xs text-content-tertiary dark:text-content-dark-tertiary">
           Painel de administração
         </p>
       </div>
@@ -66,7 +64,7 @@ export function AdminSidebar() {
                 "inline-flex min-h-11 shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 font-display text-sm font-semibold transition-colors duration-200",
                 isActive
                   ? "bg-bordeaux text-white dark:bg-bordeaux-dark"
-                  : "text-content-dark-secondary hover:bg-surface-dark-secondary hover:text-content-dark-primary",
+                  : "text-content-secondary hover:bg-surface-secondary hover:text-content-primary dark:text-content-dark-secondary dark:hover:bg-surface-dark-secondary dark:hover:text-content-dark-primary",
               )}
               aria-current={isActive ? "page" : undefined}
             >
@@ -77,8 +75,8 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <div className="mt-auto hidden border-t border-border-dark px-5 py-4 md:block">
-        <p className="text-xs text-content-dark-tertiary">
+      <div className="mt-auto hidden border-t border-border px-5 py-4 md:block dark:border-border-dark">
+        <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
           Sessão isolada do painel. O site público mantém a sua própria conta.
         </p>
       </div>
