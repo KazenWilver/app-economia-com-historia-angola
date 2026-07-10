@@ -1,13 +1,8 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Linking,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import type { ContentDetailResponse } from "@shared/types";
+import { ContentMediaPlayer } from "@/components/ContentMediaPlayer";
 import { Card, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/lib/api";
@@ -37,7 +32,9 @@ export default function ConteudoDetailScreen() {
       setContent(data.data);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Não foi possível carregar o conteúdo.",
+        err instanceof Error
+          ? err.message
+          : "Não foi possível carregar o conteúdo.",
       );
     } finally {
       setLoading(false);
@@ -79,21 +76,18 @@ export default function ConteudoDetailScreen() {
         <Text style={styles.author}>Por {content.author.name}</Text>
       ) : null}
 
-      {content.body ? (
+      {content.media_url ? (
         <Card>
-          <Text style={styles.body}>{content.body}</Text>
+          <ContentMediaPlayer
+            mediaUrl={content.media_url}
+            contentType={content.type}
+          />
         </Card>
       ) : null}
 
-      {content.media_url ? (
+      {content.body ? (
         <Card>
-          <Text style={styles.mediaLabel}>Multimédia</Text>
-          <Text
-            style={styles.mediaLink}
-            onPress={() => void Linking.openURL(content.media_url!)}
-          >
-            Abrir media
-          </Text>
+          <Text style={styles.body}>{content.body}</Text>
         </Card>
       ) : null}
 
@@ -153,11 +147,6 @@ const styles = StyleSheet.create({
     color: colors.contentTertiary,
     marginBottom: 8,
     textTransform: "uppercase",
-  },
-  mediaLink: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: colors.bordeaux,
   },
   error: {
     marginTop: 24,

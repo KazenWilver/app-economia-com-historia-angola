@@ -48,12 +48,11 @@ npm start
 - Detalhe de conteúdos (`/conteudo/[slug]`)
 - Jogar quiz com timer, submissão e resultados
 - Mapa com marcadores + lista de províncias e narrativas
-- Fórum: listar tópicos, criar tópico, ver e responder
+- Fórum: listar tópicos, criar (público/privado), ver e responder
 - Perfil editável + upload de avatar + logout
+- Players nativos de áudio, vídeo e imagem no detalhe de conteúdo
 
 ## Ainda por fazer (iterações seguintes)
 
-- Players nativos de áudio/vídeo
 - Polish visual Apple-like
 - GeoJSON completo como na web
-- Tópicos privados no mobile
