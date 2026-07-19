@@ -1,157 +1,50 @@
-"use client";
-
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { buildAuthHeaders, getStoredToken } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth";
-import { AudioPlayer } from "@/components/content/AudioPlayer";
-import { CommentSection } from "@/components/content/CommentSection";
-import { ContentImage } from "@/components/content/ContentImage";
-import { ContentStatistics } from "@/components/content/ContentStatistics";
-import { VideoPlayer } from "@/components/content/VideoPlayer";
-import {
-  API_URL,
-  type ContentDetail,
-  type ContentDetailResponse,
-  type ContentType,
-  isImageMediaUrl,
-} from "@/components/content/types";
-import {
-  Badge,
-  type BadgeType,
-  Button,
-  Card,
-  CardContent,
-  Skeleton,
-} from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { ContentArticleView } from "@/components/content/ContentArticleView";
+import { ContentExclusiveGate } from "@/components/content/ContentExclusiveGate";
+import type { ContentDetailResponse } from "@/components/content/types";
+import { Card, CardContent } from "@/components/ui";
+import { serverApiFetch } from "@/lib/server-api";
 
-const TYPE_LABELS: Record<ContentType, string> = {
-  texto: "Texto",
-  audio: "Áudio",
-  video: "Vídeo",
-  podcast: "Podcast",
-  jindungo: "Jindungo",
-};
+export const dynamic = "force-dynamic";
 
-const BADGE_TYPES: Record<ContentType, BadgeType> = {
-  texto: "text",
-  audio: "audio",
-  video: "video",
-  podcast: "podcast",
-  jindungo: "jindungo",
-};
-
-function formatPublishedDate(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-
-  return new Date(value).toLocaleDateString("pt-PT", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+interface ContentDetailPageProps {
+  params: Promise<{ slug: string }>;
 }
 
-export default function ContentDetailPage() {
-  const params = useParams<{ slug: string }>();
-  const slug = params.slug;
-  const { token } = useAuth();
-  const publicToken = token ?? getStoredToken();
-  const [content, setContent] = useState<ContentDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [requiresAuth, setRequiresAuth] = useState(false);
-  const [notFound, setNotFound] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const fetchContent = useCallback(async () => {
-    if (!slug) {
-      return;
-    }
-
-    setIsLoading(true);
-    setRequiresAuth(false);
-    setNotFound(false);
-    setErrorMessage(null);
-
-    try {
-      const response = await fetch(`${API_URL}/contents/${slug}`, {
-        headers: buildAuthHeaders(publicToken),
-      });
-
-      if (response.status === 401) {
-        setRequiresAuth(true);
-        setContent(null);
-        return;
-      }
-
-      if (response.status === 404) {
-        setNotFound(true);
-        setContent(null);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to load content");
-      }
-
-      const data = (await response.json()) as ContentDetailResponse;
-      setContent(data.data);
-    } catch {
-      setErrorMessage("Não foi possível carregar o conteúdo.");
-      setContent(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [slug, publicToken]);
-
-  useEffect(() => {
-    void fetchContent();
-  }, [fetchContent]);
-
-  const publishedDate = content ? formatPublishedDate(content.published_at) : null;
-  const showAudioPlayer =
-    content?.media_url &&
-    (content.type === "audio" || content.type === "podcast");
-  const showVideoPlayer = content?.media_url && content.type === "video";
-  const showImageMedia =
-    content?.media_url && isImageMediaUrl(content.media_url);
-
+function BackLink() {
   return (
-    <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <Link
-        href="/explorar"
-        className="mb-6 inline-flex items-center gap-2 font-display text-sm font-semibold text-bordeaux transition-colors hover:text-bordeaux/80 dark:text-bordeaux-dark dark:hover:text-bordeaux-dark/80"
-      >
-        <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden />
-        Voltar a Explorar
-      </Link>
+    <Link
+      href="/explorar"
+      className="mb-6 inline-flex items-center gap-2 font-display text-sm font-semibold text-bordeaux transition-colors hover:text-bordeaux/80 dark:text-bordeaux-dark dark:hover:text-bordeaux-dark/80"
+    >
+      <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden />
+      Voltar a Explorar
+    </Link>
+  );
+}
 
-      {isLoading ? (
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-40 w-full" />
-        </div>
-      ) : requiresAuth ? (
-        <Card hoverLift={false}>
-          <CardContent className="space-y-4 py-10 text-center">
-            <p className="font-display text-xl font-bold tracking-display text-content-primary dark:text-content-dark-primary">
-              Conteúdo exclusivo
-            </p>
-            <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
-              Inicia sessão para aceder a este conteúdo exclusivo.
-            </p>
-            <Link href="/login">
-              <Button type="button">Iniciar sessão</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : notFound ? (
+export default async function ContentDetailPage({
+  params,
+}: ContentDetailPageProps) {
+  const { slug } = await params;
+  const result = await serverApiFetch<ContentDetailResponse>(
+    `/contents/${slug}`,
+    { revalidate: false },
+  );
+
+  if (result.ok) {
+    return <ContentArticleView content={result.data.data} />;
+  }
+
+  if (result.status === 401 || result.status === 403) {
+    return <ContentExclusiveGate slug={slug} />;
+  }
+
+  if (result.status === 404) {
+    return (
+      <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+        <BackLink />
         <Card hoverLift={false}>
           <CardContent className="py-10 text-center">
             <p className="font-display text-xl font-bold tracking-display text-content-primary dark:text-content-dark-primary">
@@ -162,73 +55,20 @@ export default function ContentDetailPage() {
             </p>
           </CardContent>
         </Card>
-      ) : errorMessage ? (
-        <Card>
-          <CardContent className="py-10 text-center">
-            <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
-              {errorMessage}
-            </p>
-          </CardContent>
-        </Card>
-      ) : content ? (
-        <article className="space-y-8">
-          <header className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <Badge type={BADGE_TYPES[content.type]}>
-                {TYPE_LABELS[content.type]}
-              </Badge>
-              {content.is_exclusive ? (
-                <Badge type="jindungo" className="normal-case">
-                  Exclusivo
-                </Badge>
-              ) : null}
-              {content.category ? (
-                <span className="text-xs font-medium tracking-display text-content-tertiary dark:text-content-dark-tertiary">
-                  {content.category.name}
-                </span>
-              ) : null}
-            </div>
+      </div>
+    );
+  }
 
-            <h1 className="font-display text-3xl font-bold tracking-display text-content-primary dark:text-content-dark-primary sm:text-4xl">
-              {content.title}
-            </h1>
-
-            <div className="flex flex-wrap gap-4 text-sm text-content-secondary dark:text-content-dark-secondary">
-              {content.author ? <span>Por {content.author.name}</span> : null}
-              {publishedDate ? <span>Publicado em {publishedDate}</span> : null}
-            </div>
-          </header>
-
-          {showVideoPlayer ? (
-            <VideoPlayer src={content.media_url!} title={content.title} />
-          ) : null}
-
-          {showAudioPlayer ? (
-            <AudioPlayer src={content.media_url!} title={content.title} />
-          ) : null}
-
-          {showImageMedia ? (
-            <ContentImage src={content.media_url!} alt={content.title} />
-          ) : null}
-
-          {content.body ? (
-            <div
-              className={cn(
-                "prose max-w-none text-content-secondary dark:prose-invert dark:text-content-dark-secondary",
-                "whitespace-pre-wrap leading-7",
-              )}
-            >
-              {content.body}
-            </div>
-          ) : null}
-
-          {content.statistics_data ? (
-            <ContentStatistics data={content.statistics_data} />
-          ) : null}
-
-          <CommentSection contentSlug={content.slug} />
-        </article>
-      ) : null}
+  return (
+    <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+      <BackLink />
+      <Card>
+        <CardContent className="py-10 text-center">
+          <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
+            Não foi possível carregar o conteúdo.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
