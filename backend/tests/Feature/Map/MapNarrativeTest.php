@@ -6,12 +6,19 @@ use App\Models\MapNarrative;
 use App\Models\Province;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class MapNarrativeTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
+    }
 
     private function createProvince(): Province
     {
@@ -50,6 +57,57 @@ class MapNarrativeTest extends TestCase
             ->assertJsonPath('features.0.geometry.type', 'Point')
             ->assertJsonPath('features.0.geometry.coordinates.0', 13.2343)
             ->assertJsonPath('features.0.geometry.coordinates.1', -8.8368);
+
+        $cacheControl = (string) $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('public', $cacheControl);
+        $this->assertStringContainsString('max-age=300', $cacheControl);
+        $this->assertStringContainsString('stale-while-revalidate=3600', $cacheControl);
+    }
+
+    public function test_provinces_geojson_is_cached_between_requests(): void
+    {
+        $this->createProvince();
+
+        $this->getJson('/api/provinces/geojson')
+            ->assertOk()
+            ->assertJsonCount(1, 'features');
+
+        Province::query()->create([
+            'name' => 'Benguela',
+            'code' => 'BGU',
+            'capital' => 'Benguela',
+            'latitude' => -12.5763,
+            'longitude' => 13.4055,
+        ]);
+
+        // Sem invalidação, a resposta continua a vir da cache (1 feature).
+        $this->getJson('/api/provinces/geojson')
+            ->assertOk()
+            ->assertJsonCount(1, 'features');
+    }
+
+    public function test_creating_narrative_busts_provinces_geojson_cache(): void
+    {
+        $province = $this->createProvince();
+        $admin = User::factory()->admin()->create();
+
+        $this->getJson('/api/provinces/geojson')
+            ->assertOk()
+            ->assertJsonPath('features.0.properties.narratives_count', 0);
+
+        Sanctum::actingAs($admin);
+
+        $this->postJson('/api/map-narratives', [
+            'province_id' => $province->id,
+            'title' => 'Luanda colonial',
+            'narrative_text' => 'História económica de Luanda.',
+            'period' => 'colonial',
+            'display_order' => 1,
+        ])->assertCreated();
+
+        $this->getJson('/api/provinces/geojson')
+            ->assertOk()
+            ->assertJsonPath('features.0.properties.narratives_count', 1);
     }
 
     public function test_geojson_prefers_polygon_over_point_when_available(): void

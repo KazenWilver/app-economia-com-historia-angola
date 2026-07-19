@@ -10,10 +10,35 @@ use App\Models\MapNarrative;
 use App\Models\Province;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Cache;
 
 class MapNarrativeController extends Controller
 {
+    private const GEOJSON_CACHE_TTL_SECONDS = 86400;
+
+    private const GEOJSON_VERSION_KEY = 'provinces:geojson:version';
+
     public function provincesGeoJson(): JsonResponse
+    {
+        $version = (int) Cache::get(self::GEOJSON_VERSION_KEY, 1);
+        $cacheKey = "provinces:geojson:v{$version}";
+
+        /** @var array{type: string, features: list<array<string, mixed>>} $payload */
+        $payload = Cache::remember(
+            $cacheKey,
+            self::GEOJSON_CACHE_TTL_SECONDS,
+            fn (): array => $this->buildProvincesGeoJson(),
+        );
+
+        return response()->json($payload, 200, [
+            'Cache-Control' => 'public, max-age=300, stale-while-revalidate=3600',
+        ]);
+    }
+
+    /**
+     * @return array{type: string, features: list<array<string, mixed>>}
+     */
+    private function buildProvincesGeoJson(): array
     {
         $provinces = Province::query()
             ->withCount('narratives')
@@ -23,12 +48,13 @@ class MapNarrativeController extends Controller
         $features = $provinces
             ->map(fn (Province $province): ?array => $this->provinceToGeoJsonFeature($province))
             ->filter()
-            ->values();
+            ->values()
+            ->all();
 
-        return response()->json([
+        return [
             'type' => 'FeatureCollection',
             'features' => $features,
-        ]);
+        ];
     }
 
     /**
@@ -131,6 +157,7 @@ class MapNarrativeController extends Controller
         ]);
 
         $narrative->load('province');
+        $this->bustProvincesGeoJsonCache();
 
         return response()->json([
             'message' => 'Narrativa criada com sucesso.',
@@ -144,6 +171,7 @@ class MapNarrativeController extends Controller
     ): JsonResponse {
         $mapNarrative->update($request->validated());
         $mapNarrative->load('province');
+        $this->bustProvincesGeoJsonCache();
 
         return response()->json([
             'message' => 'Narrativa actualizada com sucesso.',
@@ -154,9 +182,16 @@ class MapNarrativeController extends Controller
     public function destroy(MapNarrative $mapNarrative): JsonResponse
     {
         $mapNarrative->delete();
+        $this->bustProvincesGeoJsonCache();
 
         return response()->json([
             'message' => 'Narrativa eliminada com sucesso.',
         ]);
+    }
+
+    private function bustProvincesGeoJsonCache(): void
+    {
+        $version = (int) Cache::get(self::GEOJSON_VERSION_KEY, 1);
+        Cache::forever(self::GEOJSON_VERSION_KEY, $version + 1);
     }
 }
