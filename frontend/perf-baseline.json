@@ -1,0 +1,95 @@
+﻿{
+  "measured_at": "2026-07-19T21:46:11.4363513+01:00",
+  "mode": "production",
+  "command": "next build && next start -p 3005",
+  "node": "v24.13.0",
+  "next_build_id": "mpqeXkdX5BLBS_RZTSNTp",
+  "port": 3005,
+  "runs_per_route": 3,
+  "note": "Baseline HTML via curl (TTFB/total). Nao inclui hidratacao JS nem fetch a API no browser.",
+  "conclusion": {
+    "html_delivery": "Rapido em producao (TTFB tipico 5-15 ms nas rotas medidas). O Next.js em next start NAO e o gargalo do HTML.",
+    "perceived_slowness_likely_from": [
+      "next dev (compilacao sob pedido) vs next start",
+      "First Load JS (~103-148 kB) + hidratacao de paginas use client",
+      "Waterfall AuthContext (/auth/me) antes dos dados da pagina",
+      "Fetches client-side a API Laravel apos o paint inicial"
+    ],
+    "next_task": "RSC nas rotas publicas + Auth a nao bloquear o primeiro paint"
+  },
+  "build_first_load_js_kb": {
+    "/": 148,
+    "/explorar": 125,
+    "/ranking": 121,
+    "/mapa": 118,
+    "/quiz": 120,
+    "/forum": 121,
+    "/login": 121,
+    "shared_by_all": 103
+  },
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "bytes": 22083,
+      "ttfb_ms_avg": 10.2,
+      "ttfb_ms_min": 3.8,
+      "total_ms_avg": 10.7,
+      "total_ms_min": 4.3
+    },
+    {
+      "path": "/explorar",
+      "status": 200,
+      "bytes": 33222,
+      "ttfb_ms_avg": 5.3,
+      "ttfb_ms_min": 3.4,
+      "total_ms_avg": 6.1,
+      "total_ms_min": 4.4
+    },
+    {
+      "path": "/ranking",
+      "status": 200,
+      "bytes": 25707,
+      "ttfb_ms_avg": 8.7,
+      "ttfb_ms_min": 4.8,
+      "total_ms_avg": 9.4,
+      "total_ms_min": 5.7
+    },
+    {
+      "path": "/mapa",
+      "status": 200,
+      "bytes": 23985,
+      "ttfb_ms_avg": 4.6,
+      "ttfb_ms_min": 3.5,
+      "total_ms_avg": 5.3,
+      "total_ms_min": 4.1
+    },
+    {
+      "path": "/quiz",
+      "status": 200,
+      "bytes": 26466,
+      "ttfb_ms_avg": 5.1,
+      "ttfb_ms_min": 3.6,
+      "total_ms_avg": 5.8,
+      "total_ms_min": 4.2
+    },
+    {
+      "path": "/forum",
+      "status": 200,
+      "bytes": 27599,
+      "ttfb_ms_avg": 12.9,
+      "ttfb_ms_min": 4.9,
+      "total_ms_avg": 14.4,
+      "total_ms_min": 5.8
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "bytes": 20509,
+      "ttfb_ms_avg": 4.8,
+      "ttfb_ms_min": 3.5,
+      "total_ms_avg": 5.3,
+      "total_ms_min": 4.0
+    }
+  ]
+}
