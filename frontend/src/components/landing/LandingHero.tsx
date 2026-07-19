@@ -61,7 +61,7 @@ function AngolaMap() {
 }
 
 export function LandingHero() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
@@ -110,7 +110,8 @@ export function LandingHero() {
     { scope: containerRef },
   );
 
-  const showExplorar = !isLoading && isAuthenticated;
+  // CTA nunca espera por /auth/me: convidado vê "Entrar"; sessão local → "Explorar".
+  const showExplorar = isAuthenticated;
 
   return (
     <section

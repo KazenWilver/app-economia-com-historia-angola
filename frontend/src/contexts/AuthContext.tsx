@@ -4,7 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -26,7 +26,13 @@ export type { UpdateProfilePayload, User } from "@shared/types";
 interface AuthContextValue {
   user: User | null;
   token: string | null;
+  /**
+   * true apenas enquanto a sessão local (localStorage) ainda não foi lida.
+   * Não espera por /auth/me — a revalidação corre em background.
+   */
   isLoading: boolean;
+  /** true enquanto /auth/me está a revalidar a sessão em background. */
+  isValidating: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (
@@ -109,10 +115,12 @@ async function parseErrorMessage(response: Response): Promise<string> {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Estado inicial idêntico no servidor e no cliente (evita hydration mismatch).
+  // Estado inicial idêntico no servidor e no 1.º render do cliente (evita hydration mismatch).
+  // A sessão local é restaurada em useLayoutEffect — antes do paint do browser.
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isValidating, setIsValidating] = useState(false);
 
   const persistSession = useCallback((nextUser: User | null, nextToken: string | null) => {
     if (nextToken && nextUser) {
@@ -149,49 +157,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.user;
   }, [persistSession]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let cancelled = false;
 
-    const bootstrap = async () => {
-      const storedToken = readStoredToken();
-      const storedUser = readStoredUser();
+    const storedToken = readStoredToken();
+    const storedUser = readStoredUser();
 
-      if (!storedToken) {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-        return;
-      }
+    if (!storedToken) {
+      setIsLoading(false);
+      return;
+    }
 
-      if (storedUser && !cancelled) {
-        setToken(storedToken);
-        setUser(storedUser);
-        setIsLoading(false);
+    if (storedUser) {
+      // Sessão optimista: UI autenticada no 1.º paint; /auth/me em background.
+      setToken(storedToken);
+      setUser(storedUser);
+      setIsLoading(false);
+      setIsValidating(true);
 
-        try {
-          await fetchMe(storedToken);
-        } catch {
+      void fetchMe(storedToken)
+        .catch(() => {
           if (!cancelled) {
             clearSession();
           }
-        }
-        return;
-      }
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setIsValidating(false);
+          }
+        });
 
-      try {
-        await fetchMe(storedToken);
-      } catch {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    // Token sem user em cache (caso raro): só aqui esperamos /auth/me.
+    // Páginas públicas já mostram "Entrar"; rotas protegidas mantêm o ecrã de carga.
+    setToken(storedToken);
+    setIsValidating(true);
+
+    void fetchMe(storedToken)
+      .catch(() => {
         if (!cancelled) {
           clearSession();
         }
-      } finally {
+      })
+      .finally(() => {
         if (!cancelled) {
+          setIsValidating(false);
           setIsLoading(false);
         }
-      }
-    };
-
-    void bootstrap();
+      });
 
     return () => {
       cancelled = true;
@@ -388,6 +405,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       token,
       isLoading,
+      isValidating,
       isAuthenticated: Boolean(user && token),
       login,
       register,
@@ -402,6 +420,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       token,
       isLoading,
+      isValidating,
       login,
       register,
       updateProfile,

@@ -41,7 +41,8 @@ export function Header() {
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <ThemeToggle />
-          {!isLoading && isAuthenticated && user ? (
+          {/* Durante o bootstrap mostra "Entrar" (nunca slot vazio) para o 1.º paint fluir. */}
+          {isAuthenticated && user ? (
             <>
               <span className="hidden text-sm text-content-secondary dark:text-content-dark-secondary md:inline">
                 Olá,{" "}
@@ -67,14 +68,15 @@ export function Header() {
                 Sair
               </Button>
             </>
-          ) : !isLoading ? (
+          ) : (
             <Link
               href="/login"
               className="hidden min-h-11 items-center rounded-full bg-bordeaux px-5 font-display text-sm font-semibold tracking-display text-white transition-colors hover:bg-bordeaux/90 md:inline-flex dark:bg-bordeaux-dark dark:hover:bg-bordeaux-dark/90"
+              aria-busy={isLoading || undefined}
             >
               Entrar
             </Link>
-          ) : null}
+          )}
 
           <Navigation
             links={mainNavLinks}
