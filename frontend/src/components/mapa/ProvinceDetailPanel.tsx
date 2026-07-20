@@ -1,6 +1,7 @@
 "use client";
 
-import { MapPin, X } from "lucide-react";
+import { BookOpen, MapPin, X } from "lucide-react";
+import { AnimatedNarrativeCount } from "@/components/mapa/AnimatedNarrativeCount";
 import {
   formatMapPeriod,
   type MapProvinceDetail,
@@ -38,6 +39,8 @@ export function ProvinceDetailPanel({
     );
   }
 
+  const narrativesCount = province?.narratives.length ?? 0;
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-4 py-4 dark:border-border-dark sm:px-5">
@@ -57,6 +60,19 @@ export function ProvinceDetailPanel({
                   Capital: {province.capital}
                 </p>
               ) : null}
+              <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-petrol/25 bg-petrol/10 px-3 py-1 dark:border-petrol-dark/30 dark:bg-petrol-dark/15">
+                <BookOpen
+                  className="h-3.5 w-3.5 text-petrol dark:text-petrol-dark"
+                  strokeWidth={1.5}
+                />
+                <span className="text-xs font-semibold text-petrol dark:text-petrol-dark">
+                  <AnimatedNarrativeCount
+                    value={narrativesCount}
+                    className="font-mono tabular-nums"
+                  />{" "}
+                  {narrativesCount === 1 ? "narrativa" : "narrativas"}
+                </span>
+              </div>
             </>
           ) : null}
         </div>
@@ -74,7 +90,6 @@ export function ProvinceDetailPanel({
         ) : null}
       </header>
 
-      {/* Scroll dedicado às narrativas — não empurra a página inteira */}
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
         {isLoading ? (
           <div className="space-y-4">
