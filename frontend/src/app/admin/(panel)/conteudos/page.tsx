@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { adminFetch } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
 
@@ -66,43 +67,49 @@ export default function AdminContentsPage() {
     null,
   );
 
-  const loadContents = useCallback(async () => {
-    if (!token) {
-      return;
-    }
+  const loadContents = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!token) {
+        return;
+      }
 
-    setIsLoading(true);
-    setErrorMessage(null);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await adminFetch<AdminContentsResponse>("/admin/contents", {
-        token,
-      });
-      setContents(data.data);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar os conteúdos.",
-      );
-      setContents([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+      try {
+        const data = await adminFetch<AdminContentsResponse>("/admin/contents", {
+          token,
+        });
+        setContents(data.data);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar os conteúdos.",
+        );
+        setContents([]);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [token],
+  );
 
-  useEffect(() => {
-    void loadContents();
-  }, [loadContents]);
+  useLiveRefresh(loadContents, { enabled: Boolean(token) });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("created") === "1") {
       setSuccessMessage("Conteúdo criado com sucesso.");
+      void loadContents({ silent: true });
       router.replace("/admin/conteudos");
     }
-  }, [router]);
+  }, [loadContents, router]);
 
   const filteredContents = useMemo(() => {
     if (statusFilter === "all") {

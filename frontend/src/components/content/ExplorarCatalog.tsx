@@ -12,6 +12,7 @@ import {
   resolveMediaUrl,
 } from "@/components/content/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch, getStoredToken } from "@/lib/api";
 import {
   Badge,
@@ -104,27 +105,37 @@ export function ExplorarCatalog({
 
   const publicToken = token ?? getStoredToken();
 
-  const loadContents = useCallback(async (currentToken: string | null) => {
-    setIsFetching(true);
-    setErrorMessage(null);
+  const loadContents = useCallback(
+    async (
+      currentToken: string | null,
+      options?: { silent?: boolean },
+    ) => {
+      if (!options?.silent) {
+        setIsFetching(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const cacheKey = `GET:/contents:${currentToken ?? "guest"}`;
-      const data = await apiFetch<ContentsResponse>("/contents", {
-        token: currentToken,
-        cacheTtlMs: 0,
-        cacheKey,
-        skipCache: true,
-      });
-      setAllContents(data.data);
-    } catch {
-      setErrorMessage(
-        "Ocorreu um erro ao carregar os conteúdos. Tenta novamente mais tarde.",
-      );
-    } finally {
-      setIsFetching(false);
-    }
-  }, []);
+      try {
+        const cacheKey = `GET:/contents:${currentToken ?? "guest"}`;
+        const data = await apiFetch<ContentsResponse>("/contents", {
+          token: currentToken,
+          cacheTtlMs: 0,
+          cacheKey,
+          skipCache: true,
+        });
+        setAllContents(data.data);
+      } catch {
+        setErrorMessage(
+          "Ocorreu um erro ao carregar os conteúdos. Tenta novamente mais tarde.",
+        );
+      } finally {
+        if (!options?.silent) {
+          setIsFetching(false);
+        }
+      }
+    },
+    [],
+  );
 
   // Dados públicos vêm do RSC. Só refetch com token (exclusivos) ou após login/logout.
   useEffect(() => {
@@ -142,6 +153,19 @@ export function ExplorarCatalog({
 
     void loadContents(publicToken);
   }, [authLoading, publicToken, loadContents]);
+
+  useLiveRefresh(
+    useCallback(
+      (options?: { silent?: boolean }) => {
+        if (authLoading) {
+          return;
+        }
+        void loadContents(publicToken, options);
+      },
+      [authLoading, loadContents, publicToken],
+    ),
+    { runOnMount: false, enabled: !authLoading },
+  );
 
   const requiresAuth =
     activeFilter === "jindungo" && !isAuthenticated && !publicToken;

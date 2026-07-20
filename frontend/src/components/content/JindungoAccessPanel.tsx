@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Clock3, ShieldCheck, ShieldX, Sparkles } from "lucide-react";
 import type {
   JindungoAccessMutationResponse,
@@ -10,6 +10,7 @@ import type {
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 
 interface JindungoAccessPanelProps {
@@ -46,29 +47,36 @@ export function JindungoAccessPanel({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
-  const loadStatus = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMessage(null);
+  const loadStatus = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await apiFetch<JindungoAccessStatusResponse>(
-        "/jindungo/access",
-        { token, skipCache: true },
-      );
-      setStatus(data.data.status);
-      onAccessChange?.(data.data.has_access);
-    } catch {
-      setErrorMessage("Não foi possível verificar o estado do acesso Jindungo.");
-      setStatus("none");
-      onAccessChange?.(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [onAccessChange, token]);
+      try {
+        const data = await apiFetch<JindungoAccessStatusResponse>(
+          "/jindungo/access",
+          { token, skipCache: true },
+        );
+        setStatus(data.data.status);
+        onAccessChange?.(data.data.has_access);
+      } catch {
+        setErrorMessage(
+          "Não foi possível verificar o estado do acesso Jindungo.",
+        );
+        setStatus("none");
+        onAccessChange?.(false);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [onAccessChange, token],
+  );
 
-  useEffect(() => {
-    void loadStatus();
-  }, [loadStatus]);
+  useLiveRefresh(loadStatus);
 
   const submitRequest = async () => {
     setIsSubmitting(true);

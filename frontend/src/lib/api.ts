@@ -3,8 +3,10 @@ import {
   invalidateMemoryCache,
   setMemoryCache,
 } from "@/lib/memory-cache";
+import { notifyDataChanged } from "@/lib/data-refresh";
 
 export { invalidateMemoryCache };
+export { notifyDataChanged } from "@/lib/data-refresh";
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
@@ -90,6 +92,7 @@ export async function apiFetch<T>(
 
   if (method !== "GET") {
     invalidateMemoryCache("GET:");
+    notifyDataChanged();
   }
 
   return data;

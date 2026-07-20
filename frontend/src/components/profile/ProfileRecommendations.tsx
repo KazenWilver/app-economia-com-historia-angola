@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { BookOpen } from "lucide-react";
 import type { QuizRecommendation } from "@/components/quiz/quiz-types";
 import { Badge, type BadgeType } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
-import { API_URL, buildAuthHeaders, getStoredToken } from "@/lib/api";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
+import { apiFetch, getStoredToken, notifyDataChanged } from "@/lib/api";
 
 const BADGE_TYPES: Record<QuizRecommendation["content"]["type"], BadgeType> = {
   texto: "text",
@@ -45,39 +46,42 @@ export function ProfileRecommendations() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadRecommendations = useCallback(async () => {
-    const token = getStoredToken();
-    if (!token) {
-      setRecommendations([]);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const response = await fetch(`${API_URL}/recommendations`, {
-        headers: buildAuthHeaders(token),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to load recommendations");
+  const loadRecommendations = useCallback(
+    async (options?: { silent?: boolean }) => {
+      const token = getStoredToken();
+      if (!token) {
+        setRecommendations([]);
+        setIsLoading(false);
+        return;
       }
 
-      const data = (await response.json()) as RecommendationsResponse;
-      setRecommendations(data.data);
-    } catch {
-      setErrorMessage("Não foi possível carregar as recomendações.");
-      setRecommendations([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-  useEffect(() => {
-    void loadRecommendations();
-  }, [loadRecommendations]);
+      try {
+        const data = await apiFetch<RecommendationsResponse>(
+          "/recommendations",
+          {
+            token,
+            skipCache: true,
+          },
+        );
+        setRecommendations(data.data);
+      } catch {
+        setErrorMessage("Não foi possível carregar as recomendações.");
+        setRecommendations([]);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [],
+  );
+
+  useLiveRefresh(loadRecommendations);
 
   const markAsRead = async (recommendation: QuizRecommendation) => {
     if (recommendation.is_read) {
@@ -96,10 +100,11 @@ export function ProfileRecommendations() {
     );
 
     try {
-      await fetch(`${API_URL}/recommendations/${recommendation.id}/read`, {
+      await apiFetch(`/recommendations/${recommendation.id}/read`, {
         method: "PATCH",
-        headers: buildAuthHeaders(token),
+        token,
       });
+      notifyDataChanged();
     } catch {
       // Mantém o estado optimista; a próxima visita corrige se falhar.
     }

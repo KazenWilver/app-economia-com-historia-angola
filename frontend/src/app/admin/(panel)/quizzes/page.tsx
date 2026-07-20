@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { adminFetch } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
 
@@ -45,43 +46,49 @@ export default function AdminQuizzesPage() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [quizToDelete, setQuizToDelete] = useState<AdminQuiz | null>(null);
 
-  const loadQuizzes = useCallback(async () => {
-    if (!token) {
-      return;
-    }
+  const loadQuizzes = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!token) {
+        return;
+      }
 
-    setIsLoading(true);
-    setErrorMessage(null);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await adminFetch<AdminQuizzesResponse>("/admin/quizzes", {
-        token,
-      });
-      setQuizzes(data.data);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar os quizzes.",
-      );
-      setQuizzes([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+      try {
+        const data = await adminFetch<AdminQuizzesResponse>("/admin/quizzes", {
+          token,
+        });
+        setQuizzes(data.data);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar os quizzes.",
+        );
+        setQuizzes([]);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [token],
+  );
 
-  useEffect(() => {
-    void loadQuizzes();
-  }, [loadQuizzes]);
+  useLiveRefresh(loadQuizzes, { enabled: Boolean(token) });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("created") === "1") {
       setSuccessMessage("Quiz criado com sucesso.");
+      void loadQuizzes({ silent: true });
       router.replace("/admin/quizzes");
     }
-  }, [router]);
+  }, [loadQuizzes, router]);
 
   const filteredQuizzes = useMemo(() => {
     if (statusFilter === "all") {

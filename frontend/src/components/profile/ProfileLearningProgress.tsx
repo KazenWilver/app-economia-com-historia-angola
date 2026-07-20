@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { Route } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { LearningPathResponse } from "@shared/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 
 export function ProfileLearningProgress() {
@@ -15,22 +16,24 @@ export function ProfileLearningProgress() {
   const [label, setLabel] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setIsLoading(false);
-      return;
-    }
+  const loadProgress = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!isAuthenticated) {
+        setIsLoading(false);
+        setPercent(null);
+        setLabel("");
+        return;
+      }
 
-    let cancelled = false;
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
 
-    void (async () => {
       try {
         const data = await apiFetch<LearningPathResponse>("/learning-path", {
           cacheTtlMs: 15_000,
+          skipCache: Boolean(options?.silent),
         });
-        if (cancelled) {
-          return;
-        }
         setPercent(data.meta.percent);
         setLabel(
           data.data
@@ -38,21 +41,22 @@ export function ProfileLearningProgress() {
             : "Sem trilho activo",
         );
       } catch {
-        if (!cancelled) {
-          setPercent(null);
-          setLabel("Indisponível");
-        }
+        setPercent(null);
+        setLabel("Indisponível");
       } finally {
-        if (!cancelled) {
+        if (!options?.silent) {
           setIsLoading(false);
         }
       }
-    })();
+    },
+    [isAuthenticated],
+  );
 
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated]);
+  useLiveRefresh(loadProgress, { enabled: isAuthenticated });
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (isLoading) {
     return <Skeleton className="h-36 w-full" />;

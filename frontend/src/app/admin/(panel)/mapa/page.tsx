@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { adminFetch } from "@/lib/admin-api";
 
 export default function AdminMapaPage() {
@@ -25,41 +26,47 @@ export default function AdminMapaPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
 
-  const loadNarratives = useCallback(async () => {
-    if (!token) return;
+  const loadNarratives = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!token) return;
 
-    setIsLoading(true);
-    setErrorMessage(null);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await adminFetch<AdminMapNarrativesResponse>(
-        "/admin/map-narratives",
-        { token },
-      );
-      setNarratives(data.data);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar as narrativas.",
-      );
-      setNarratives([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+      try {
+        const data = await adminFetch<AdminMapNarrativesResponse>(
+          "/admin/map-narratives",
+          { token },
+        );
+        setNarratives(data.data);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar as narrativas.",
+        );
+        setNarratives([]);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [token],
+  );
 
-  useEffect(() => {
-    void loadNarratives();
-  }, [loadNarratives]);
+  useLiveRefresh(loadNarratives, { enabled: Boolean(token) });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("created") === "1") {
       setSuccessMessage("Narrativa criada com sucesso.");
+      void loadNarratives({ silent: true });
       router.replace("/admin/mapa");
     }
-  }, [router]);
+  }, [loadNarratives, router]);
 
   const provinces = useMemo(() => {
     const map = new Map<number, string>();

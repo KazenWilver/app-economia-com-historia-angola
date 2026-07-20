@@ -1,7 +1,7 @@
 import { API_URL } from "@/lib/api";
-import {
-  ADMIN_TOKEN_STORAGE_KEY,
-} from "@/contexts/AdminAuthContext";
+import { notifyDataChanged } from "@/lib/data-refresh";
+import { invalidateMemoryCache } from "@/lib/memory-cache";
+import { ADMIN_TOKEN_STORAGE_KEY } from "@/contexts/AdminAuthContext";
 
 export function getStoredAdminToken(): string | null {
   if (typeof window === "undefined") {
@@ -60,6 +60,7 @@ export async function adminFetch<T>(
   options: RequestInit & { token?: string | null } = {},
 ): Promise<T> {
   const { token, headers, ...rest } = options;
+  const method = (rest.method ?? "GET").toUpperCase();
 
   const response = await fetch(`${API_URL}${path}`, {
     ...rest,
@@ -68,6 +69,11 @@ export async function adminFetch<T>(
 
   if (!response.ok) {
     throw new Error(await parseApiError(response));
+  }
+
+  if (method !== "GET") {
+    invalidateMemoryCache();
+    notifyDataChanged();
   }
 
   if (response.status === 204) {

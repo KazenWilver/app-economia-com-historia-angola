@@ -10,7 +10,7 @@ import {
   Route,
   Sparkles,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type {
   LearningPath,
   LearningPathMeta,
@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 
 const STEP_ICONS: Record<LearningStepType, typeof BookOpen> = {
@@ -66,13 +67,16 @@ export function LearningPathView() {
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [completingId, setCompletingId] = useState<number | null>(null);
 
-  const loadPath = useCallback(async () => {
-    setIsLoading(true);
+  const loadPath = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setIsLoading(true);
+    }
     setErrorMessage(null);
 
     try {
       const data = await apiFetch<LearningPathResponse>("/learning-path", {
         cacheTtlMs: 0,
+        skipCache: true,
       });
       setPath(data.data);
       setMeta(data.meta);
@@ -81,13 +85,13 @@ export function LearningPathView() {
       setMeta(null);
       setErrorMessage("Não foi possível carregar o trilho educativo.");
     } finally {
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
-  useEffect(() => {
-    void loadPath();
-  }, [loadPath, isAuthenticated]);
+  useLiveRefresh(loadPath, { enabled: true });
 
   const handleComplete = async (step: LearningPathStep) => {
     if (!isAuthenticated) {

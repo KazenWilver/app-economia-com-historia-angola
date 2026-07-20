@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { Trophy } from "lucide-react";
 import { QuizCard } from "@/components/quiz/QuizCard";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 
 function QuizCardSkeleton() {
@@ -30,26 +31,29 @@ export default function QuizListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadQuizzes = useCallback(async () => {
-    setIsLoading(true);
+  const loadQuizzes = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setIsLoading(true);
+    }
     setErrorMessage(null);
 
     try {
       const data = await apiFetch<PublicQuizzesResponse>("/quizzes", {
         cacheTtlMs: 60_000,
+        skipCache: Boolean(options?.silent),
       });
       setQuizzes(data.data);
     } catch {
       setQuizzes([]);
       setErrorMessage("Não foi possível carregar os quizzes.");
     } finally {
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
-  useEffect(() => {
-    void loadQuizzes();
-  }, [loadQuizzes]);
+  useLiveRefresh(loadQuizzes);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">

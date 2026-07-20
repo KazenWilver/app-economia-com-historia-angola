@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   BarChart3,
   FileText,
@@ -19,6 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { adminFetch } from "@/lib/admin-api";
 
 interface SummaryCard {
@@ -73,34 +74,39 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadStats = useCallback(async () => {
-    if (!token) {
-      return;
-    }
+  const loadStats = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!token) {
+        return;
+      }
 
-    setIsLoading(true);
-    setErrorMessage(null);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await adminFetch<AdminStatsResponse>("/admin/stats", {
-        token,
-      });
-      setStats(data.data);
-    } catch (error) {
-      setStats(null);
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar as estatísticas.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+      try {
+        const data = await adminFetch<AdminStatsResponse>("/admin/stats", {
+          token,
+        });
+        setStats(data.data);
+      } catch (error) {
+        setStats(null);
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar as estatísticas.",
+        );
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [token],
+  );
 
-  useEffect(() => {
-    void loadStats();
-  }, [loadStats]);
+  useLiveRefresh(loadStats, { enabled: Boolean(token) });
 
   return (
     <div className="space-y-6">

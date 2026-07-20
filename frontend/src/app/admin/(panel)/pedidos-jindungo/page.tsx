@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Check, ShieldAlert, X } from "lucide-react";
 import type {
   AdminJindungoAccessRequestsResponse,
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { adminFetch } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
 
@@ -65,37 +66,44 @@ export default function AdminJindungoAccessPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
 
-  const loadRequests = useCallback(async () => {
-    if (!token) {
-      return;
-    }
+  const loadRequests = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!token) {
+        return;
+      }
 
-    setIsLoading(true);
-    setErrorMessage(null);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const query =
-        statusFilter === "all" ? "" : `?status=${encodeURIComponent(statusFilter)}`;
-      const data = await adminFetch<AdminJindungoAccessRequestsResponse>(
-        `/admin/jindungo-access-requests${query}`,
-        { token },
-      );
-      setRequests(data.data);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar os pedidos.",
-      );
-      setRequests([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [statusFilter, token]);
+      try {
+        const query =
+          statusFilter === "all"
+            ? ""
+            : `?status=${encodeURIComponent(statusFilter)}`;
+        const data = await adminFetch<AdminJindungoAccessRequestsResponse>(
+          `/admin/jindungo-access-requests${query}`,
+          { token },
+        );
+        setRequests(data.data);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar os pedidos.",
+        );
+        setRequests([]);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [statusFilter, token],
+  );
 
-  useEffect(() => {
-    void loadRequests();
-  }, [loadRequests]);
+  useLiveRefresh(loadRequests, { enabled: Boolean(token) });
 
   const pendingCount = useMemo(
     () => requests.filter((item) => item.status === "pending").length,

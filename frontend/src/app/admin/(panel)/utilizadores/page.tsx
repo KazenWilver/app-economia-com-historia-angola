@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Shield, UserCheck, UserX } from "lucide-react";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import {
@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { adminFetch } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
 
@@ -51,34 +52,39 @@ export default function AdminUsersPage() {
     null,
   );
 
-  const loadUsers = useCallback(async () => {
-    if (!token) {
-      return;
-    }
+  const loadUsers = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!token) {
+        return;
+      }
 
-    setIsLoading(true);
-    setErrorMessage(null);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await adminFetch<AdminUsersResponse>("/admin/users", {
-        token,
-      });
-      setUsers(data.data);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar os utilizadores.",
-      );
-      setUsers([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+      try {
+        const data = await adminFetch<AdminUsersResponse>("/admin/users", {
+          token,
+        });
+        setUsers(data.data);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar os utilizadores.",
+        );
+        setUsers([]);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [token],
+  );
 
-  useEffect(() => {
-    void loadUsers();
-  }, [loadUsers]);
+  useLiveRefresh(loadUsers, { enabled: Boolean(token) });
 
   const filteredUsers = useMemo(() => {
     if (statusFilter === "active") {

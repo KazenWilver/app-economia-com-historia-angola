@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { adminFetch } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
 
@@ -44,40 +45,46 @@ export default function AdminForumPage() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [topicToDelete, setTopicToDelete] = useState<AdminTopic | null>(null);
 
-  const loadTopics = useCallback(async () => {
-    if (!token) return;
+  const loadTopics = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!token) return;
 
-    setIsLoading(true);
-    setErrorMessage(null);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await adminFetch<AdminTopicsResponse>("/admin/topics", {
-        token,
-      });
-      setTopics(data.data);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível carregar os tópicos.",
-      );
-      setTopics([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+      try {
+        const data = await adminFetch<AdminTopicsResponse>("/admin/topics", {
+          token,
+        });
+        setTopics(data.data);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar os tópicos.",
+        );
+        setTopics([]);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [token],
+  );
 
-  useEffect(() => {
-    void loadTopics();
-  }, [loadTopics]);
+  useLiveRefresh(loadTopics, { enabled: Boolean(token) });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("created") === "1") {
       setSuccessMessage("Tópico criado com sucesso.");
+      void loadTopics({ silent: true });
       router.replace("/admin/forum");
     }
-  }, [router]);
+  }, [loadTopics, router]);
 
   const filteredTopics = useMemo(() => {
     if (filter === "visible") {

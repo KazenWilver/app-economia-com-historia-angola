@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { MessageSquarePlus } from "lucide-react";
 import { TopicCard } from "@/components/forum/TopicCard";
 import type { PublicTopicsResponse } from "@/components/forum/forum-types";
@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 
 function TopicCardSkeleton() {
@@ -54,29 +55,7 @@ export default function ForumPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadTopics();
-  }, [loadTopics]);
-
-  useEffect(() => {
-    const refresh = () => {
-      void loadTopics({ silent: true });
-    };
-
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") {
-        refresh();
-      }
-    };
-
-    window.addEventListener("focus", refresh);
-    document.addEventListener("visibilitychange", onVisibility);
-
-    return () => {
-      window.removeEventListener("focus", refresh);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [loadTopics]);
+  useLiveRefresh(loadTopics);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">

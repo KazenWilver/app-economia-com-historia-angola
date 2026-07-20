@@ -15,6 +15,7 @@ import type { PublicQuizzesResponse } from "@/components/quiz/quiz-types";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 
 function RankingSkeleton() {
@@ -89,7 +90,7 @@ export function RankingPageClient({
     }
   }, [initialProvinces.length, initialQuizzes.length]);
 
-  const loadRankings = useCallback(async () => {
+  const loadRankings = useCallback(async (options?: { silent?: boolean }) => {
     if (scope === "region" && selectedProvinceId === "all") {
       setRankings([]);
       setMeta({
@@ -98,17 +99,22 @@ export function RankingPageClient({
         province_id: null,
         total: 0,
       });
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
       return;
     }
 
-    setIsLoading(true);
+    if (!options?.silent) {
+      setIsLoading(true);
+    }
     setErrorMessage(null);
 
     try {
       const data = await apiFetch<RankingsResponse>(rankingsPath, {
         cacheTtlMs: 30_000,
         cacheKey: rankingsPath,
+        skipCache: Boolean(options?.silent),
       });
 
       setRankings(data.data);
@@ -118,7 +124,9 @@ export function RankingPageClient({
       setMeta(null);
       setErrorMessage("Não foi possível carregar o ranking.");
     } finally {
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
     }
   }, [rankingsPath, scope, selectedProvinceId, selectedQuizId]);
 
@@ -133,6 +141,8 @@ export function RankingPageClient({
 
     void loadRankings();
   }, [filtersDirty, loadRankings]);
+
+  useLiveRefresh(loadRankings, { runOnMount: false });
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">

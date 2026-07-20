@@ -21,6 +21,7 @@ import type {
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 
 const InteractiveMap = dynamic(
@@ -46,23 +47,33 @@ export default function MapPage() {
   const [immersive, setImmersive] = useState(false);
   const [nightMode, setNightMode] = useState(false);
 
-  const loadProvince = useCallback(async (provinceId: number) => {
-    setIsLoadingProvince(true);
-    setErrorMessage(null);
+  const loadProvince = useCallback(
+    async (provinceId: number, options?: { silent?: boolean }) => {
+      if (!options?.silent) {
+        setIsLoadingProvince(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await apiFetch<MapProvinceDetailResponse>(
-        `/provinces/${provinceId}`,
-        { cacheTtlMs: 60_000 },
-      );
-      setProvince(data.data);
-    } catch {
-      setProvince(null);
-      setErrorMessage("Não foi possível carregar a província seleccionada.");
-    } finally {
-      setIsLoadingProvince(false);
-    }
-  }, []);
+      try {
+        const data = await apiFetch<MapProvinceDetailResponse>(
+          `/provinces/${provinceId}`,
+          {
+            cacheTtlMs: 60_000,
+            skipCache: Boolean(options?.silent),
+          },
+        );
+        setProvince(data.data);
+      } catch {
+        setProvince(null);
+        setErrorMessage("Não foi possível carregar a província seleccionada.");
+      } finally {
+        if (!options?.silent) {
+          setIsLoadingProvince(false);
+        }
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (selectedProvinceId === null) {
@@ -72,6 +83,19 @@ export default function MapPage() {
 
     void loadProvince(selectedProvinceId);
   }, [loadProvince, selectedProvinceId]);
+
+  useLiveRefresh(
+    useCallback(
+      (options?: { silent?: boolean }) => {
+        if (selectedProvinceId === null) {
+          return;
+        }
+        void loadProvince(selectedProvinceId, options);
+      },
+      [loadProvince, selectedProvinceId],
+    ),
+    { runOnMount: false, enabled: selectedProvinceId !== null },
+  );
 
   const handleProvinceSelect = (provinceId: number) => {
     setSelectedProvinceId(provinceId);
