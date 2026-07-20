@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { User } from "lucide-react";
 import { ProfileForm } from "@/components/profile/ProfileForm";
+import { ProfileLearningProgress } from "@/components/profile/ProfileLearningProgress";
 import { ProfileRecommendations } from "@/components/profile/ProfileRecommendations";
 import { ProfileShortcuts } from "@/components/profile/ProfileShortcuts";
 import {
@@ -177,7 +178,10 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        <ProfileShortcuts />
+        <div className="space-y-6">
+          <ProfileLearningProgress />
+          <ProfileShortcuts />
+        </div>
       </div>
 
       <div className="mt-6">

@@ -87,3 +87,12 @@ export type {
   QuizMutationResponse,
   QuizQuestion,
 } from "./quiz";
+
+export type {
+  LearningPath,
+  LearningPathCompleteResponse,
+  LearningPathMeta,
+  LearningPathResponse,
+  LearningPathStep,
+  LearningStepType,
+} from "./learning-path";

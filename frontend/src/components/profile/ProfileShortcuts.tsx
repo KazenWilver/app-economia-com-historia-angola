@@ -5,12 +5,19 @@ import {
   BookOpen,
   Map,
   MessageSquare,
+  Route,
   Sparkles,
   Trophy,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 const shortcuts = [
+  {
+    href: "/trilho",
+    label: "Trilho educativo",
+    description: "Segue o percurso guiado e acompanha o progresso.",
+    icon: Route,
+  },
   {
     href: "/explorar",
     label: "Explorar conteúdos",

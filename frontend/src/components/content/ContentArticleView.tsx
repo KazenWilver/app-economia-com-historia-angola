@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { LearningPathContentTracker } from "@/components/learning/LearningPathContentTracker";
 import { AudioPlayer } from "@/components/content/AudioPlayer";
 import { CommentSection } from "@/components/content/CommentSection";
 import { ContentImage } from "@/components/content/ContentImage";
@@ -58,6 +59,7 @@ export function ContentArticleView({ content }: ContentArticleViewProps) {
 
   return (
     <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+      <LearningPathContentTracker slug={content.slug} />
       <Link
         href="/explorar"
         className="mb-6 inline-flex items-center gap-2 font-display text-sm font-semibold text-bordeaux transition-colors hover:text-bordeaux/80 dark:text-bordeaux-dark dark:hover:text-bordeaux-dark/80"

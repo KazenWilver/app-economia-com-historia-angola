@@ -8,6 +8,7 @@ use App\Http\Resources\QuizAttemptResource;
 use App\Http\Resources\RecommendationResource;
 use App\Models\Question;
 use App\Models\Quiz;
+use App\Services\LearningPathService;
 use App\Services\QuizScoringService;
 use App\Services\RecommendationService;
 use Illuminate\Http\JsonResponse;
@@ -17,6 +18,7 @@ class QuizAttemptController extends Controller
     public function __construct(
         private readonly QuizScoringService $quizScoringService,
         private readonly RecommendationService $recommendationService,
+        private readonly LearningPathService $learningPathService,
     ) {}
 
     public function store(StoreQuizAttemptRequest $request, Quiz $quiz): JsonResponse
@@ -27,6 +29,8 @@ class QuizAttemptController extends Controller
             answersPayload: $request->validated('answers'),
             timeSpentSeconds: $request->validated('time_spent_seconds'),
         );
+
+        $this->learningPathService->completeQuizSteps($request->user(), $quiz->id);
 
         $recommendations = $this->recommendationService->generateForAttempt(
             $attempt,

@@ -8,6 +8,7 @@ use App\Http\Resources\ContentListResource;
 use App\Http\Resources\ContentResource;
 use App\Models\Content;
 use App\Services\ContentMediaService;
+use App\Services\LearningPathService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -20,7 +21,8 @@ class ContentController extends Controller
     private const CACHE_TTL_SECONDS = 60;
 
     public function __construct(
-        private readonly ContentMediaService $contentMediaService
+        private readonly ContentMediaService $contentMediaService,
+        private readonly LearningPathService $learningPathService,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection|JsonResponse
@@ -115,6 +117,13 @@ class ContentController extends Controller
         }
 
         $content->load(['category', 'author']);
+
+        if ($request->user('sanctum') !== null) {
+            $this->learningPathService->completeContentSteps(
+                $request->user('sanctum'),
+                $content,
+            );
+        }
 
         return (new ContentResource($content))
             ->response()
