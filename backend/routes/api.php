@@ -13,6 +13,7 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\LearningPathController;
 use App\Http\Controllers\MapNarrativeController;
 use App\Http\Controllers\MediaStreamController;
+use App\Http\Controllers\QuizGenerationController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\RankingController;
@@ -98,6 +99,7 @@ Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
     Route::post('/quizzes', [QuizController::class, 'store']);
     Route::put('/quizzes/{quiz}', [QuizController::class, 'update']);
     Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy']);
+    Route::post('/admin/quizzes/generate-from-content', [QuizGenerationController::class, 'store']);
     Route::post('/map-narratives', [MapNarrativeController::class, 'store']);
     Route::put('/map-narratives/{mapNarrative}', [MapNarrativeController::class, 'update']);
     Route::delete('/map-narratives/{mapNarrative}', [MapNarrativeController::class, 'destroy']);
