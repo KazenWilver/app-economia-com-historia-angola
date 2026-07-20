@@ -46,9 +46,20 @@ function formatPublishedDate(value: string | null): string | null {
 
 interface ContentArticleViewProps {
   content: ContentDetail;
+  /** Pré-visualização no painel admin (sem comentários nem tracker do trilho). */
+  mode?: "public" | "admin-preview";
+  backHref?: string;
+  backLabel?: string;
+  statusBanner?: string | null;
 }
 
-export function ContentArticleView({ content }: ContentArticleViewProps) {
+export function ContentArticleView({
+  content,
+  mode = "public",
+  backHref = "/explorar",
+  backLabel = "Voltar a Explorar",
+  statusBanner = null,
+}: ContentArticleViewProps) {
   const publishedDate = formatPublishedDate(content.published_at);
   const showAudioPlayer =
     content.media_url &&
@@ -56,17 +67,26 @@ export function ContentArticleView({ content }: ContentArticleViewProps) {
   const showVideoPlayer = content.media_url && content.type === "video";
   const showImageMedia =
     content.media_url && isImageMediaUrl(content.media_url);
+  const isAdminPreview = mode === "admin-preview";
 
   return (
     <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <LearningPathContentTracker slug={content.slug} />
+      {!isAdminPreview ? (
+        <LearningPathContentTracker slug={content.slug} />
+      ) : null}
       <Link
-        href="/explorar"
+        href={backHref}
         className="mb-6 inline-flex items-center gap-2 font-display text-sm font-semibold text-bordeaux transition-colors hover:text-bordeaux/80 dark:text-bordeaux-dark dark:hover:text-bordeaux-dark/80"
       >
         <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden />
-        Voltar a Explorar
+        {backLabel}
       </Link>
+
+      {statusBanner ? (
+        <div className="mb-6 rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-500/40 dark:bg-amber-950/30 dark:text-amber-100">
+          {statusBanner}
+        </div>
+      ) : null}
 
       <article className="space-y-8">
         <header className="space-y-4">
@@ -123,7 +143,9 @@ export function ContentArticleView({ content }: ContentArticleViewProps) {
           <ContentStatistics data={content.statistics_data} />
         ) : null}
 
-        <CommentSection contentSlug={content.slug} />
+        {!isAdminPreview ? (
+          <CommentSection contentSlug={content.slug} />
+        ) : null}
       </article>
     </div>
   );

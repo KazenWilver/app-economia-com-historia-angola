@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Archive, Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, Eye, Pencil, Plus, Send, Trash2 } from "lucide-react";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import {
   STATUS_LABELS,
@@ -299,6 +299,17 @@ export default function AdminContentsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
+                        <Link href={`/admin/conteudos/${content.id}/preview`}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="min-h-9 px-3 py-1.5"
+                          >
+                            <Eye className="h-4 w-4" strokeWidth={1.5} />
+                            Pré-visualizar
+                          </Button>
+                        </Link>
+
                         <Link href={`/admin/conteudos/${content.id}/editar`}>
                           <Button
                             type="button"
@@ -320,7 +331,7 @@ export default function AdminContentsPage() {
                               void updateStatus(content, "published")
                             }
                           >
-                            <Eye className="h-4 w-4" strokeWidth={1.5} />
+                            <Send className="h-4 w-4" strokeWidth={1.5} />
                             Publicar
                           </Button>
                         ) : null}

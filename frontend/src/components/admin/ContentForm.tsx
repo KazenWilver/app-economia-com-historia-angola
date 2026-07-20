@@ -32,7 +32,11 @@ interface ContentFormProps {
   isSubmitting: boolean;
   errorMessage: string | null;
   existingMediaUrl?: string | null;
-  onSubmit: (values: ContentFormValues, mediaFile: File | null) => Promise<void>;
+  previewHref?: string | null;
+  onSubmit: (
+    values: ContentFormValues,
+    mediaFile: File | null,
+  ) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -114,6 +118,7 @@ export function ContentForm({
   isSubmitting,
   errorMessage,
   existingMediaUrl = null,
+  previewHref = null,
   onSubmit,
   onCancel,
 }: ContentFormProps) {
@@ -200,9 +205,16 @@ export function ContentForm({
 
   const mediaAccept = getMediaAcceptForType(values.type);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (
+    event: React.FormEvent,
+    statusOverride?: ContentFormValues["status"],
+  ) => {
     event.preventDefault();
-    await onSubmit(values, mediaFile);
+    const payload =
+      statusOverride !== undefined
+        ? { ...values, status: statusOverride }
+        : values;
+    await onSubmit(payload, mediaFile);
   };
 
   const selectClassName = cn(
@@ -513,6 +525,29 @@ export function ContentForm({
         <Button type="submit" isLoading={isSubmitting}>
           {submitLabel}
         </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          isLoading={isSubmitting}
+          onClick={(event) => void handleSubmit(event, "draft")}
+        >
+          Guardar rascunho
+        </Button>
+        <Button
+          type="button"
+          isLoading={isSubmitting}
+          onClick={(event) => void handleSubmit(event, "published")}
+        >
+          Publicar agora
+        </Button>
+        {previewHref ? (
+          <a href={previewHref}>
+            <Button type="button" variant="ghost">
+              <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
+              Pré-visualizar
+            </Button>
+          </a>
+        ) : null}
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancelar
         </Button>

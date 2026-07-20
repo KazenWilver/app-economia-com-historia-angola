@@ -169,6 +169,38 @@ class ContentTest extends TestCase
             'title' => 'Título Actualizado',
             'status' => 'published',
         ]);
+
+        $this->assertNotNull($content->fresh()->published_at);
+    }
+
+    public function test_guest_cannot_view_draft_content(): void
+    {
+        $content = Content::factory()->create([
+            'title' => 'Rascunho Secreto',
+            'slug' => 'rascunho-secreto',
+            'status' => 'draft',
+        ]);
+
+        $response = $this->getJson("/api/contents/{$content->slug}");
+
+        $response->assertNotFound();
+    }
+
+    public function test_admin_can_view_draft_content_for_preview(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $content = Content::factory()->create([
+            'title' => 'Rascunho Admin',
+            'slug' => 'rascunho-admin',
+            'status' => 'draft',
+        ]);
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson("/api/contents/{$content->id}");
+
+        $response->assertOk()
+            ->assertJsonPath('data.title', 'Rascunho Admin')
+            ->assertJsonPath('data.status', 'draft');
     }
 
     public function test_admin_can_delete_content(): void

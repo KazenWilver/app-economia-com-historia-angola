@@ -222,6 +222,7 @@ export default function AdminEditContentPage() {
             isSubmitting={isSubmitting}
             errorMessage={errorMessage}
             existingMediaUrl={content.media_url}
+            previewHref={`/admin/conteudos/${content.id}/preview`}
             onSubmit={handleSubmit}
             onCancel={() => router.push("/admin/conteudos")}
           />
