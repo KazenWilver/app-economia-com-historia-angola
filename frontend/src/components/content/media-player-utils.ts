@@ -10,12 +10,16 @@ export function formatMediaTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
+function apiOrigin(): string {
+  return API_URL.replace(/\/api$/, "");
+}
+
 function extractStoragePath(url: string): string | null {
-  const apiOrigin = API_URL.replace(/\/api$/, "");
+  const origin = apiOrigin();
 
   if (url.startsWith("http://") || url.startsWith("https://")) {
-    if (url.startsWith(`${apiOrigin}/storage/`)) {
-      return url.slice(`${apiOrigin}/storage/`.length);
+    if (url.startsWith(`${origin}/storage/`)) {
+      return url.slice(`${origin}/storage/`.length);
     }
 
     if (url.includes("/api/media/")) {
@@ -36,6 +40,10 @@ function extractStoragePath(url: string): string | null {
   return null;
 }
 
+/**
+ * Resolve URL de media para entrega estática via nginx (/storage/...),
+ * em vez de atravessar o PHP (/api/media/...).
+ */
 export function resolveMediaUrl(url: string): string {
   if (url.startsWith("blob:")) {
     return url;
@@ -44,7 +52,7 @@ export function resolveMediaUrl(url: string): string {
   const storagePath = extractStoragePath(url);
 
   if (storagePath) {
-    return `${API_URL}/media/${storagePath}`;
+    return `${apiOrigin()}/storage/${storagePath}`;
   }
 
   if (url.startsWith("http://") || url.startsWith("https://")) {

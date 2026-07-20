@@ -1,4 +1,5 @@
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $projectRoot
 
-docker compose up backend
+# API em modo produção local: nginx + php-fpm (porta 8000)
+docker compose up backend nginx

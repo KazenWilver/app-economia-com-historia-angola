@@ -6,6 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+/**
+ * Serve ficheiros públicos (contents/, avatars/).
+ *
+ * Em Docker/produção o nginx entrega /storage/ e /api/media/... directamente
+ * a partir de storage/app/public — este controller fica como fallback
+ * (testes PHPUnit e ambientes sem nginx).
+ */
 class MediaStreamController extends Controller
 {
     public function show(Request $request, string $path): BinaryFileResponse
