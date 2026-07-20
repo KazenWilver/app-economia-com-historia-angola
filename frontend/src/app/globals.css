@@ -34,6 +34,21 @@
     font-family: inherit;
   }
 
+  /* Mapa choropleth: sem tiles; fundo = só Angola sobre a paleta. */
+  .jindungo-angola-map.leaflet-container,
+  .jindungo-angola-map .leaflet-container {
+    background-color: var(--color-surface-secondary, #eeeeef);
+  }
+
+  .dark .jindungo-angola-map.leaflet-container,
+  .dark .jindungo-angola-map .leaflet-container {
+    background-color: var(--color-surface-dark-secondary, #1e293b);
+  }
+
+  .jindungo-angola-map .leaflet-tile-pane {
+    display: none;
+  }
+
   .leaflet-pane,
   .leaflet-top,
   .leaflet-bottom {

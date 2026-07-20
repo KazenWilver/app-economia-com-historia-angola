@@ -8,9 +8,10 @@ import "leaflet/dist/leaflet.css";
 
 const ANGOLA_CENTER: L.LatLngExpression = [-12.5, 17.5];
 const DEFAULT_ZOOM = 6;
+/** Bounding box apertado de Angola (sem RDC/Namíbia/Atlântico largo). */
 const MAX_BOUNDS = L.latLngBounds(
-  L.latLng(-19.5, 10.5),
-  L.latLng(-3.5, 25.5),
+  L.latLng(-18.2, 11.4),
+  L.latLng(-4.2, 24.2),
 );
 
 const PETROL = "#2C7A7B";
@@ -108,7 +109,7 @@ export function InteractiveMap({
         return;
       }
       if (bounds?.isValid()) {
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 7 });
+        map.fitBounds(bounds, { padding: [28, 28], maxZoom: 7 });
       } else {
         map.setView(ANGOLA_CENTER, DEFAULT_ZOOM);
       }
@@ -163,25 +164,20 @@ export function InteractiveMap({
       delete (container as HTMLDivElement & { _leaflet_id?: number })._leaflet_id;
     }
 
+    // Sem tiles OSM: só o GeoJSON de Angola (pedido do professor).
     const map = L.map(container, {
       center: ANGOLA_CENTER,
       zoom: DEFAULT_ZOOM,
       minZoom: 5,
-      maxZoom: 12,
+      maxZoom: 10,
       maxBounds: MAX_BOUNDS,
-      maxBoundsViscosity: 0.85,
+      maxBoundsViscosity: 1,
       scrollWheelZoom: true,
       zoomControl: false,
-      attributionControl: true,
+      attributionControl: false,
     });
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 18,
-    }).addTo(map);
 
     map.on("locationfound", (event: L.LocationEvent) => {
       if (!mapRef.current || !isMountedRef.current) {
@@ -203,9 +199,11 @@ export function InteractiveMap({
         .addTo(mapRef.current);
 
       const inAngola = MAX_BOUNDS.contains(event.latlng);
-      mapRef.current.setView(event.latlng, inAngola ? 8 : DEFAULT_ZOOM, {
-        animate: true,
-      });
+      if (inAngola) {
+        mapRef.current.setView(event.latlng, 8, { animate: true });
+      } else {
+        getHandle().resetView();
+      }
     });
 
     mapRef.current = map;
@@ -301,8 +299,10 @@ export function InteractiveMap({
           const bounds = geoJsonLayer.getBounds();
           if (bounds.isValid() && mapRef.current) {
             initialBoundsRef.current = bounds;
+            // Limita pan/zoom ao contorno real de Angola (+ margem pequena).
+            mapRef.current.setMaxBounds(bounds.pad(0.08));
             mapRef.current.fitBounds(bounds, {
-              padding: [40, 40],
+              padding: [28, 28],
               maxZoom: 7,
             });
           }
@@ -387,7 +387,7 @@ export function InteractiveMap({
       ref={containerRef}
       className={
         className ??
-        "h-full min-h-[420px] w-full rounded-2xl border border-border bg-surface-card shadow-glass dark:border-border-dark dark:bg-surface-dark-card"
+        "jindungo-angola-map h-full min-h-[420px] w-full rounded-2xl border border-border bg-surface-secondary shadow-glass dark:border-border-dark dark:bg-surface-dark-secondary"
       }
       aria-label="Mapa interactivo de Angola"
     />
