@@ -130,10 +130,6 @@ export function LandingHero() {
       <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center">
         <WelcomeBanner />
 
-        <p className="mb-6 font-display text-sm font-semibold tracking-display text-bordeaux-dark sm:mb-8">
-          Jindungo
-        </p>
-
         <div ref={mapRef} className="mb-8 sm:mb-10">
           <AngolaMap />
         </div>
@@ -155,13 +151,19 @@ export function LandingHero() {
 
         <div ref={ctaRef} className="mt-10">
           {showExplorar ? (
-            <Link href="/explorar" aria-label="Explorar conteúdos Jindungo">
+            <Link
+              href="/explorar"
+              aria-label="Explorar conteúdos de Economia com História – Angola"
+            >
               <Button variant="primary" className="min-h-12 px-8 text-base">
                 Explorar
               </Button>
             </Link>
           ) : (
-            <Link href="/login" aria-label="Entrar na plataforma Jindungo">
+            <Link
+              href="/login"
+              aria-label="Entrar na plataforma Economia com História – Angola"
+            >
               <Button variant="primary" className="min-h-12 px-8 text-base">
                 Entrar
               </Button>

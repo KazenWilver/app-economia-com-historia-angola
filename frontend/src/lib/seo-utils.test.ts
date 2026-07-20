@@ -21,7 +21,9 @@ describe("createPageMetadata", () => {
     expect(metadata.title).toBe("Quiz");
     expect(metadata.description).toBe("Testa o teu conhecimento.");
     expect(metadata.alternates?.canonical).toBe("http://localhost:3000/quiz");
-    expect(metadata.openGraph?.title).toBe("Quiz | Jindungo");
+    expect(metadata.openGraph?.title).toBe(
+      "Quiz | Economia com História – Angola",
+    );
     expect(metadata.robots).toBeUndefined();
   });
 

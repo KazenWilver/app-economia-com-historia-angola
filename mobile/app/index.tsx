@@ -18,10 +18,10 @@ export default function IndexScreen() {
     return (
       <View style={[styles.splash, { backgroundColor: colors.surface }]}>
         <Text style={[styles.brand, { color: colors.bordeaux }]}>
-          🌶️ Jindungo
+          Economia com História – Angola
         </Text>
         <Text style={[styles.tagline, { color: colors.contentSecondary }]}>
-          Economia com História – Angola
+          Plataforma educativa
         </Text>
         <ActivityIndicator color={colors.bordeaux} style={styles.loader} />
       </View>
@@ -39,10 +39,10 @@ export default function IndexScreen() {
         <ThemeToggle size={40} />
       </View>
       <Text style={[styles.brand, { color: colors.bordeaux }]}>
-        🌶️ Jindungo
+        Economia com História – Angola
       </Text>
       <Text style={[styles.tagline, { color: colors.contentSecondary }]}>
-        Economia com História – Angola
+        Plataforma educativa
       </Text>
       <Text style={[styles.copy, { color: colors.contentSecondary }]}>
         Explora conteúdos, quizzes, o fórum e o mapa interactivo das
@@ -97,9 +97,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   brand: {
-    fontSize: 34,
+    fontSize: 22,
     fontWeight: "800",
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
+    textAlign: "center",
+    paddingHorizontal: 8,
   },
   tagline: {
     marginTop: 12,

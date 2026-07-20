@@ -24,10 +24,13 @@ export function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link
           href="/"
-          className="font-display text-lg font-extrabold tracking-display text-bordeaux transition-opacity hover:opacity-90 dark:text-bordeaux-dark sm:text-xl"
+          className="min-w-0 max-w-[11.5rem] font-display text-sm font-extrabold leading-tight tracking-display text-bordeaux transition-opacity hover:opacity-90 dark:text-bordeaux-dark sm:max-w-none sm:text-base md:text-lg"
+          aria-label="Economia com História – Angola"
         >
-          <span aria-hidden>🌶️ </span>
-          Jindungo
+          <span className="sm:hidden">Economia com História</span>
+          <span className="hidden sm:inline">
+            Economia com História – Angola
+          </span>
         </Link>
 
         <nav

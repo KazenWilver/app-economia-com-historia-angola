@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex flex-col items-center gap-6 text-center">
           <div>
             <p className="font-display text-sm font-semibold tracking-display text-content-primary dark:text-content-dark-primary">
-              Jindungo — Economia com História, Angola
+              Economia com História – Angola
             </p>
             <p className="mt-2 text-sm text-content-secondary dark:text-content-dark-secondary">
               ISPTEC · Engenharia de Software II · Grupo 6 · 2025/2026

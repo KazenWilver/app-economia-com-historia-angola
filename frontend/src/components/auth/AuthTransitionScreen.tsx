@@ -11,7 +11,7 @@ const PUBLIC_MESSAGES = [
 ];
 
 const ADMIN_MESSAGES = [
-  "A preparar o painel de gestão Jindungo…",
+  "A preparar o painel de administração…",
   "A organizar conteúdos e utilizadores…",
   "A sincronizar dados da plataforma…",
   "Quase pronto para gerires a experiência educativa…",
@@ -64,14 +64,15 @@ export function AuthTransitionScreen({
       <div className="relative z-10 flex max-w-lg flex-col items-center">
         <p
           className={cn(
-            "font-display text-3xl font-extrabold",
+            "max-w-xs font-display text-xl font-extrabold leading-tight sm:text-2xl",
             isAdmin
               ? "text-bordeaux dark:text-bordeaux-dark"
               : "text-white",
           )}
         >
-          <span aria-hidden>🌶️ </span>
-          Jindungo{isAdmin ? " Admin" : ""}
+          {isAdmin
+            ? "Economia com História – Admin"
+            : "Economia com História – Angola"}
         </p>
 
         {firstName ? (

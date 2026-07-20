@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
-const SITE_NAME = "Jindungo";
+/** Nome público da aplicação (UI, SEO, Open Graph). */
+export const SITE_NAME = "Economia com História – Angola";
 const SITE_DESCRIPTION =
-  "Economia com História — Angola. Plataforma educativa com conteúdos multimédia, quizzes, fórum e mapa interactivo.";
+  "Plataforma educativa com conteúdos multimédia, quizzes, fórum e mapa interactivo sobre a economia e a história de Angola.";
 
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??

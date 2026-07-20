@@ -38,14 +38,13 @@ export function AdminSidebar() {
       <div className="border-b border-border px-5 py-5 dark:border-border-dark">
         <Link
           href="/admin"
-          className="font-display text-lg font-extrabold text-bordeaux dark:text-bordeaux-dark"
+          className="font-display text-base font-extrabold leading-tight text-bordeaux dark:text-bordeaux-dark"
         >
-          <span aria-hidden>🌶️ </span>
-          Jindungo Admin
+          Economia com História
+          <span className="mt-0.5 block text-xs font-semibold tracking-wide text-content-tertiary dark:text-content-dark-tertiary">
+            Administração
+          </span>
         </Link>
-        <p className="mt-1 text-xs text-content-tertiary dark:text-content-dark-tertiary">
-          Painel de administração
-        </p>
       </div>
 
       <nav

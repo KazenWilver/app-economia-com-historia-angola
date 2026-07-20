@@ -97,7 +97,7 @@ export default function RecuperarPalavraPasseScreen() {
       >
         <View style={styles.topRow}>
           <Text style={[styles.brand, { color: colors.bordeaux }]}>
-            🌶️ Jindungo
+            Economia com História – Angola
           </Text>
           <ThemeToggle size={40} />
         </View>
@@ -175,8 +175,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   brand: {
-    fontSize: 26,
+    fontSize: 18,
     fontWeight: "800",
+    flexShrink: 1,
+    maxWidth: "78%",
   },
   title: {
     fontSize: 30,
