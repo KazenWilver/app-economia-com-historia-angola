@@ -20,6 +20,7 @@ use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\TutorController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +73,7 @@ Route::middleware('auth.api:sanctum')->group(function () {
     Route::post('/quizzes/{quiz}/attempt', [QuizAttemptController::class, 'store']);
     Route::post('/quizzes/{quiz}/questions/{question}/feedback', [QuizAttemptController::class, 'questionFeedback']);
     Route::post('/learning-path/steps/{step}/complete', [LearningPathController::class, 'completeStep']);
+    Route::post('/tutor/ask', [TutorController::class, 'ask']);
     Route::get('/recommendations', [RecommendationController::class, 'index']);
     Route::patch('/recommendations/{recommendation}/read', [RecommendationController::class, 'markAsRead']);
     Route::post('/topics', [TopicController::class, 'store']);

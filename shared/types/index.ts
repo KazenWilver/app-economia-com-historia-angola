@@ -96,3 +96,9 @@ export type {
   LearningPathStep,
   LearningStepType,
 } from "./learning-path";
+
+export type {
+  TutorAskResponse,
+  TutorExchange,
+  TutorSource,
+} from "./tutor";
