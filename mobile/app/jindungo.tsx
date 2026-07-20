@@ -21,6 +21,7 @@ import { Card, EmptyState, PrimaryButton, Screen, Title } from "@/components/ui"
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 import { isImageUrl, resolveMediaUrl } from "@/lib/media";
 
 export default function JindungoScreen() {
@@ -106,6 +107,9 @@ export default function JindungoScreen() {
   useFocusEffect(
     useCallback(() => {
       void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
     }, [load]),
   );
 

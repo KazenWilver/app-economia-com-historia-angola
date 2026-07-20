@@ -1,10 +1,11 @@
-import { useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useLocalSearchParams, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text } from "react-native";
 import type { MapProvinceDetailResponse } from "@shared/types";
 import { Card, Screen } from "@/components/ui";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 
 export default function ProvinciaDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,9 +40,14 @@ export default function ProvinciaDetailScreen() {
     }
   }, [id]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
+    }, [load]),
+  );
 
   if (loading) {
     return (

@@ -1,5 +1,5 @@
-import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -17,6 +17,7 @@ import { Card, Field, PrimaryButton, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 import { formatPtDate } from "@/lib/format";
 import type { ThemeColors } from "@/lib/theme";
 
@@ -126,9 +127,14 @@ export default function ForumTopicScreen() {
     }
   }, [id, token]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
+    }, [load]),
+  );
 
   const handleReply = async () => {
     if (!token || !id || !body.trim()) {

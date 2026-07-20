@@ -16,6 +16,7 @@ import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 import { isImageUrl, resolveMediaUrl } from "@/lib/media";
 import { TYPE_LABELS } from "@/lib/theme";
 
@@ -66,6 +67,9 @@ export default function ExplorarScreen() {
   useFocusEffect(
     useCallback(() => {
       void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
     }, [load]),
   );
 

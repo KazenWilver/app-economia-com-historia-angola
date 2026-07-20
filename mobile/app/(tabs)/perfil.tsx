@@ -27,6 +27,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 import { resolveMediaUrl } from "@/lib/media";
 
 type AvatarAsset = {
@@ -93,6 +94,9 @@ export default function PerfilScreen() {
   useFocusEffect(
     useCallback(() => {
       void loadRecommendations();
+      return subscribeDataChanged(() => {
+        void loadRecommendations();
+      });
     }, [loadRecommendations]),
   );
 

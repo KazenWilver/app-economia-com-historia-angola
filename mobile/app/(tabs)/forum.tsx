@@ -13,6 +13,7 @@ import { Card, EmptyState, PrimaryButton, Screen, Title } from "@/components/ui"
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 
 export default function ForumScreen() {
   const { token, isAuthenticated } = useAuth();
@@ -51,6 +52,9 @@ export default function ForumScreen() {
   useFocusEffect(
     useCallback(() => {
       void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
     }, [load]),
   );
 

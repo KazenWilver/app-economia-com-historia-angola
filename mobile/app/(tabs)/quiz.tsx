@@ -13,6 +13,7 @@ import type { PublicQuizzesResponse } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 
 export default function QuizScreen() {
   const colors = useThemeColors();
@@ -47,6 +48,9 @@ export default function QuizScreen() {
   useFocusEffect(
     useCallback(() => {
       void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
     }, [load]),
   );
 

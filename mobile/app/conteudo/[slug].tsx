@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useLocalSearchParams, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import type { ContentDetailResponse } from "@shared/types";
 import { CommentSection } from "@/components/CommentSection";
@@ -9,6 +9,7 @@ import { Card, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 import { TYPE_LABELS } from "@/lib/theme";
 
 export default function ConteudoDetailScreen() {
@@ -45,9 +46,14 @@ export default function ConteudoDetailScreen() {
     }
   }, [slug, token]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
+    }, [load]),
+  );
 
   if (loading) {
     return (

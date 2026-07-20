@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,6 +20,7 @@ import { Card, PrimaryButton, Screen } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 
 interface QuizAttemptResponse {
   message: string;
@@ -235,9 +236,27 @@ export default function QuizPlayScreen() {
     }
   }, [id, token]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+
+  useFocusEffect(
+    useCallback(() => {
+      const refreshIfIdle = () => {
+        const current = phaseRef.current;
+        if (
+          current === "playing" ||
+          current === "submitting" ||
+          current === "results"
+        ) {
+          return;
+        }
+        void load();
+      };
+
+      refreshIfIdle();
+      return subscribeDataChanged(refreshIfIdle);
+    }, [load]),
+  );
 
   useEffect(() => {
     if (!needsProvince) {

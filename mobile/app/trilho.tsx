@@ -17,6 +17,7 @@ import { Card, PrimaryButton, Screen, Title } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 import {
   LEARNING_STEP_LABELS,
   resolveLearningStepHref,
@@ -54,6 +55,9 @@ export default function TrilhoScreen() {
   useFocusEffect(
     useCallback(() => {
       void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
     }, [load]),
   );
 

@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { CommentItem, CommentsResponse } from "@shared/types";
 import { Field, PrimaryButton } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
 import { apiFetch } from "@/lib/api";
+import { subscribeDataChanged } from "@/lib/data-refresh";
 import { formatPtDate } from "@/lib/format";
 
 function CommentTree({
@@ -107,9 +109,14 @@ export function CommentSection({ contentSlug }: { contentSlug: string }) {
     }
   }, [contentSlug, token]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+      return subscribeDataChanged(() => {
+        void load();
+      });
+    }, [load]),
+  );
 
   const handleSubmit = async () => {
     if (!token || !body.trim()) {
