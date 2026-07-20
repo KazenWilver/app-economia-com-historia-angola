@@ -9,5 +9,6 @@ export const adminNavItems: AdminNavItem[] = [
   { href: "/admin/quizzes", label: "Quizzes" },
   { href: "/admin/forum", label: "Fórum" },
   { href: "/admin/mapa", label: "Mapa" },
+  { href: "/admin/pedidos-jindungo", label: "Pedidos Jindungo" },
   { href: "/admin/utilizadores", label: "Utilizadores" },
 ];

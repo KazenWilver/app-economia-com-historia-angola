@@ -476,7 +476,8 @@ export function ContentForm({
                 </span>
                 {values.type === "jindungo" ? (
                   <span className="mt-2 block text-xs text-content-tertiary dark:text-content-dark-tertiary">
-                    O tipo «Jindungo» já exige login por defeito.
+                    O tipo «Jindungo» exige pedido de acesso aprovado pelo
+                    administrador.
                   </span>
                 ) : null}
               </span>

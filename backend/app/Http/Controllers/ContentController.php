@@ -8,6 +8,7 @@ use App\Http\Resources\ContentListResource;
 use App\Http\Resources\ContentResource;
 use App\Models\Content;
 use App\Services\ContentMediaService;
+use App\Services\JindungoAccessService;
 use App\Services\LearningPathService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class ContentController extends Controller
     public function __construct(
         private readonly ContentMediaService $contentMediaService,
         private readonly LearningPathService $learningPathService,
+        private readonly JindungoAccessService $jindungoAccessService,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection|JsonResponse
@@ -31,18 +33,29 @@ class ContentController extends Controller
             'type' => ['nullable', Rule::in(['texto', 'audio', 'video', 'podcast', 'jindungo'])],
         ]);
 
-        if ($request->string('type')->toString() === 'jindungo' && $request->user('sanctum') === null) {
+        $user = $request->user('sanctum');
+        $wantsJindungo = $request->string('type')->toString() === 'jindungo';
+
+        if ($wantsJindungo && $user === null) {
             return response()->json([
                 'message' => 'Autenticação necessária para aceder a conteúdos Jindungo.',
             ], 401);
         }
 
-        $userId = $request->user('sanctum')?->id ?? 'guest';
+        if ($wantsJindungo && $user !== null && ! $this->jindungoAccessService->hasAccess($user)) {
+            return response()->json([
+                'message' => 'Precisas de um pedido de acesso aprovado para ver a biblioteca Jindungo.',
+                'code' => 'jindungo_access_required',
+            ], 403);
+        }
+
+        $userId = $user?->id ?? 'guest';
+        $hasJindungoAccess = $user !== null && $this->jindungoAccessService->hasAccess($user);
         $type = $request->string('type')->toString() ?: 'all';
         $cacheVersion = (int) Cache::get('contents:version', 1);
-        $cacheKey = "contents:index:v{$cacheVersion}:{$userId}:{$type}";
+        $cacheKey = "contents:index:v{$cacheVersion}:{$userId}:{$type}:j".($hasJindungoAccess ? '1' : '0');
 
-        $contents = Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($request) {
+        $contents = Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($request, $user, $hasJindungoAccess) {
             return Content::query()
                 ->select([
                     'id',
@@ -58,10 +71,14 @@ class ContentController extends Controller
                 ->with(['category:id,name,slug'])
                 ->where('status', 'published')
                 ->when(
-                    $request->user('sanctum') === null,
+                    $user === null,
                     fn ($query) => $query
                         ->where('is_exclusive', false)
                         ->where('type', '!=', 'jindungo')
+                )
+                ->when(
+                    $user !== null && ! $hasJindungoAccess,
+                    fn ($query) => $query->where('type', '!=', 'jindungo')
                 )
                 ->when(
                     $request->filled('type'),
@@ -73,7 +90,7 @@ class ContentController extends Controller
 
         return ContentListResource::collection($contents)
             ->response()
-            ->withHeaders($this->cacheHeaders($request->user('sanctum') !== null));
+            ->withHeaders($this->cacheHeaders($user !== null));
     }
 
     /**
@@ -110,24 +127,30 @@ class ContentController extends Controller
             ], 404);
         }
 
-        if ($this->requiresAuthentication($content) && $request->user('sanctum') === null) {
+        $user = $request->user('sanctum');
+
+        if ($this->requiresAuthentication($content) && $user === null) {
             return response()->json([
                 'message' => 'Autenticação necessária para aceder a este conteúdo.',
             ], 401);
         }
 
+        if ($this->requiresJindungoAccess($content) && ($user === null || ! $this->jindungoAccessService->hasAccess($user))) {
+            return response()->json([
+                'message' => 'Precisas de um pedido de acesso aprovado para abrir este texto Jindungo.',
+                'code' => 'jindungo_access_required',
+            ], 403);
+        }
+
         $content->load(['category', 'author']);
 
-        if ($request->user('sanctum') !== null) {
-            $this->learningPathService->completeContentSteps(
-                $request->user('sanctum'),
-                $content,
-            );
+        if ($user !== null) {
+            $this->learningPathService->completeContentSteps($user, $content);
         }
 
         return (new ContentResource($content))
             ->response()
-            ->withHeaders($this->cacheHeaders($request->user('sanctum') !== null));
+            ->withHeaders($this->cacheHeaders($user !== null));
     }
 
     public function store(StoreContentRequest $request): JsonResponse
@@ -244,6 +267,11 @@ class ContentController extends Controller
     private function requiresAuthentication(Content $content): bool
     {
         return $content->is_exclusive || $content->type === 'jindungo';
+    }
+
+    private function requiresJindungoAccess(Content $content): bool
+    {
+        return $content->type === 'jindungo';
     }
 
     /**

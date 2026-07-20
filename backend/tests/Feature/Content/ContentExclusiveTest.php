@@ -27,6 +27,11 @@ class ContentExclusiveTest extends TestCase
     public function test_authenticated_user_can_list_jindungo_contents(): void
     {
         $user = User::factory()->create();
+        \App\Models\JindungoAccessRequest::factory()->approved()->create([
+            'user_id' => $user->id,
+            'reviewed_by' => User::factory()->admin()->create()->id,
+            'reviewed_at' => now(),
+        ]);
         Content::factory()->ofType('jindungo')->create([
             'title' => 'Texto Jindungo para Membros',
         ]);

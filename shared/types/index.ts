@@ -102,3 +102,11 @@ export type {
   TutorExchange,
   TutorSource,
 } from "./tutor";
+
+export type {
+  AdminJindungoAccessRequestsResponse,
+  JindungoAccessMutationResponse,
+  JindungoAccessRequestItem,
+  JindungoAccessStatus,
+  JindungoAccessStatusResponse,
+} from "./jindungo-access";

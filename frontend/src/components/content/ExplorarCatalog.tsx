@@ -221,15 +221,32 @@ export function ExplorarCatalog({
         >
           <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-content-primary dark:text-content-dark-primary">
-              Os conteúdos Jindungo são exclusivos. Inicia sessão para os
-              explorar.
+              Os conteúdos Jindungo são exclusivos. Inicia sessão e pede acesso
+              ao administrador para os explorar.
             </p>
-            <Link href="/login">
+            <Link href="/login?redirect=%2Fjindungo">
               <Button type="button">Iniciar sessão</Button>
             </Link>
           </CardContent>
         </Card>
       )}
+
+      {!requiresAuth && activeFilter === "jindungo" && (isAuthenticated || publicToken) ? (
+        <Card
+          hoverLift={false}
+          className="mb-8 border-gold/30 bg-gold/5 dark:border-gold-dark/30 dark:bg-gold-dark/5"
+        >
+          <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-content-primary dark:text-content-dark-primary">
+              A biblioteca Jindungo exige pedido de acesso aprovado. Gere o teu
+              pedido e consulta os textos na página dedicada.
+            </p>
+            <Link href="/jindungo">
+              <Button type="button">Ir à biblioteca Jindungo</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {errorMessage && (
         <Card className="mb-8 border-error-light/30 bg-error-light/5 dark:border-error-dark/30">

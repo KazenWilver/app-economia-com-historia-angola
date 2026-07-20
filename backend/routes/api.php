@@ -19,6 +19,7 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\JindungoAccessController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\TutorController;
 use App\Http\Controllers\UserController;
@@ -74,6 +75,8 @@ Route::middleware('auth.api:sanctum')->group(function () {
     Route::post('/quizzes/{quiz}/questions/{question}/feedback', [QuizAttemptController::class, 'questionFeedback']);
     Route::post('/learning-path/steps/{step}/complete', [LearningPathController::class, 'completeStep']);
     Route::post('/tutor/ask', [TutorController::class, 'ask']);
+    Route::get('/jindungo/access', [JindungoAccessController::class, 'status']);
+    Route::post('/jindungo/access-requests', [JindungoAccessController::class, 'store']);
     Route::get('/recommendations', [RecommendationController::class, 'index']);
     Route::patch('/recommendations/{recommendation}/read', [RecommendationController::class, 'markAsRead']);
     Route::post('/topics', [TopicController::class, 'store']);
@@ -94,6 +97,8 @@ Route::middleware(['auth.api:sanctum', 'admin'])->group(function () {
     Route::get('/admin/map-narratives/{mapNarrative}', [MapNarrativeController::class, 'adminShow']);
     Route::get('/admin/users', [UserController::class, 'adminIndex']);
     Route::put('/admin/users/{user}', [UserController::class, 'updateStatus']);
+    Route::get('/admin/jindungo-access-requests', [JindungoAccessController::class, 'adminIndex']);
+    Route::patch('/admin/jindungo-access-requests/{jindungoAccessRequest}', [JindungoAccessController::class, 'review']);
     Route::post('/contents', [ContentController::class, 'store']);
     Route::put('/contents/{content}', [ContentController::class, 'update']);
     Route::post('/contents/{content}', [ContentController::class, 'update']);

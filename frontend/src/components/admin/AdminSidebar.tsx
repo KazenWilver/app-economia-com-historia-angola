@@ -8,6 +8,7 @@ import {
   Map,
   MessageSquare,
   Puzzle,
+  ShieldCheck,
   Users,
 } from "lucide-react";
 import { adminNavItems } from "@/components/admin/admin-nav";
@@ -19,6 +20,7 @@ const iconByHref: Record<string, typeof LayoutDashboard> = {
   "/admin/quizzes": Puzzle,
   "/admin/forum": MessageSquare,
   "/admin/mapa": Map,
+  "/admin/pedidos-jindungo": ShieldCheck,
   "/admin/utilizadores": Users,
 };
 

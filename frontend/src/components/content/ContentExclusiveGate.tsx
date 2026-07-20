@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { ContentArticleView } from "@/components/content/ContentArticleView";
+import { JindungoAccessPanel } from "@/components/content/JindungoAccessPanel";
 import {
   API_URL,
   type ContentDetail,
@@ -22,7 +23,9 @@ export function ContentExclusiveGate({ slug }: ContentExclusiveGateProps) {
   const publicToken = token ?? getStoredToken();
   const [content, setContent] = useState<ContentDetail | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(publicToken) || authLoading);
-  const [stillForbidden, setStillForbidden] = useState(!publicToken && !authLoading);
+  const [needsLogin, setNeedsLogin] = useState(!publicToken && !authLoading);
+  const [needsJindungoAccess, setNeedsJindungoAccess] = useState(false);
+  const [accessReady, setAccessReady] = useState(false);
 
   useEffect(() => {
     if (authLoading) {
@@ -31,7 +34,8 @@ export function ContentExclusiveGate({ slug }: ContentExclusiveGateProps) {
 
     if (!publicToken) {
       setIsLoading(false);
-      setStillForbidden(true);
+      setNeedsLogin(true);
+      setNeedsJindungoAccess(false);
       setContent(null);
       return;
     }
@@ -40,7 +44,8 @@ export function ContentExclusiveGate({ slug }: ContentExclusiveGateProps) {
 
     async function loadExclusive() {
       setIsLoading(true);
-      setStillForbidden(false);
+      setNeedsLogin(false);
+      setNeedsJindungoAccess(false);
 
       try {
         const response = await fetch(`${API_URL}/contents/${slug}`, {
@@ -51,14 +56,27 @@ export function ContentExclusiveGate({ slug }: ContentExclusiveGateProps) {
           return;
         }
 
-        if (response.status === 401 || response.status === 403) {
-          setStillForbidden(true);
+        if (response.status === 401) {
+          setNeedsLogin(true);
+          setContent(null);
+          return;
+        }
+
+        if (response.status === 403) {
+          const payload = (await response.json().catch(() => null)) as {
+            code?: string;
+          } | null;
+          if (payload?.code === "jindungo_access_required") {
+            setNeedsJindungoAccess(true);
+          } else {
+            setNeedsLogin(true);
+          }
           setContent(null);
           return;
         }
 
         if (!response.ok) {
-          setStillForbidden(true);
+          setNeedsLogin(true);
           setContent(null);
           return;
         }
@@ -67,7 +85,7 @@ export function ContentExclusiveGate({ slug }: ContentExclusiveGateProps) {
         setContent(data.data);
       } catch {
         if (!cancelled) {
-          setStillForbidden(true);
+          setNeedsLogin(true);
           setContent(null);
         }
       } finally {
@@ -82,7 +100,7 @@ export function ContentExclusiveGate({ slug }: ContentExclusiveGateProps) {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, publicToken, slug]);
+  }, [authLoading, publicToken, slug, accessReady]);
 
   if (isLoading || authLoading) {
     return (
@@ -107,7 +125,29 @@ export function ContentExclusiveGate({ slug }: ContentExclusiveGateProps) {
     return <ContentArticleView content={content} />;
   }
 
-  if (stillForbidden) {
+  if (needsJindungoAccess && publicToken) {
+    return (
+      <div className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <Link
+          href="/jindungo"
+          className="inline-flex items-center gap-2 font-display text-sm font-semibold text-bordeaux dark:text-bordeaux-dark"
+        >
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden />
+          Voltar à biblioteca Jindungo
+        </Link>
+        <JindungoAccessPanel
+          token={publicToken}
+          onAccessChange={(hasAccess) => {
+            if (hasAccess) {
+              setAccessReady((value) => !value);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (needsLogin) {
     return (
       <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <Link
@@ -125,7 +165,7 @@ export function ContentExclusiveGate({ slug }: ContentExclusiveGateProps) {
             <p className="text-sm text-content-secondary dark:text-content-dark-secondary">
               Inicia sessão para aceder a este conteúdo exclusivo.
             </p>
-            <Link href="/login">
+            <Link href={`/login?redirect=${encodeURIComponent(`/explorar/${slug}`)}`}>
               <Button type="button">Iniciar sessão</Button>
             </Link>
           </CardContent>

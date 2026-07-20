@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Cache;
 use RuntimeException;
 
 abstract class TestCase extends BaseTestCase
@@ -14,6 +15,8 @@ abstract class TestCase extends BaseTestCase
         if (! app()->environment('testing')) {
             return;
         }
+
+        Cache::flush();
 
         $connection = (string) config('database.default');
         $database = (string) config("database.connections.{$connection}.database");
