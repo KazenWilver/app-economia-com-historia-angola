@@ -88,16 +88,23 @@ class QuizGenerationService
     private function generate(string $sourceText, ?string $sourceTitle, int $questionCount): array
     {
         $questionCount = max(3, min(8, $questionCount));
-        $apiKey = config('services.openai.key');
+        $credential = $this->resolveLlmCredential();
 
-        if (is_string($apiKey) && $apiKey !== '') {
+        if ($credential !== null) {
             try {
-                $questions = $this->generateWithOpenAi($sourceText, $questionCount);
+                $questions = $this->generateWithChatApi(
+                    sourceText: $sourceText,
+                    questionCount: $questionCount,
+                    apiKey: $credential['key'],
+                    model: $credential['model'],
+                    baseUrl: $credential['base_url'],
+                    provider: $credential['provider'],
+                );
 
                 return $this->buildPayload(
                     questions: $questions,
                     sourceTitle: $sourceTitle,
-                    provider: 'openai',
+                    provider: $credential['provider'],
                 );
             } catch (\Throwable) {
                 // Fallback local se a API falhar.
@@ -114,6 +121,44 @@ class QuizGenerationService
     }
 
     /**
+     * @return array{provider: string, key: string, model: string, base_url: string}|null
+     */
+    private function resolveLlmCredential(): ?array
+    {
+        $preferred = strtolower((string) config('services.llm.provider', 'groq'));
+        $order = $preferred === 'auto'
+            ? ['groq', 'openrouter', 'google', 'nvidia']
+            : [$preferred, 'groq', 'openrouter', 'google', 'nvidia'];
+
+        $seen = [];
+        foreach ($order as $provider) {
+            if (isset($seen[$provider])) {
+                continue;
+            }
+            $seen[$provider] = true;
+
+            $config = config("services.llm.{$provider}");
+            if (! is_array($config)) {
+                continue;
+            }
+
+            $key = $config['key'] ?? null;
+            if (! is_string($key) || trim($key) === '') {
+                continue;
+            }
+
+            return [
+                'provider' => $provider,
+                'key' => trim($key),
+                'model' => (string) ($config['model'] ?? 'llama-3.3-70b-versatile'),
+                'base_url' => rtrim((string) ($config['base_url'] ?? ''), '/'),
+            ];
+        }
+
+        return null;
+    }
+
+    /**
      * @return list<array{
      *     question_text: string,
      *     explanation: string|null,
@@ -121,13 +166,24 @@ class QuizGenerationService
      *     answers: list<array{answer_text: string, is_correct: bool, order: int}>
      * }>
      */
-    private function generateWithOpenAi(string $sourceText, int $questionCount): array
-    {
+    private function generateWithChatApi(
+        string $sourceText,
+        int $questionCount,
+        string $apiKey,
+        string $model,
+        string $baseUrl,
+        string $provider,
+    ): array {
         $truncated = mb_substr($sourceText, 0, 6000);
-        $model = (string) config('services.openai.model', 'gpt-4o-mini');
-        $baseUrl = rtrim((string) config('services.openai.base_url', 'https://api.openai.com/v1'), '/');
 
-        $response = Http::withToken((string) config('services.openai.key'))
+        $headers = [];
+        if ($provider === 'openrouter') {
+            $headers['HTTP-Referer'] = (string) config('app.url', 'http://localhost');
+            $headers['X-Title'] = (string) config('app.name', 'Economia com Historia');
+        }
+
+        $response = Http::withToken($apiKey)
+            ->withHeaders($headers)
             ->timeout(45)
             ->acceptJson()
             ->post("{$baseUrl}/chat/completions", [

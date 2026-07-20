@@ -142,9 +142,9 @@ export function QuizAiGenerator({ onGenerated }: QuizAiGeneratorProps) {
       onGenerated(formValues, data.meta);
 
       const providerLabel =
-        data.meta.provider === "openai"
-          ? "modelo de IA (OpenAI)"
-          : "assistente heurístico local";
+        data.meta.provider === "heuristic"
+          ? "assistente heurístico local"
+          : `modelo de IA (${data.meta.provider})`;
       setInfoMessage(
         `Proposta gerada via ${providerLabel}. Revisa as perguntas antes de criar o quiz.`,
       );
