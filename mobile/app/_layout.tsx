@@ -93,6 +93,14 @@ function RootNavigator() {
           options={{ title: "Jindungo", headerBackTitle: "Voltar" }}
         />
         <Stack.Screen
+          name="tutor"
+          options={{ title: "Tutor", headerBackTitle: "Voltar" }}
+        />
+        <Stack.Screen
+          name="trilho"
+          options={{ title: "Trilho", headerBackTitle: "Voltar" }}
+        />
+        <Stack.Screen
           name="termos"
           options={{ title: "Termos", headerBackTitle: "Voltar" }}
         />

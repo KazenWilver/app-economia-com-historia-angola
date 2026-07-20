@@ -10,6 +10,8 @@ import {
   View,
 } from "react-native";
 import type {
+  LearningPathMeta,
+  LearningPathResponse,
   ProvincesResponse,
   QuizRecommendation,
   RecommendationsResponse,
@@ -46,6 +48,7 @@ export default function PerfilScreen() {
   const [recommendations, setRecommendations] = useState<QuizRecommendation[]>(
     [],
   );
+  const [pathMeta, setPathMeta] = useState<LearningPathMeta | null>(null);
   const [avatarAsset, setAvatarAsset] = useState<AvatarAsset | null>(null);
   const [saving, setSaving] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -70,16 +73,20 @@ export default function PerfilScreen() {
   const loadRecommendations = useCallback(async () => {
     if (!token) {
       setRecommendations([]);
+      setPathMeta(null);
       return;
     }
 
     try {
-      const data = await apiFetch<RecommendationsResponse>("/recommendations", {
-        token,
-      });
-      setRecommendations(data.data);
+      const [recs, path] = await Promise.all([
+        apiFetch<RecommendationsResponse>("/recommendations", { token }),
+        apiFetch<LearningPathResponse>("/learning-path", { token }),
+      ]);
+      setRecommendations(recs.data);
+      setPathMeta(path.meta);
     } catch {
       setRecommendations([]);
+      setPathMeta(null);
     }
   }, [token]);
 
@@ -230,6 +237,11 @@ export default function PerfilScreen() {
           <PrimaryButton
             label="Explorar conteúdos"
             onPress={() => router.push("/(tabs)/explorar" as never)}
+          />
+          <View style={styles.spacer} />
+          <PrimaryButton
+            label="Trilho educativo"
+            onPress={() => router.push("/trilho" as never)}
           />
           <View style={styles.spacer} />
           <PrimaryButton
@@ -393,7 +405,28 @@ export default function PerfilScreen() {
       <Text style={[styles.sectionTitle, { color: colors.contentPrimary }]}>
         Atalhos
       </Text>
+      {pathMeta && pathMeta.total_count > 0 ? (
+        <Card onPress={() => router.push("/trilho" as never)}>
+          <Text style={[styles.recTitle, { color: colors.contentPrimary }]}>
+            Progresso do trilho
+          </Text>
+          <Text style={[styles.hint, { color: colors.contentTertiary }]}>
+            {pathMeta.completed_count}/{pathMeta.total_count} passos ·{" "}
+            {pathMeta.percent}%
+          </Text>
+        </Card>
+      ) : null}
       <View style={styles.shortcuts}>
+        <PrimaryButton
+          label="Trilho educativo"
+          onPress={() => router.push("/trilho" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Tutor IA"
+          onPress={() => router.push("/tutor" as never)}
+        />
+        <View style={styles.spacer} />
         <PrimaryButton
           label="Explorar conteúdos"
           onPress={() => router.push("/(tabs)/explorar" as never)}
