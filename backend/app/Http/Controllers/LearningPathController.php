@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\LearningPathResource;
+use App\Models\Content;
 use App\Models\LearningPathStep;
 use App\Services\LearningPathService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class LearningPathController extends Controller
 {
@@ -76,7 +78,7 @@ class LearningPathController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, LearningPathStep>  $steps
+     * @param  Collection<int, LearningPathStep>  $steps
      * @return array<int, string>
      */
     private function contentSlugMap($steps): array
@@ -91,7 +93,7 @@ class LearningPathController extends Controller
             return [];
         }
 
-        return \App\Models\Content::query()
+        return Content::query()
             ->whereIn('id', $contentIds)
             ->pluck('slug', 'id')
             ->all();

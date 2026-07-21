@@ -100,13 +100,10 @@ class JindungoAccessController extends Controller
 
         $message = match (true) {
             $previousStatus === JindungoAccessRequest::STATUS_APPROVED
-                && $updated->status === JindungoAccessRequest::STATUS_REJECTED
-                => 'Acesso Jindungo revogado com sucesso.',
+                && $updated->status === JindungoAccessRequest::STATUS_REJECTED => 'Acesso Jindungo revogado com sucesso.',
             $previousStatus === JindungoAccessRequest::STATUS_REJECTED
-                && $updated->status === JindungoAccessRequest::STATUS_APPROVED
-                => 'Acesso Jindungo restaurado com sucesso.',
-            $updated->status === JindungoAccessRequest::STATUS_APPROVED
-                => 'Pedido aprovado com sucesso.',
+                && $updated->status === JindungoAccessRequest::STATUS_APPROVED => 'Acesso Jindungo restaurado com sucesso.',
+            $updated->status === JindungoAccessRequest::STATUS_APPROVED => 'Pedido aprovado com sucesso.',
             default => 'Pedido rejeitado com sucesso.',
         };
 

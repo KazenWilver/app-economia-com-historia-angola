@@ -98,12 +98,14 @@ foreach ($tables as $table) {
 
     if (! $exists) {
         echo "missing table {$table} no Postgres — corre migrate primeiro\n";
+
         continue;
     }
 
     $rows = $mysql->query("SELECT * FROM `{$table}`")->fetchAll();
     if ($rows === []) {
         echo "empty {$table}\n";
+
         continue;
     }
 
@@ -142,9 +144,9 @@ foreach ($tables as $table) {
     }
     $maxId = (int) $pgsql->query("SELECT COALESCE(MAX(id), 0) FROM \"{$table}\"")->fetchColumn();
     if ($maxId > 0) {
-        $pgsql->exec("SELECT setval(".$pgsql->quote($seq).", {$maxId}, true)");
+        $pgsql->exec('SELECT setval('.$pgsql->quote($seq).", {$maxId}, true)");
     } else {
-        $pgsql->exec("SELECT setval(".$pgsql->quote($seq).", 1, false)");
+        $pgsql->exec('SELECT setval('.$pgsql->quote($seq).', 1, false)');
     }
     echo "seq {$table} → {$maxId}\n";
 }

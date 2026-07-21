@@ -3,6 +3,7 @@
 namespace Tests\Feature\Content;
 
 use App\Models\Content;
+use App\Models\JindungoAccessRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -27,7 +28,7 @@ class ContentExclusiveTest extends TestCase
     public function test_authenticated_user_can_list_jindungo_contents(): void
     {
         $user = User::factory()->create();
-        \App\Models\JindungoAccessRequest::factory()->approved()->create([
+        JindungoAccessRequest::factory()->approved()->create([
             'user_id' => $user->id,
             'reviewed_by' => User::factory()->admin()->create()->id,
             'reviewed_at' => now(),
