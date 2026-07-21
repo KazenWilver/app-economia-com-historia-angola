@@ -5,7 +5,7 @@ const apiOrigin =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") ??
   "http://localhost:8000";
 
-const sharedTypesEntry = path.resolve(__dirname, "../shared/types/index.ts");
+const sharedTypesEntry = path.resolve(__dirname, "./shared/types/index.ts");
 
 const nextConfig: NextConfig = {
   turbopack: {

@@ -27,10 +27,10 @@
         "./src/*"
       ],
       "@shared/types": [
-        "../shared/types/index.ts"
+        "./shared/types/index.ts"
       ],
       "@shared/types/*": [
-        "../shared/types/*"
+        "./shared/types/*"
       ]
     }
   },
