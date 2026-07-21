@@ -96,6 +96,8 @@ function resolveApiUrl(): string {
 
 import { notifyDataChanged } from "@/lib/data-refresh";
 
+export { notifyDataChanged } from "@/lib/data-refresh";
+
 export const API_URL = resolveApiUrl();
 
 export const TOKEN_STORAGE_KEY = "jindungo_mobile_token";
@@ -149,6 +151,7 @@ export async function apiFetch<T>(
   try {
     response = await fetch(`${API_URL}${path}`, {
       ...rest,
+      cache: "no-store",
       headers: {
         ...buildAuthHeaders(token),
         ...(headers as Record<string, string> | undefined),

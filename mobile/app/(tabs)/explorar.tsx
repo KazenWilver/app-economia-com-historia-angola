@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,8 +15,8 @@ import type { ContentItem, ContentsResponse, ContentType } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
-import { subscribeDataChanged } from "@/lib/data-refresh";
 import { isImageUrl, resolveMediaUrl } from "@/lib/media";
 import { TYPE_LABELS } from "@/lib/theme";
 
@@ -64,14 +64,7 @@ export default function ExplorarScreen() {
     [token],
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-      return subscribeDataChanged(() => {
-        void load();
-      });
-    }, [load]),
-  );
+  useLiveRefresh(load);
 
   const visibleItems = useMemo(() => {
     let list = items;

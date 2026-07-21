@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -16,6 +16,7 @@ import {
 } from "@/components/ProvinceMap";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 
 interface ProvincesMapResponse {
@@ -143,11 +144,7 @@ export default function MapaScreen() {
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-    }, [load]),
-  );
+  useLiveRefresh(load);
 
   const markers = useMemo(
     () =>

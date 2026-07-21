@@ -20,6 +20,7 @@ import {
   TOKEN_STORAGE_KEY,
   USER_STORAGE_KEY,
   parseApiError,
+  notifyDataChanged,
 } from "@/lib/api";
 
 interface AuthContextValue {
@@ -270,6 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data = (await response.json()) as { user: User };
       await persistSession(data.user, token);
+      notifyDataChanged();
       return data.user;
     },
     [persistSession, token],

@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,8 +12,8 @@ import type { PublicTopicsResponse } from "@shared/types";
 import { Card, EmptyState, PrimaryButton, Screen, Title } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
-import { subscribeDataChanged } from "@/lib/data-refresh";
 
 export default function ForumScreen() {
   const { token, isAuthenticated } = useAuth();
@@ -49,14 +49,7 @@ export default function ForumScreen() {
     [token],
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-      return subscribeDataChanged(() => {
-        void load();
-      });
-    }, [load]),
-  );
+  useLiveRefresh(load);
 
   return (
     <Screen>

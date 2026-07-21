@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,8 +12,8 @@ import {
 import type { PublicQuizzesResponse } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
-import { subscribeDataChanged } from "@/lib/data-refresh";
 
 export default function QuizScreen() {
   const colors = useThemeColors();
@@ -45,14 +45,7 @@ export default function QuizScreen() {
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-      return subscribeDataChanged(() => {
-        void load();
-      });
-    }, [load]),
-  );
+  useLiveRefresh(load);
 
   return (
     <Screen>

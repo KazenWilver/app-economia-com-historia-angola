@@ -1,4 +1,3 @@
-import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +13,7 @@ import {
 import type { ProvincesResponse, PublicQuizzesResponse } from "@shared/types";
 import { Card, EmptyState, Screen, Title } from "@/components/ui";
 import { useThemeColors } from "@/contexts/ThemeContext";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch } from "@/lib/api";
 import { resolveMediaUrl } from "@/lib/media";
 
@@ -134,11 +134,7 @@ export default function RankingScreen() {
     [path],
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-    }, [load]),
-  );
+  useLiveRefresh(load);
 
   return (
     <Screen>
