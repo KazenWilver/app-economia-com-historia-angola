@@ -1,14 +1,24 @@
-# Documentação interna (não versionar)
+# Documentação interna / notas locais (não versionar)
 documentos/
+ajudas/
+Apple-design-analysis.md
+Divisão Territorial de Angola.md
+Divisao Territorial de Angola.md
 
 # Dependências
 node_modules/
 vendor/
+docs/node_modules/
 
-# Ambiente
+# Ambiente e segredos (NUNCA versionar chaves reais)
 .env
 .env.*
 !.env.example
+*.pem
+*.p12
+id_rsa*
+credentials.json
+service-account*.json
 
 # Laravel / PHP
 backend/storage/*.key
@@ -55,8 +65,8 @@ coverage/
 # Docker (volumes locais, se aplicável)
 docker/mysql/data/
 
-# Ajudas
-ajudas/
+# Métricas locais de performance (não versionar)
+frontend/perf-baseline.json
 
 # Cursor (regras locais da equipa — não versionar)
 .cursorrules
