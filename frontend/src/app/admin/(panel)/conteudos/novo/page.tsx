@@ -9,7 +9,7 @@ import {
   type ContentFormValues,
 } from "@/components/admin/content-types";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
-import { adminFetch, API_URL, buildAdminHeaders } from "@/lib/admin-api";
+import { adminFetch, API_URL, buildAdminHeaders, markDataMutated } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 
 interface CategoryOption {
@@ -84,6 +84,7 @@ export default function AdminCreateContentPage() {
       }
 
       await response.json();
+      markDataMutated();
 
       router.replace("/admin/conteudos?created=1");
     } catch (error) {

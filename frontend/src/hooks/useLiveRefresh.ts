@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import {
   DATA_CHANGED_EVENT,
+  subscribeCrossTabDataChanged,
   type DataChangedDetail,
 } from "@/lib/data-refresh";
 
@@ -18,7 +19,8 @@ interface UseLiveRefreshOptions {
 
 /**
  * Recarrega dados no mount, ao focar a janela, ao voltar ao separador
- * e quando notifyDataChanged() é disparado após mutações.
+ * e quando notifyDataChanged() é disparado após mutações (mesmo separador
+ * ou outro).
  */
 export function useLiveRefresh(
   load: LoadFn,
@@ -55,18 +57,32 @@ export function useLiveRefresh(
       }
     };
 
-    const onDataChanged = (event: Event) => {
-      const detail = (event as CustomEvent<DataChangedDetail>).detail;
+    const shouldRefresh = (detail?: DataChangedDetail) => {
       if (
         scopes &&
         scopes.length > 0 &&
         detail?.scope &&
         !scopes.includes(detail.scope)
       ) {
+        return false;
+      }
+      return true;
+    };
+
+    const onDataChanged = (event: Event) => {
+      const detail = (event as CustomEvent<DataChangedDetail>).detail;
+      if (!shouldRefresh(detail)) {
         return;
       }
       refreshSilent();
     };
+
+    const unsubscribeCrossTab = subscribeCrossTabDataChanged((detail) => {
+      if (!shouldRefresh(detail)) {
+        return;
+      }
+      refreshSilent();
+    });
 
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
@@ -76,6 +92,7 @@ export function useLiveRefresh(
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener(DATA_CHANGED_EVENT, onDataChanged);
+      unsubscribeCrossTab();
     };
   }, [enabled, runOnMount, scopes]);
 }

@@ -279,6 +279,7 @@ class ContentController extends Controller
      */
     private function cacheHeaders(bool $isAuthenticated): array
     {
+        // Sem cache HTTP agressivo: a UI faz live refresh sem F5.
         if ($isAuthenticated) {
             return [
                 'Cache-Control' => 'private, no-store, must-revalidate',
@@ -287,7 +288,7 @@ class ContentController extends Controller
         }
 
         return [
-            'Cache-Control' => 'public, max-age=60, stale-while-revalidate=300',
+            'Cache-Control' => 'public, max-age=0, must-revalidate',
         ];
     }
 

@@ -160,11 +160,11 @@ export function ExplorarCatalog({
         if (authLoading) {
           return;
         }
-        void loadContents(publicToken, options);
+        void loadContents(publicToken, { silent: true, ...options });
       },
       [authLoading, loadContents, publicToken],
     ),
-    { runOnMount: false, enabled: !authLoading },
+    { runOnMount: true, enabled: !authLoading },
   );
 
   const requiresAuth =

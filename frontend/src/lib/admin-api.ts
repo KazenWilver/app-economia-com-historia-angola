@@ -3,6 +3,12 @@ import { notifyDataChanged } from "@/lib/data-refresh";
 import { invalidateMemoryCache } from "@/lib/memory-cache";
 import { ADMIN_TOKEN_STORAGE_KEY } from "@/contexts/AdminAuthContext";
 
+/** Usar após mutações feitas com fetch/FormData fora de adminFetch. */
+export function markDataMutated(scope?: string): void {
+  invalidateMemoryCache();
+  notifyDataChanged(scope);
+}
+
 export function getStoredAdminToken(): string | null {
   if (typeof window === "undefined") {
     return null;
@@ -64,6 +70,7 @@ export async function adminFetch<T>(
 
   const response = await fetch(`${API_URL}${path}`, {
     ...rest,
+    cache: "no-store",
     headers: buildAdminHeaders(token, headers),
   });
 
@@ -72,8 +79,7 @@ export async function adminFetch<T>(
   }
 
   if (method !== "GET") {
-    invalidateMemoryCache();
-    notifyDataChanged();
+    markDataMutated();
   }
 
   if (response.status === 204) {

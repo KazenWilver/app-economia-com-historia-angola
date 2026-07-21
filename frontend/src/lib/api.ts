@@ -74,6 +74,7 @@ export async function apiFetch<T>(
 
   const response = await fetch(`${API_URL}${path}`, {
     ...rest,
+    cache: "no-store",
     headers: {
       ...buildAuthHeaders(token),
       ...(headers ?? {}),

@@ -16,6 +16,7 @@ import {
   API_URL,
   adminFetch,
   buildAdminHeaders,
+  markDataMutated,
   parseApiError,
 } from "@/lib/admin-api";
 import {
@@ -131,6 +132,7 @@ export default function AdminEditContentPage() {
         }
 
         const data = (await response.json()) as AdminContentResponse;
+        markDataMutated();
         if (data.content) {
           setContent(data.content);
         }

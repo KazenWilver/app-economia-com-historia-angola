@@ -20,6 +20,7 @@ import {
   buildAuthHeaders,
   getStoredToken,
   invalidateMemoryCache,
+  notifyDataChanged,
 } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -159,11 +160,13 @@ export default function CreateForumTopicPage() {
           "O tópico foi criado, mas a resposta da API foi inválida. Abre o fórum para confirmar.",
         );
         invalidateMemoryCache("GET:/topics");
+        notifyDataChanged();
         router.replace("/forum");
         return;
       }
 
       invalidateMemoryCache("GET:/topics");
+      notifyDataChanged();
       router.replace(`/forum/${topic.id}`);
     } catch (error) {
       const message =
