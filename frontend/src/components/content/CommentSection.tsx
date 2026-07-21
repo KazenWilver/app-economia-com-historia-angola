@@ -13,7 +13,7 @@ import {
   type CommentItem,
   type CommentsResponse,
 } from "@/components/content/types";
-import { buildAuthHeaders, getStoredToken } from "@/lib/api";
+import { buildAuthHeaders, getStoredToken, notifyDataChanged } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 function removeCommentFromTree(
@@ -285,6 +285,8 @@ export function CommentSection({ contentSlug }: CommentSectionProps) {
       throw new Error("Failed to create comment");
     }
 
+    notifyDataChanged();
+
     const data = (await response.json()) as {
       comment?: CommentItem;
     };
@@ -327,6 +329,7 @@ export function CommentSection({ contentSlug }: CommentSectionProps) {
       throw new Error("Failed to delete comment");
     }
 
+    notifyDataChanged();
     setSuccessMessage("Comentário eliminado com sucesso.");
   };
 

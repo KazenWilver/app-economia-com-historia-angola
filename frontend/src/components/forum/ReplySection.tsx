@@ -11,7 +11,7 @@ import {
   type RepliesResponse,
 } from "@/components/forum/forum-types";
 import { useAuth } from "@/hooks/useAuth";
-import { API_URL, buildAuthHeaders, getStoredToken } from "@/lib/api";
+import { API_URL, buildAuthHeaders, getStoredToken, notifyDataChanged } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -299,6 +299,7 @@ export function ReplySection({ topicId }: ReplySectionProps) {
       throw new Error(await parseApiErrorMessage(response));
     }
 
+    notifyDataChanged();
     await fetchReplies({ silent: true });
     setSuccessMessage(
       parentId ? "Resposta publicada com sucesso." : "Resposta publicada com sucesso.",
@@ -326,6 +327,7 @@ export function ReplySection({ topicId }: ReplySectionProps) {
       throw new Error("Failed to delete reply");
     }
 
+    notifyDataChanged();
     setSuccessMessage("Resposta eliminada com sucesso.");
   };
 

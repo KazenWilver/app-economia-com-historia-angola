@@ -13,6 +13,7 @@ import {
   API_URL,
   TOKEN_STORAGE_KEY,
   USER_STORAGE_KEY,
+  notifyDataChanged,
 } from "@/lib/api";
 import type {
   AuthResponse,
@@ -298,6 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data = (await response.json()) as { user: User };
       persistSession(data.user, activeToken);
+      notifyDataChanged();
       return data.user;
     },
     [persistSession, token],

@@ -11,6 +11,7 @@ import {
   getContentPreview,
 } from "@/components/content/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { apiFetch, getStoredToken } from "@/lib/api";
 import {
   Badge,
@@ -64,23 +65,46 @@ export default function JindungoListPage() {
     }
   }, [authToken, isAuthLoading, isAuthenticated, router]);
 
-  const fetchContents = useCallback(async (currentToken: string) => {
-    setIsLoading(true);
-    setErrorMessage(null);
+  const fetchContents = useCallback(
+    async (currentToken: string, options?: { silent?: boolean }) => {
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
+      setErrorMessage(null);
 
-    try {
-      const data = await apiFetch<ContentsResponse>("/contents?type=jindungo", {
-        token: currentToken,
-        skipCache: true,
-      });
-      setContents(data.data);
-    } catch {
-      setErrorMessage("Não foi possível carregar os textos Jindungo.");
-      setContents([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        const data = await apiFetch<ContentsResponse>(
+          "/contents?type=jindungo",
+          {
+            token: currentToken,
+            skipCache: true,
+          },
+        );
+        setContents(data.data);
+      } catch {
+        setErrorMessage("Não foi possível carregar os textos Jindungo.");
+        setContents([]);
+      } finally {
+        if (!options?.silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [],
+  );
+
+  useLiveRefresh(
+    useCallback(
+      (options?: { silent?: boolean }) => {
+        if (!authToken || !hasAccess) {
+          return;
+        }
+        void fetchContents(authToken, { silent: true, ...options });
+      },
+      [authToken, fetchContents, hasAccess],
+    ),
+    { enabled: Boolean(authToken && hasAccess) },
+  );
 
   useEffect(() => {
     if (authToken && hasAccess) {
