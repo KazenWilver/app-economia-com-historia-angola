@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guia fácil de utilização — Economia com História – Angola</title>
+  <style>
+    :root {
+      --bordeaux: #7A1F2B;
+      --petrol: #1F4E5F;
+      --gold: #C9A227;
+      --ink: #1A1A1A;
+      --muted: #5C5C5C;
+      --paper: #FBF8F4;
+      --card: #FFFFFF;
+      --line: #E6DED3;
+      --ok: #065F46;
+      --ok-bg: #ECFDF5;
+      --no: #9F1239;
+      --no-bg: #FFF1F2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, rgba(122, 31, 43, 0.08), transparent 60%),
+        radial-gradient(900px 400px at 100% 0%, rgba(201, 162, 39, 0.12), transparent 55%),
+        var(--paper);
+      line-height: 1.55;
+    }
+    .page { max-width: 920px; margin: 0 auto; padding: 48px 28px 80px; }
+    .cover {
+      position: relative; overflow: hidden; border-radius: 28px; padding: 48px 40px; color: #fff;
+      background: linear-gradient(135deg, var(--bordeaux) 0%, #5a1620 45%, var(--petrol) 100%);
+      box-shadow: 0 24px 60px rgba(122, 31, 43, 0.28); margin-bottom: 36px;
+    }
+    .eyebrow { display: inline-block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--gold); margin-bottom: 14px; }
+    .cover h1 { margin: 0 0 12px; font-size: clamp(2rem, 4vw, 2.75rem); line-height: 1.15; max-width: 18ch; }
+    .cover .product { font-size: 1.1rem; opacity: 0.95; margin: 0 0 14px; }
+    .cover .intro { max-width: 64ch; opacity: 0.9; margin: 0 0 18px; }
+    .cover .meta { font-size: 0.85rem; opacity: 0.8; margin: 0 0 6px; }
+    .toc, .chapter, .about {
+      background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+      padding: 28px 30px; margin-bottom: 22px; page-break-inside: avoid;
+    }
+    .toc h2, .about h2 { margin: 0 0 14px; font-size: 1.25rem; color: var(--bordeaux); }
+    .toc ol { margin: 0; padding-left: 1.2rem; }
+    @media (min-width: 720px) { .toc ol { columns: 2; column-gap: 28px; } }
+    .toc a { color: var(--petrol); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+    .toc li { margin: 0.35rem 0; break-inside: avoid; }
+    .chapter-index { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.16em; color: var(--gold); margin-bottom: 8px; }
+    .chapter h2 { margin: 0 0 8px; font-size: 1.3rem; color: var(--bordeaux); }
+    .summary { margin: 0 0 14px; color: var(--muted); }
+    .purpose { background: #EEF7F8; border: 1px solid #C5DEE3; border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; }
+    .purpose p { margin: 6px 0 0; color: var(--muted); }
+    .grid-2 { display: grid; gap: 12px; margin-bottom: 16px; }
+    @media (min-width: 720px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    .can, .cannot { border-radius: 14px; padding: 14px 16px; }
+    .can { background: var(--ok-bg); border: 1px solid #A7F3D0; color: var(--ok); }
+    .cannot { background: var(--no-bg); border: 1px solid #FECDD3; color: var(--no); }
+    .can ul, .cannot ul { margin: 8px 0 0; padding-left: 1.1rem; }
+    .can li, .cannot li { margin: 0.25rem 0; color: inherit; }
+    .howto { margin: 0 0 10px; font-size: 0.95rem; color: var(--petrol); }
+    .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    .step { display: grid; grid-template-columns: 32px 1fr; gap: 12px; }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(201, 162, 39, 0.18); color: #8a6d12; font-size: 0.8rem; font-weight: 800;
+    }
+    .step h3 { margin: 0 0 4px; font-size: 1rem; }
+    .step p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    .screens { margin-top: 18px; }
+    .shot {
+      margin: 0 0 18px;
+      padding: 0;
+      background: transparent;
+      border: none;
+    }
+    .shot img {
+      display: block;
+      width: 100%;
+      max-width: 860px;
+      height: auto;
+      margin: 0 auto;
+      border-radius: 8px;
+    }
+    .shot figcaption {
+      margin-top: 8px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      text-align: center;
+      max-width: 70ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .members { display: grid; gap: 12px; }
+    @media (min-width: 720px) { .members { grid-template-columns: 1fr 1fr; } }
+    .member { border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+    .member h3 { margin: 0 0 4px; color: var(--bordeaux); }
+    .role { font-weight: 700; margin: 0 0 8px; }
+    .email { font-size: 0.85rem; color: var(--petrol); }
+    .footer-note { margin-top: 36px; text-align: center; color: var(--muted); font-size: 0.85rem; }
+    @media print {
+      body { background: #fff; }
+      .page { padding: 0; max-width: none; }
+      .cover { box-shadow: none; border-radius: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      a { color: inherit; text-decoration: none; }
+      .can, .cannot, .purpose { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .shot img { max-width: 100%; page-break-inside: avoid; }
+      .shot { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="cover">
+      <div class="eyebrow">Jindungo · Manual v3.1</div>
+      <h1>Guia fácil de utilização</h1>
+      <p class="product">Economia com História – Angola</p>
+      <p class="intro">Este guia explica, com palavras simples e com imagens, como usar o site e a aplicação. Segue os passos um a um. Se vires uma imagem, compara com o teu ecrã — ajuda a não te perderes.</p>
+      <p class="meta">Instituto Superior Politécnico de Tecnologias e Ciências (ISPTEC) · Engenharia de Software II · Grupo 6 · 2025/2026</p>
+      <p class="meta">Criado pelo Grupo 6 · ISPTEC · ES II · 2025/2026 — Willfredy Vieira Dias, Manuel Sulo, Eduarda e Adelino</p>
+    </header>
+
+    <nav class="toc" aria-label="Índice">
+      <h2>Índice</h2>
+      <ol><li><a href="#sobre-nos">Sobre nós — a equipa</a></li><li><a href="#visao-geral">1. O que é esta aplicação?</a></li><li><a href="#convidado">2. Sem conta (só a olhar)</a></li><li><a href="#conta-sessao">3. Entrar e criar conta</a></li><li><a href="#explorar">4. Explorar (biblioteca de conteúdos)</a></li><li><a href="#conteudo">5. Dentro de um conteúdo</a></li><li><a href="#jindungo">6. Biblioteca Jindungo (textos especiais)</a></li><li><a href="#trilho">7. Trilho (caminho de aprendizagem)</a></li><li><a href="#tutor">8. Tutor (assistente que responde perguntas)</a></li><li><a href="#ia">9. A inteligência artificial (IA) — o que faz, pode e não pode</a></li><li><a href="#quiz">10. Quizzes (perguntas e pontuação)</a></li><li><a href="#ranking">11. Ranking (classificação)</a></li><li><a href="#forum">12. Fórum (conversas)</a></li><li><a href="#mapa">13. Mapa de Angola</a></li><li><a href="#perfil">14. Perfil (os teus dados)</a></li><li><a href="#ajuda-sobre">15. Ajuda e Sobre nós</a></li><li><a href="#admin-acesso">16. Administrador — como entrar</a></li><li><a href="#admin-conteudos">17. Admin — publicar conteúdos</a></li><li><a href="#admin-quizzes">18. Admin — quizzes</a></li><li><a href="#admin-forum-mapa">19. Admin — fórum e mapa</a></li><li><a href="#admin-jindungo">20. Admin — pedidos Jindungo</a></li><li><a href="#admin-utilizadores">21. Admin — utilizadores</a></li><li><a href="#mobile">22. No telemóvel</a></li><li><a href="#tema">23. Tema claro e escuro</a></li><li><a href="#o-que-nao-faz">24. O que a aplicação NÃO faz</a></li><li><a href="#problemas">25. Problemas comuns (e soluções)</a></li></ol>
+    </nav>
+
+    <section class="about" id="sobre-nos">
+      <h2>Sobre nós — Grupo 6</h2>
+      <p>Plataforma educativa multimédia sobre a economia e a história de Angola — web, administração e aplicação móvel.</p>
+      <p><strong>Missão:</strong> Tornar acessível, de forma interactiva e rigorosa, o conhecimento sobre a economia e a história de Angola, através de conteúdos multimédia, trilho educativo, tutor com IA, quizzes, fórum, mapa provincial e biblioteca exclusiva Jindungo.</p>
+      <p><strong>Instituição:</strong> Instituto Superior Politécnico de Tecnologias e Ciências (ISPTEC)</p>
+      <p><strong>Unidade curricular:</strong> Engenharia de Software II · 2025/2026</p>
+      <p><strong>Stack:</strong> Backend Laravel (API REST + Sanctum), frontend Next.js, app móvel Expo/React Native, base de dados MySQL/PostgreSQL.</p>
+      <h3 style="margin-top:20px;color:var(--petrol)">A equipa</h3>
+      <div class="members">
+    <article class="member">
+      <h3>Willfredy Vieira Dias</h3>
+      <p class="role">Engenharia full-stack · backend e web</p>
+      <p>API Laravel, Docker/CI, design system, autenticação, landing, painel de administração (conteúdos e utilizadores).</p>
+      <p class="email">starkeliude90@gmail.com</p>
+    </article>
+    <article class="member">
+      <h3>Manuel Sulo</h3>
+      <p class="role">Engenharia full-stack · web e mobile</p>
+      <p>Setup Next.js/Expo, tipos partilhados, cliente API, Quiz, Fórum, Mapa interactivo, documentação e paridade mobile.</p>
+      <p class="email">20221465@isptec.co.ao</p>
+    </article>
+    <article class="member">
+      <h3>Eduarda</h3>
+      <p class="role">Desenvolvimento mobile</p>
+      <p>Contribuições na aplicação móvel Expo (experiência nativa, ecrãs e integração com a API).</p>
+      <p class="email">Adraude2694@gmail.com</p>
+    </article>
+    <article class="member">
+      <h3>Adelino</h3>
+      <p class="role">Desenvolvimento mobile</p>
+      <p>Contribuições na aplicação móvel Expo (fluxos de utilizador, UI e testes em dispositivo).</p>
+      <p class="email">adelinodo003@gmail.com</p>
+    </article></div>
+    </section>
+
+    
+    <section class="chapter" id="visao-geral">
+      <div class="chapter-index">01</div>
+      <h2>1. O que é esta aplicação?</h2>
+      <p class="summary">Há um site, um telemóvel e uma zona só para o administrador.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para aprenderes sobre a economia e a história de Angola, no computador ou no telemóvel.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Ver textos, vídeos e áudios sobre Angola.</li><li>Fazer quizzes (perguntas) e ver o ranking.</li><li>Falar no fórum e ver o mapa das províncias.</li><li>Pedir acesso a textos especiais (Jindungo).</li><li>Perguntar ao Tutor (IA) sobre os temas da plataforma (com conta).</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não podes comprar coisas aqui — não há pagamentos.</li><li>No telemóvel não existe a zona de administrador.</li><li>Não envia mensagens tipo WhatsApp em tempo real.</li><li>A IA não faz tudo sozinha — vê a secção 9.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>No computador</h3>
+            <p>Abre o site no browser (Chrome, Edge, etc.). Em cima vês o menu: Explorar, Trilho, Tutor, Quiz, Ranking, Fórum, Mapa.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>No telemóvel</h3>
+            <p>Abre a app. Em baixo vês as abas: Explorar, Quiz, Fórum, Mapa e Perfil.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Queres ver um vídeo? Clica em Explorar → toca no filtro «Vídeo» → escolhe um cartão.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/01-inicio.png" alt="Página inicial do site com o botão Entrar" />
+          <figcaption>Página inicial: o botão vermelho «Entrar» fica em cima, à direita.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="convidado">
+      <div class="chapter-index">02</div>
+      <h2>2. Sem conta (só a olhar)</h2>
+      <p class="summary">Podes ver muita coisa, mas não podes gravar progresso nem comentar.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para conheceres o site antes de criares conta.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Ver Explorar (textos e vídeos públicos).</li><li>Ver o mapa e o ranking.</li><li>Ler o fórum (tópicos abertos).</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não podes escrever comentários.</li><li>Não podes fazer um quiz com pontuação.</li><li>Não podes usar o Tutor nem a biblioteca Jindungo.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Como fazer</h3>
+            <p>Entra no site e usa o menu. Quando algo pedir conta, aparece o botão «Entrar».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Abres o Fórum e lês. Se quiseres responder, o site pede para iniciares sessão.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="conta-sessao">
+      <div class="chapter-index">03</div>
+      <h2>3. Entrar e criar conta</h2>
+      <p class="summary">Precisas de email e palavra-passe. É como entrar no email.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para o site te conhecer e guardar o teu progresso.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Criar conta nova (Registar).</li><li>Entrar com email e palavra-passe.</li><li>Pedir nova palavra-passe se esqueceres.</li><li>Sair quando terminares.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não podes entrar com Google ou Facebook.</li><li>Não mistures a conta de aluno com a de administrador.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Entrar no site</h3>
+            <p>Em cima à direita, clica no botão vermelho «Entrar». Escreve o teu email e a palavra-passe. Clica outra vez em «Entrar».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Ainda não tens conta?</h3>
+            <p>Na mesma página, clica em «Registar». Preenche o nome, o email, a palavra-passe e a tua província. Depois entra.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Exemplo de conta de teste</h3>
+            <p>Email: julieta@jindungo.ao — Palavra-passe: password (conta de utilizador normal).</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">4</span>
+          <div>
+            <h3>Esqueceste a palavra-passe?</h3>
+            <p>Clica em «Esqueci a palavra-passe», põe o email e segue as instruções.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/02-entrar.png" alt="Ecrã de entrar com email e palavra-passe" />
+          <figcaption>Ecrã «Entrar»: escreve o email, a palavra-passe e carrega no botão vermelho.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="explorar">
+      <div class="chapter-index">04</div>
+      <h2>4. Explorar (biblioteca de conteúdos)</h2>
+      <p class="summary">É a prateleira de materiais. Escolhes um cartão e abres.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para encontrares textos, áudios, vídeos e podcasts.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Filtrar por tipo (Texto, Áudio, Vídeo, Podcast, Jindungo).</li><li>Abrir um conteúdo e ler ou ouvir.</li><li>Com conta: escrever comentários.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não podes criar conteúdos novos (só o administrador).</li><li>Sem acesso Jindungo, não abres os textos especiais.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Abrir Explorar</h3>
+            <p>No menu de cima, clica em «Explorar». No telemóvel, toca na aba «Explorar».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Escolher um tipo</h3>
+            <p>Clica num filtro redondo: Todos, Texto, Áudio, Vídeo, Podcast ou Jindungo.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Abrir um item</h3>
+            <p>Clica no cartão que quiseres. Lê, ouve ou vê o vídeo.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">4</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Queres um podcast? Filtro «Podcast» → clica no cartão → carrega em play.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/03-explorar.png" alt="Lista de conteúdos em Explorar com filtros" />
+          <figcaption>Explorar: os filtros ficam sob o título. Os cartões são os conteúdos.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="conteudo">
+      <div class="chapter-index">05</div>
+      <h2>5. Dentro de um conteúdo</h2>
+      <p class="summary">Abre o cartão e trabalhas na página do conteúdo.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para leres ou ouvires o material completo e deixares um comentário.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Ler o texto ou usar o leitor de áudio/vídeo.</li><li>Com conta: comentar e responder a comentários.</li><li>Apagar só os teus comentários.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não apagas comentários de outras pessoas.</li><li>Sem conta não escreves comentários.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Como comentar</h3>
+            <p>Entra com a tua conta. Desce até à zona de comentários. Escreve e envia.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Leste um texto sobre petróleo e queres perguntar algo → escreve o comentário e envia.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/04-conteudo.png" alt="Página de um conteúdo aberto" />
+          <figcaption>Página de um conteúdo: o texto ou o leitor fica no centro.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="jindungo">
+      <div class="chapter-index">06</div>
+      <h2>6. Biblioteca Jindungo (textos especiais)</h2>
+      <p class="summary">Pedes acesso → esperas → se for aceite, lês os textos.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para textos exclusivos. Precisas de pedido aprovado pelo administrador.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Com conta: pedir acesso (podes escrever uma mensagem).</li><li>Ver se o pedido está a aguardar, aceite ou recusado.</li><li>Com acesso aceite: abrir os textos Jindungo.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Sem conta não pedes acesso.</li><li>Enquanto esperas, não cries outro pedido.</li><li>Se o admin retirar o acesso, deixas de ver os textos.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Pedir acesso</h3>
+            <p>Entra na tua conta. Vai a Explorar → filtro «Jindungo», ou abre a página Jindungo. Escreve uma mensagem (opcional) e carrega em «Pedir acesso».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Esperar</h3>
+            <p>Vais ver «Pedido em análise». Não precisas de fazer mais nada.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Quando for aceite</h3>
+            <p>Já não pedes de novo. Abres os textos normalmente.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">4</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>És aluno e queres os textos extras da disciplina → pedes acesso → o professor (admin) aprova.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/12-jindungo.png" alt="Pedido de acesso à biblioteca Jindungo" />
+          <figcaption>Biblioteca Jindungo: se ainda não entraste, aparece o ecrã «Entrar». Depois pedes o acesso.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="trilho">
+      <div class="chapter-index">07</div>
+      <h2>7. Trilho (caminho de aprendizagem)</h2>
+      <p class="summary">É um percurso. Com conta, o progresso fica guardado.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para te guiar passo a passo: conteúdo, quiz, mapa e fórum.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Ver os passos do trilho.</li><li>Com conta: marcar progresso e ver a percentagem.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Sem conta o progresso não fica gravado.</li><li>Não mudas a ordem dos passos.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Abrir o Trilho</h3>
+            <p>No site: menu «Trilho». No telemóvel: Perfil → Trilho educativo.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Seguir</h3>
+            <p>Clica em «Começar» ou no passo indicado. Faz a actividade e volta ao trilho.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/05-trilho.png" alt="Ecrã do trilho educativo" />
+          <figcaption>Trilho: lista de passos e barra de progresso.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="tutor">
+      <div class="chapter-index">08</div>
+      <h2>8. Tutor (assistente que responde perguntas)</h2>
+      <p class="summary">Só funciona se estiveres com sessão iniciada. Lê também a secção 9 sobre a IA.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para fazeres perguntas sobre economia e história de Angola e receberes uma resposta da IA.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Escrever uma pergunta.</li><li>Usar uma sugestão pronta.</li><li>Seguir ligações para conteúdos quando aparecerem.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Sem conta não usas o Tutor.</li><li>O Tutor não substitui um professor e pode demorar se a internet estiver lenta.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Abrir</h3>
+            <p>Entra na conta. No site: menu «Tutor». No telemóvel: Perfil → Tutor IA. Se ainda não entraste, o site mostra o ecrã de Entrar — entra primeiro e volta ao Tutor.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Perguntar</h3>
+            <p>Escreve a pergunta (com algumas palavras) e envia. Exemplo: «O que é a diversificação económica em Angola?»</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/06-tutor.png" alt="Ecrã do Tutor com caixa de pergunta" />
+          <figcaption>Se ainda não entraste, o Tutor pede o ecrã «Entrar». Depois de entrares, voltas e fazes a pergunta.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="ia">
+      <div class="chapter-index">09</div>
+      <h2>9. A inteligência artificial (IA) — o que faz, pode e não pode</h2>
+      <p class="summary">Há duas utilizações: o Tutor (para ti) e a ajuda a criar quizzes (só para o administrador).</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para saberes, em palavras simples, o que a IA faz nesta aplicação — e o que nunca faz sozinha.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>No Tutor: ler a tua pergunta e procurar nos conteúdos publicados da plataforma.</li><li>No Tutor: responder em português de Portugal, de forma clara, e indicar fontes quando encontrar.</li><li>No Tutor: usar sugestões de perguntas prontas (ex.: sobre petróleo ou café).</li><li>No admin: propor um quiz (perguntas e respostas) a partir de um texto ou de um conteúdo.</li><li>Se a ligação à IA falhar: o Tutor ainda tenta dar uma resposta simples com base nos textos da biblioteca.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não inventa factos: se não houver base nos conteúdos, deve dizer que não encontrou informação suficiente.</li><li>Não substitui um professor, um livro oficial nem um exame.</li><li>Não publica conteúdos, quizzes nem respostas no fórum sozinha.</li><li>Não aprova pedidos Jindungo, não muda o teu perfil e não altera o ranking.</li><li>Não é chat tipo WhatsApp: não guarda conversas longas entre dias nem envia mensagens no telemóvel.</li><li>Não responde a perguntas fora do tema (economia/história de Angola na plataforma).</li><li>Não faz trabalhos escolares por ti nem dá respostas de exames oficiais.</li><li>Sem conta iniciada: o Tutor não funciona.</li><li>Só o administrador usa a geração de quizzes com IA — e tem de rever e guardar à mão.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>O que a IA faz (resumo)</h3>
+            <p>Ajuda a aprender: responde no Tutor com base nos textos da plataforma; e, no painel admin, sugere perguntas de quiz para o administrador rever.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Exemplo (aluno)</h3>
+            <p>Perguntas: «Qual o peso do petróleo nas exportações?» → a IA lê conteúdos publicados → responde e pode mostrar ligações para leres mais.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Exemplo (administrador)</h3>
+            <p>No admin, em Quizzes → «Gerar quiz com assistência de IA» → escolhe um conteúdo ou cola um texto → a IA propõe perguntas → tu corriges e só depois guardas.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">4</span>
+          <div>
+            <h3>Se a resposta parecer estranha</h3>
+            <p>Lê os conteúdos indicados. Em dúvida, pergunta a um professor ou ao administrador. A IA pode errar ou ficar sem base se o tema não estiver na biblioteca.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/06-tutor.png" alt="Tutor IA — ponto de contacto principal com a inteligência artificial" />
+          <figcaption>O Tutor é o sítio principal onde a IA fala contigo. Entra na conta, escreve a pergunta e compara a resposta com os conteúdos sugeridos.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="quiz">
+      <div class="chapter-index">10</div>
+      <h2>10. Quizzes (perguntas e pontuação)</h2>
+      <p class="summary">Vês a lista; para jogar a sério, precisas de conta.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para testares o que aprendeste, com pontos e tempo (se houver).</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Ver a lista de quizzes.</li><li>Com conta: responder, ver se acertaste e ver a pontuação final.</li><li>Repetir o quiz mais tarde.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Sem conta não ficas no ranking.</li><li>Quando o tempo acaba, o quiz fecha.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Começar</h3>
+            <p>Menu «Quiz» (ou aba Quiz no telemóvel). Escolhe um quiz → «Começar».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Responder</h3>
+            <p>Escolhe uma opção → «Confirmar» → lê se está certa → «Seguinte».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Fazes o quiz «Petróleo» → no fim vês 80% → podes ir ao Ranking para te comparares.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/07-quiz.png" alt="Lista de quizzes" />
+          <figcaption>Lista de quizzes: escolhe um e começa.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="ranking">
+      <div class="chapter-index">11</div>
+      <h2>11. Ranking (classificação)</h2>
+      <p class="summary">Podes filtrar por país inteiro ou por província.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para veres quem tem melhores resultados nos quizzes.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Ver a tabela sem conta.</li><li>Filtrar Nacional ou Por região.</li><li>Filtrar por quiz.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não mudas a pontuação à mão.</li><li>Sem quizzes feitos com conta, o teu nome não aparece.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Abrir</h3>
+            <p>Menu «Ranking» ou botão «Ver ranking» depois de um quiz.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Queres ver a tua província → escolhe «Por região» → selecciona a província.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/08-ranking.png" alt="Tabela de ranking" />
+          <figcaption>Ranking: tabela de classificação com filtros em cima.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="forum">
+      <div class="chapter-index">12</div>
+      <h2>12. Fórum (conversas)</h2>
+      <p class="summary">Podes ler sem conta; para escrever, precisas de conta.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para debater temas em tópicos (como um quadro de discussões).</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Ler tópicos públicos.</li><li>Com conta: criar tópico e responder.</li><li>Apagar as tuas respostas.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Tópicos privados só o autor e o admin vêem.</li><li>Não é chat instantâneo.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Ler</h3>
+            <p>Menu «Fórum» → clica num tópico.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Escrever</h3>
+            <p>Entra na conta → «Novo tópico» → título e texto → Publicar. Ou abre um tópico e responde em baixo.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Queres discutir o café em Angola → Novo tópico → título «Café e exportações» → Publicar.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/09-forum.png" alt="Lista de tópicos do fórum" />
+          <figcaption>Fórum: lista de debates. «Novo tópico» cria uma conversa nova.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="mapa">
+      <div class="chapter-index">13</div>
+      <h2>13. Mapa de Angola</h2>
+      <p class="summary">Há 21 províncias. Clica numa para abrir o painel.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para clicares numa província e leres a sua história/economia.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Clicar numa província e ler o texto.</li><li>No site: usar botões Noite, Elevar, Repor, Localizar, Centrar.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não és obrigado a ligar o GPS.</li><li>No telemóvel pelo browser o mapa pode ser só uma lista.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Abrir</h3>
+            <p>Menu «Mapa» (ou aba Mapa no telemóvel).</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Escolher província</h3>
+            <p>Clica em Luanda (ou outra). Lê o painel que abre. Fecha quando terminares.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Queres saber sobre Benguela → clica em Benguela no mapa → lê a narrativa.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/10-mapa.png" alt="Mapa interactivo de Angola" />
+          <figcaption>Mapa: clica numa província colorida para ler o texto.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="perfil">
+      <div class="chapter-index">14</div>
+      <h2>14. Perfil (os teus dados)</h2>
+      <p class="summary">Só funciona depois de entrares com a conta.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para mudares o teu nome, email, telefone, província e foto.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Actualizar dados e fotografia.</li><li>Ver progresso do trilho e atalhos.</li><li>Sair da conta (no telemóvel).</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não editas o perfil de outra pessoa.</li><li>Não te tornas administrador pelo perfil.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Abrir</h3>
+            <p>No site: «Perfil» em cima. No telemóvel: aba «Perfil».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Guardar</h3>
+            <p>Muda o que precisares → «Guardar».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Mudaste de província → escolhe a nova no perfil → Guardar (ajuda no ranking regional).</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/11-perfil.png" alt="Ecrã de perfil do utilizador" />
+          <figcaption>Perfil e Jindungo pedem sessão. Entra com o email e a palavra-passe; depois abres Perfil ou Jindungo outra vez.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="ajuda-sobre">
+      <div class="chapter-index">15</div>
+      <h2>15. Ajuda e Sobre nós</h2>
+      <p class="summary">Há um botão de ajuda e uma página Sobre nós.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para leres este guia e conheceres a equipa do Grupo 6.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Abrir o guia completo e expandir cada secção.</li><li>Ver os nomes dos criadores e a missão do projecto.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>O guia só explica — não muda as tuas permissões.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>No site</h3>
+            <p>Clica no ícone de ajuda (?) em cima, ou no rodapé em «Ajuda» / «Sobre nós».</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>No telemóvel</h3>
+            <p>Perfil → «Ajuda — guia completo» ou «Sobre nós».</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/13-ajuda.png" alt="Página inicial — ponto de partida para a Ajuda" />
+          <figcaption>Na página inicial, usa o menu ou o rodapé para chegares à Ajuda e ao Sobre nós.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="admin-acesso">
+      <div class="chapter-index">16</div>
+      <h2>16. Administrador — como entrar</h2>
+      <p class="summary">Só no computador, endereço /admin. Não existe no telemóvel.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para quem gere a plataforma (conteúdos, pedidos, utilizadores).</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Entrar em /admin/login com conta de administrador.</li><li>Gerir conteúdos, quizzes, fórum, mapa e pedidos Jindungo.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não geres a plataforma pela app do telemóvel.</li><li>A sessão de admin é diferente da sessão de aluno.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Entrar</h3>
+            <p>Abre /admin/login. Exemplo: email admin@jindungo.ao e palavra-passe password.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Menu</h3>
+            <p>À esquerda (ou em cima no telemóvel do browser) vês: Dashboard, Conteúdos, Quizzes, Fórum, Mapa, Pedidos Jindungo, Utilizadores, Ajuda, Sobre nós.</p>
+          </div>
+        </li></ol>
+      
+      <div class="screens">
+        <h3 class="howto">Vê o ecrã</h3>
+        
+        <figure class="shot">
+          <img src="manual-images/14-admin.png" alt="Entrar no painel de administração" />
+          <figcaption>Admin: ecrã próprio. Escreve o email de administrador e «Entrar no painel».</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="admin-conteudos">
+      <div class="chapter-index">17</div>
+      <h2>17. Admin — publicar conteúdos</h2>
+      <p class="summary">Cria → guarda rascunho ou publica → o aluno vê em Explorar.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para o administrador criar textos, áudios, vídeos e podcasts.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Criar, editar, publicar, arquivar e eliminar.</li><li>Marcar conteúdo como exclusivo ou tipo Jindungo.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Eliminar é definitivo.</li><li>Rascunhos não aparecem ao público.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Novo conteúdo</h3>
+            <p>Conteúdos → Novo → preenche título e tipo → Guardar rascunho ou Publicar.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Queres um texto novo sobre diamantes → tipo Texto → escreve → Publicar.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="admin-quizzes">
+      <div class="chapter-index">18</div>
+      <h2>18. Admin — quizzes</h2>
+      <p class="summary">Podes escrever à mão ou pedir uma proposta à IA e depois rever (ver também a secção 9).</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para criar perguntas de teste para os alunos.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Criar perguntas e marcar a resposta certa.</li><li>Activar ou desactivar um quiz.</li><li>Gerar proposta com IA a partir de um texto ou conteúdo.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>A IA não publica sozinha — tens de rever e guardar.</li><li>A IA não marca o quiz como activo sem a tua confirmação.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Criar à mão</h3>
+            <p>Quizzes → Novo → adiciona perguntas → activa → Guardar.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Com ajuda da IA</h3>
+            <p>Quizzes → Gerar com IA → escolhe conteúdo ou cola texto → revê as perguntas propostas → corrige o que estiver errado → Guardar.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="admin-forum-mapa">
+      <div class="chapter-index">19</div>
+      <h2>19. Admin — fórum e mapa</h2>
+      <p class="summary">Fórum: ocultar/eliminar. Mapa: narrativas por província.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para moderar debates e escrever textos das províncias.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Editar ou eliminar tópicos.</li><li>Criar narrativas do mapa (província + texto).</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Alunos não editam as narrativas do mapa.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Mapa</h3>
+            <p>Admin → Mapa → Novo → escolhe a província → escreve → Guardar.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Fórum</h3>
+            <p>Admin → Fórum → Editar ou Eliminar um tópico inadequado.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="admin-jindungo">
+      <div class="chapter-index">20</div>
+      <h2>20. Admin — pedidos Jindungo</h2>
+      <p class="summary">Aprovar, rejeitar, revogar ou restaurar.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para decidir quem lê a biblioteca especial.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Ver pedidos pendentes e aprovar/rejeitar.</li><li>Ver aprovados e revogar.</li><li>Restaurar um rejeitado.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>O aluno não recebe SMS automático — ele vê o estado na app.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Aprovar</h3>
+            <p>Pedidos Jindungo → filtro Pendentes → Aprovar. Confirma em Aprovados.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Tirar acesso</h3>
+            <p>Filtro Aprovados → «Revogar acesso».</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="admin-utilizadores">
+      <div class="chapter-index">21</div>
+      <h2>21. Admin — utilizadores</h2>
+      <p class="summary">Uma conta desactivada deixa de usar a plataforma normalmente.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para activar ou desactivar contas de alunos.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Activar ou desactivar utilizadores comuns.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não desactivas outras contas de administrador neste ecrã.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Desactivar</h3>
+            <p>Utilizadores → encontra a pessoa → Desactivar → confirma.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="mobile">
+      <div class="chapter-index">22</div>
+      <h2>22. No telemóvel</h2>
+      <p class="summary">Abas: Explorar, Quiz, Fórum, Mapa, Perfil. Outras coisas abrem a partir do Perfil.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para usares as mesmas funções no telemóvel, com botões grandes em baixo.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Usar as cinco abas.</li><li>Puxar a lista para baixo para actualizar.</li><li>Abrir Tutor, Trilho, Jindungo, Ranking, Ajuda e Sobre nós pelo Perfil.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não há admin no telemóvel.</li><li>No telemóvel físico, «localhost» não funciona — precisa do endereço certo da API.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Primeiro uso</h3>
+            <p>Abre a app → Explorar ou Entrar. Se pedirem API, o professor/técnico configura o endereço.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Exemplo</h3>
+            <p>Queres o Tutor no telemóvel → Perfil → Tutor IA.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="tema">
+      <div class="chapter-index">23</div>
+      <h2>23. Tema claro e escuro</h2>
+      <p class="summary">O botão do sol/lua fica junto do menu.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para escolheres ecrã claro ou escuro, conforme for mais fácil para os olhos.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Mudar entre claro e escuro.</li><li>A escolha fica guardada.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não há mais temas além de claro e escuro.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Mudar</h3>
+            <p>Clica no ícone do sol (ou lua) em cima. No telemóvel também há o botão nas abas.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="o-que-nao-faz">
+      <div class="chapter-index">24</div>
+      <h2>24. O que a aplicação NÃO faz</h2>
+      <p class="summary">Lista curta do que está de fora.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para não esperares funções que não existem.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Usar tudo o que está descrito nas secções anteriores.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não há loja nem pagamentos.</li><li>O aluno não publica conteúdos.</li><li>Não há chat tipo WhatsApp nem notificações no telemóvel.</li><li>Não há login com Google.</li><li>Não há admin na app móvel.</li><li>A IA não gere a plataforma sozinha (ver secção 9).</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Em dúvida</h3>
+            <p>Se não está escrito em «O que podes fazer», provavelmente não existe. Lê a Ajuda ou pergunta ao administrador.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <section class="chapter" id="problemas">
+      <div class="chapter-index">25</div>
+      <h2>25. Problemas comuns (e soluções)</h2>
+      <p class="summary">Site lento, não entra, não vê Jindungo, quiz não começa.</p>
+      <div class="purpose">
+        <strong>Para que serve</strong>
+        <p>Isto serve para desbloqueares os casos mais frequentes.</p>
+      </div>
+      <div class="grid-2">
+        <div class="can">
+          <strong>O que podes fazer</strong>
+          <ul><li>Esperar e tentar de novo se o servidor estiver a acordar.</li><li>Usar as contas de demonstração quando forem dadas.</li></ul>
+        </div>
+        <div class="cannot">
+          <strong>O que não podes fazer</strong>
+          <ul><li>Não forces o acesso Jindungo sem aprovação — o servidor bloqueia.</li></ul>
+        </div>
+      </div>
+      <h3 class="howto">Como fazer</h3>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>O site demora muito</h3>
+            <p>Às vezes o servidor dorme. Espera até 1 minuto e actualiza a página.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Não vejo textos Jindungo</h3>
+            <p>Confirma que entraste com a conta, pediste acesso e foste aprovado. Actualiza a página.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>O quiz não começa</h3>
+            <p>Entra com a conta. Se pedir, escolhe a tua província no Perfil.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">4</span>
+          <div>
+            <h3>O Tutor não responde ou diz que não encontrou base</h3>
+            <p>Confirma que entraste com a conta e que a pergunta tem pelo menos algumas palavras. Se a IA não achar base nos conteúdos, lê Explorar ou muda a pergunta. Exemplo: em vez de «ajuda-me no exame», pergunta «O que é a diversificação económica em Angola?»</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">5</span>
+          <div>
+            <h3>Contas de teste</h3>
+            <p>Utilizador: julieta@jindungo.ao / password. Admin (só /admin): admin@jindungo.ao / password.</p>
+          </div>
+        </li></ol>
+      
+    </section>
+
+    <p class="footer-note">
+      Criado pelo Grupo 6 · ISPTEC · ES II · 2025/2026 — Willfredy Vieira Dias, Manuel Sulo, Eduarda e Adelino · Web: /ajuda e /sobre-nos · Admin: /admin/ajuda e /admin/sobre-nos · Mobile: Ajuda e Sobre nós
+    </p>
+  </main>
+</body>
+</html>

@@ -101,6 +101,14 @@ function RootNavigator() {
           options={{ title: "Trilho", headerBackTitle: "Voltar" }}
         />
         <Stack.Screen
+          name="ajuda"
+          options={{ title: "Ajuda", headerBackTitle: "Voltar" }}
+        />
+        <Stack.Screen
+          name="sobre-nos"
+          options={{ title: "Sobre nós", headerBackTitle: "Voltar" }}
+        />
+        <Stack.Screen
           name="termos"
           options={{ title: "Termos", headerBackTitle: "Voltar" }}
         />

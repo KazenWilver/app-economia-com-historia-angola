@@ -90,10 +90,6 @@ class JindungoAccessService
         string $status,
         ?string $adminNote = null,
     ): JindungoAccessRequest {
-        if ($accessRequest->status !== JindungoAccessRequest::STATUS_PENDING) {
-            throw new RuntimeException('Este pedido já foi analisado.');
-        }
-
         if (! in_array($status, [
             JindungoAccessRequest::STATUS_APPROVED,
             JindungoAccessRequest::STATUS_REJECTED,
@@ -101,9 +97,36 @@ class JindungoAccessService
             throw new RuntimeException('Estado de revisão inválido.');
         }
 
+        $current = $accessRequest->status;
+
+        $allowed = match ($current) {
+            JindungoAccessRequest::STATUS_PENDING => [
+                JindungoAccessRequest::STATUS_APPROVED,
+                JindungoAccessRequest::STATUS_REJECTED,
+            ],
+            // Revogar acesso aprovado ou reactivar um rejeitado.
+            JindungoAccessRequest::STATUS_APPROVED => [
+                JindungoAccessRequest::STATUS_REJECTED,
+            ],
+            JindungoAccessRequest::STATUS_REJECTED => [
+                JindungoAccessRequest::STATUS_APPROVED,
+            ],
+            default => [],
+        };
+
+        if (! in_array($status, $allowed, true)) {
+            throw new RuntimeException(
+                $current === $status
+                    ? 'O pedido já está neste estado.'
+                    : 'Não é possível alterar o pedido para este estado.',
+            );
+        }
+
         $accessRequest->update([
             'status' => $status,
-            'admin_note' => $adminNote !== null && trim($adminNote) !== '' ? trim($adminNote) : null,
+            'admin_note' => $adminNote !== null && trim($adminNote) !== ''
+                ? trim($adminNote)
+                : $accessRequest->admin_note,
             'reviewed_by' => $admin->id,
             'reviewed_at' => now(),
         ]);

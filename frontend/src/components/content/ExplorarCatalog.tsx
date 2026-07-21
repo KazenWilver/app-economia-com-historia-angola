@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileAudio, FileText, Film, Mic2, Sparkles } from "lucide-react";
+import type { JindungoAccessStatusResponse } from "@shared/types";
 import {
   type ContentItem,
   type ContentType,
@@ -101,9 +102,30 @@ export function ExplorarCatalog({
   const [allContents, setAllContents] = useState<ContentItem[]>(initialContents);
   const [isFetching, setIsFetching] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(initialError);
+  const [hasJindungoAccess, setHasJindungoAccess] = useState(false);
   const sessionSyncRef = useRef(false);
 
   const publicToken = token ?? getStoredToken();
+
+  const loadJindungoAccess = useCallback(
+    async (currentToken: string | null) => {
+      if (!currentToken) {
+        setHasJindungoAccess(false);
+        return;
+      }
+
+      try {
+        const data = await apiFetch<JindungoAccessStatusResponse>(
+          "/jindungo/access",
+          { token: currentToken, skipCache: true },
+        );
+        setHasJindungoAccess(data.data.has_access);
+      } catch {
+        setHasJindungoAccess(false);
+      }
+    },
+    [],
+  );
 
   const loadContents = useCallback(
     async (
@@ -147,12 +169,14 @@ export function ExplorarCatalog({
       sessionSyncRef.current = true;
       if (publicToken) {
         void loadContents(publicToken);
+        void loadJindungoAccess(publicToken);
       }
       return;
     }
 
     void loadContents(publicToken);
-  }, [authLoading, publicToken, loadContents]);
+    void loadJindungoAccess(publicToken);
+  }, [authLoading, publicToken, loadContents, loadJindungoAccess]);
 
   useLiveRefresh(
     useCallback(
@@ -161,14 +185,20 @@ export function ExplorarCatalog({
           return;
         }
         void loadContents(publicToken, { silent: true, ...options });
+        void loadJindungoAccess(publicToken);
       },
-      [authLoading, loadContents, publicToken],
+      [authLoading, loadContents, loadJindungoAccess, publicToken],
     ),
     { runOnMount: true, enabled: !authLoading },
   );
 
   const requiresAuth =
     activeFilter === "jindungo" && !isAuthenticated && !publicToken;
+
+  const needsJindungoRequest =
+    activeFilter === "jindungo" &&
+    Boolean(isAuthenticated || publicToken) &&
+    !hasJindungoAccess;
 
   const visibleContents = useMemo(() => {
     if (isAuthenticated || publicToken) {
@@ -255,7 +285,7 @@ export function ExplorarCatalog({
         </Card>
       )}
 
-      {!requiresAuth && activeFilter === "jindungo" && (isAuthenticated || publicToken) ? (
+      {!requiresAuth && needsJindungoRequest ? (
         <Card
           hoverLift={false}
           className="mb-8 border-gold/30 bg-gold/5 dark:border-gold-dark/30 dark:bg-gold-dark/5"
@@ -267,6 +297,27 @@ export function ExplorarCatalog({
             </p>
             <Link href="/jindungo">
               <Button type="button">Ir à biblioteca Jindungo</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {!requiresAuth &&
+      activeFilter === "jindungo" &&
+      hasJindungoAccess ? (
+        <Card
+          hoverLift={false}
+          className="mb-8 border-gold/30 bg-gold/5 dark:border-gold-dark/30 dark:bg-gold-dark/5"
+        >
+          <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-content-primary dark:text-content-dark-primary">
+              Tens acesso à biblioteca exclusiva. Consulta os textos na página
+              dedicada ou abre-os directamente aqui.
+            </p>
+            <Link href="/jindungo">
+              <Button type="button" variant="secondary">
+                Abrir biblioteca Jindungo
+              </Button>
             </Link>
           </CardContent>
         </Card>

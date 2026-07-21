@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TEAM_CREDIT_SHORT } from "@shared/guide";
 import { mainNavLinks } from "@/components/layout/nav-links";
 
 export function Footer() {
@@ -15,6 +16,9 @@ export function Footer() {
             </p>
             <p className="mt-1 text-xs text-content-tertiary dark:text-content-dark-tertiary">
               Instituto Superior Politécnico de Tecnologias e Ciências
+            </p>
+            <p className="mt-3 text-xs leading-relaxed text-content-secondary dark:text-content-dark-secondary">
+              Criadores: {TEAM_CREDIT_SHORT}
             </p>
           </div>
 
@@ -34,9 +38,21 @@ export function Footer() {
           </nav>
 
           <nav
-            aria-label="Informação legal"
+            aria-label="Informação legal e institucional"
             className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
           >
+            <Link
+              href="/ajuda"
+              className="text-sm text-content-tertiary transition-colors hover:text-bordeaux dark:text-content-dark-tertiary dark:hover:text-bordeaux-dark"
+            >
+              Ajuda
+            </Link>
+            <Link
+              href="/sobre-nos"
+              className="text-sm text-content-tertiary transition-colors hover:text-bordeaux dark:text-content-dark-tertiary dark:hover:text-bordeaux-dark"
+            >
+              Sobre nós
+            </Link>
             <Link
               href="/privacidade"
               className="text-sm text-content-tertiary transition-colors hover:text-bordeaux dark:text-content-dark-tertiary dark:hover:text-bordeaux-dark"

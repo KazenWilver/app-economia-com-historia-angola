@@ -139,8 +139,9 @@ export default function JindungoListPage() {
           Textos com Jindungo
         </h1>
         <p className="max-w-2xl text-content-secondary dark:text-content-dark-secondary">
-          Narrativas exclusivas sobre economia e história de Angola. O acesso
-          requer pedido ao administrador e aprovação prévia.
+          {hasAccess
+            ? "Narrativas exclusivas sobre economia e história de Angola. O teu acesso já está aprovado."
+            : "Narrativas exclusivas sobre economia e história de Angola. O acesso requer pedido ao administrador e aprovação prévia."}
         </p>
       </header>
 

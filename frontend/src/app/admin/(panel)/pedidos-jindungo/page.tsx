@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Check, ShieldAlert, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Check, ShieldAlert, ShieldOff, X } from "lucide-react";
 import type {
   AdminJindungoAccessRequestsResponse,
   JindungoAccessMutationResponse,
@@ -103,7 +103,15 @@ export default function AdminJindungoAccessPage() {
     [statusFilter, token],
   );
 
-  useLiveRefresh(loadRequests, { enabled: Boolean(token) });
+  // Recarrega ao mudar o filtro (useLiveRefresh não reage a mudanças do callback).
+  useEffect(() => {
+    void loadRequests();
+  }, [loadRequests]);
+
+  useLiveRefresh(loadRequests, {
+    enabled: Boolean(token),
+    runOnMount: false,
+  });
 
   const pendingCount = useMemo(
     () => requests.filter((item) => item.status === "pending").length,
@@ -132,7 +140,7 @@ export default function AdminJindungoAccessPage() {
         },
       );
       setSuccessMessage(data.message);
-      await loadRequests();
+      await loadRequests({ silent: true });
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -154,7 +162,7 @@ export default function AdminJindungoAccessPage() {
           Pedidos Jindungo
         </h1>
         <p className="max-w-2xl text-sm text-content-secondary dark:text-content-dark-secondary">
-          Aprova ou rejeita pedidos de acesso à biblioteca exclusiva Jindungo.
+          Aprova, rejeita ou revoga o acesso à biblioteca exclusiva Jindungo.
           {statusFilter === "pending" && pendingCount > 0
             ? ` Tens ${pendingCount} pendente(s) neste filtro.`
             : null}
@@ -271,6 +279,33 @@ export default function AdminJindungoAccessPage() {
                     >
                       <X className="h-4 w-4" strokeWidth={1.5} />
                       Rejeitar
+                    </Button>
+                  </div>
+                ) : null}
+
+                {item.status === "approved" ? (
+                  <div className="flex shrink-0 gap-2">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      isLoading={busyId === item.id}
+                      onClick={() => void review(item, "rejected")}
+                    >
+                      <ShieldOff className="h-4 w-4" strokeWidth={1.5} />
+                      Revogar acesso
+                    </Button>
+                  </div>
+                ) : null}
+
+                {item.status === "rejected" ? (
+                  <div className="flex shrink-0 gap-2">
+                    <Button
+                      type="button"
+                      isLoading={busyId === item.id}
+                      onClick={() => void review(item, "approved")}
+                    >
+                      <Check className="h-4 w-4" strokeWidth={1.5} />
+                      Restaurar acesso
                     </Button>
                   </div>
                 ) : null}

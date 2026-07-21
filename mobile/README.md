@@ -1,58 +1,81 @@
-# Jindungo Mobile — MVP
+# Jindungo Mobile — Expo SDK 54
 
-App Expo (SDK 54) que consome a API Laravel do projecto.
+App React Native (Expo Router) que consome a API Laravel do projecto.
 
-## Arranque
+## Problema mais comum (Expo Go)
 
-1. API a correr (ex.: `cd backend && php artisan serve --host=0.0.0.0 --port=8000`).
-2. Nesta pasta:
+No telemóvel, **`localhost` é o próprio telemóvel**, não o PC. Se `EXPO_PUBLIC_API_URL=http://localhost:8000/api`, a app abre mas **não liga à API**.
 
-```bash
-cd mobile
-npm start
+Também havia um bug que gerava URLs inválidas (`http://http:8000/api`) a partir do `hostUri` do Expo — já corrigido em `lib/api.ts`.
+
+## Como correr (passo a passo)
+
+### 1. Backend a escutar na rede
+
+Na raiz do projecto:
+
+```powershell
+docker compose up -d backend
 ```
 
-3. Abre no **Expo Go** (SDK 54) no telemóvel — actualiza a app se ainda tiveres uma versão antiga.
+Confirma no PC: [http://localhost:8000/api](http://localhost:8000/api) deve devolver JSON.
 
-## URL da API
-
-| Ambiente | URL |
-|----------|-----|
-| Emulador Android | `http://10.0.2.2:8000/api` (automático) |
-| iOS Simulator | `http://localhost:8000/api` (automático) |
-| Telemóvel físico (Expo Go) | `EXPO_PUBLIC_API_URL=http://<IP-LAN>:8000/api` |
-| Expo Web (browser) | `http://localhost:8000/api` (CORS: portas 8081/8082) |
-
-Exemplo PowerShell (na pasta `mobile`, **antes** de `npm start`):
+### 2. Arrancar o Metro / Expo
 
 ```powershell
 cd mobile
-$env:EXPO_PUBLIC_API_URL="http://192.168.1.36:8000/api"
 npm start
 ```
 
-### "Failed to fetch" — o que verificar
+Ou, forçando rede LAN (recomendado para Expo Go):
 
-1. **Backend a correr** noutro terminal: `.\scripts\serve.ps1`
-2. **Testar no browser do PC:** abre `http://localhost:8000/api/provinces` — deve devolver JSON
-3. **Telemóvel físico:** usa a app **Expo Go** (QR), não o browser Web do Expo
-4. **Mesma rede Wi‑Fi** entre PC e telemóvel
-5. **Firewall Windows:** permite entrada na porta 8000 (rede privada)
-6. **Porta 8082:** se o Metro mudou de porta, o CORS já inclui 8082 — reinicia o backend após alterar `.env`
-7. Nos logs do Expo, confirma: `[Jindungo] API_URL = http://...`
+```powershell
+cd mobile
+npx expo start --lan
+```
+
+### 3. Abrir no telemóvel
+
+1. Instala **Expo Go** (versão compatível com **SDK 54**).
+2. PC e telemóvel na **mesma Wi‑Fi** (evita Wi‑Fi “convidado” / isolamento de clientes).
+3. Escaneia o **QR code** no terminal (Android: Expo Go; iOS: Câmara → Expo Go).
+4. Nos logs do Metro, confirma: `[Jindungo] API_URL = http://<IP-do-PC>:8000/api`  
+   Se aparecer `localhost` ou `http://http:8000/api`, a API não vai funcionar.
+
+### 4. Se a API falhar no telemóvel
+
+Descobre o IPv4 do PC (`ipconfig`) e cria/edita `mobile/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://SEU_IPV4:8000/api
+```
+
+Exemplo:
+
+```env
+EXPO_PUBLIC_API_URL=http://172.16.249.249:8000/api
+```
+
+Reinicia o Expo (`Ctrl+C` e `npm start`) e volta a abrir no Expo Go.
+
+No Windows, permite entrada nas portas **8000** (API) e **8081** (Metro) na rede privada (Firewall).
+
+## URL da API (resumo)
+
+| Ambiente | URL |
+|----------|-----|
+| Expo Go (telemóvel) | IP LAN do PC, automático via Metro, ou `EXPO_PUBLIC_API_URL` |
+| Emulador Android | `http://10.0.2.2:8000/api` (automático se não houver `.env`) |
+| iOS Simulator / Expo Web no PC | `http://localhost:8000/api` |
 
 ## MVP incluído
 
-- Splash + login + registo
+- Splash + login + registo + recuperação de palavra-passe
 - Tabs: Explorar, Quiz, Fórum, Mapa, Perfil
-- Detalhe de conteúdos (`/conteudo/[slug]`)
-- Jogar quiz com timer, submissão e resultados
-- Mapa com marcadores + lista de províncias e narrativas
-- Fórum: listar tópicos, criar (público/privado), ver e responder
-- Perfil editável + upload de avatar + logout
-- Players nativos de áudio, vídeo e imagem no detalhe de conteúdo
+- Detalhe de conteúdos, quizzes, fórum, mapa (nativo no Expo Go), perfil
+- Tema claro / escuro
 
-## Ainda por fazer (iterações seguintes)
+## Notas
 
-- Polish visual Apple-like
-- GeoJSON completo como na web
+- O mapa interactivo com polígonos funciona no **Expo Go nativo**; no browser (Expo Web) usa a lista de províncias.
+- O painel **admin** é só Web (`/admin`).

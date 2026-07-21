@@ -5,7 +5,9 @@
     "paths": {
       "@/*": ["./*"],
       "@shared/types": ["../shared/types/index.ts"],
-      "@shared/types/*": ["../shared/types/*"]
+      "@shared/types/*": ["../shared/types/*"],
+      "@shared/guide": ["../shared/guide/index.ts"],
+      "@shared/guide/*": ["../shared/guide/*"]
     }
   },
   "include": [

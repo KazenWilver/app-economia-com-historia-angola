@@ -259,6 +259,16 @@ export default function PerfilScreen() {
           />
           <View style={styles.spacer} />
           <PrimaryButton
+            label="Ajuda — guia completo"
+            onPress={() => router.push("/ajuda" as never)}
+          />
+          <View style={styles.spacer} />
+          <PrimaryButton
+            label="Sobre nós"
+            onPress={() => router.push("/sobre-nos" as never)}
+          />
+          <View style={styles.spacer} />
+          <PrimaryButton
             label="Termos de utilização"
             onPress={() => router.push("/termos" as never)}
           />
@@ -459,6 +469,16 @@ export default function PerfilScreen() {
         <PrimaryButton
           label="Fórum"
           onPress={() => router.push("/(tabs)/forum" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Ajuda — guia completo"
+          onPress={() => router.push("/ajuda" as never)}
+        />
+        <View style={styles.spacer} />
+        <PrimaryButton
+          label="Sobre nós"
+          onPress={() => router.push("/sobre-nos" as never)}
         />
         <View style={styles.spacer} />
         <PrimaryButton

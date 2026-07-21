@@ -1,6 +1,6 @@
 "use client";
 
-import { User, LogOut } from "lucide-react";
+import { CircleHelp, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { mainNavLinks } from "@/components/layout/nav-links";
@@ -43,6 +43,14 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
+          <Link
+            href="/ajuda"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-content-secondary transition-colors hover:bg-surface-secondary hover:text-bordeaux focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordeaux dark:text-content-dark-secondary dark:hover:bg-surface-dark-secondary dark:hover:text-bordeaux-dark dark:focus-visible:outline-bordeaux-dark"
+            aria-label="Ajuda — guia de utilização"
+            title="Ajuda"
+          >
+            <CircleHelp className="h-5 w-5" strokeWidth={1.5} />
+          </Link>
           <ThemeToggle />
           {/* Durante o bootstrap mostra "Entrar" (nunca slot vazio) para o 1.º paint fluir. */}
           {isAuthenticated && user ? (
@@ -82,7 +90,11 @@ export function Header() {
           )}
 
           <Navigation
-            links={mainNavLinks}
+            links={[
+              ...mainNavLinks,
+              { href: "/ajuda", label: "Ajuda" },
+              { href: "/sobre-nos", label: "Sobre nós" },
+            ]}
             isAuthenticated={isAuthenticated}
             userName={user ? getFirstName(user.name) : null}
             onLogout={() => void handleLogout()}

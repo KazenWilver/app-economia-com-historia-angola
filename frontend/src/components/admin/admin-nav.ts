@@ -11,4 +11,6 @@ export const adminNavItems: AdminNavItem[] = [
   { href: "/admin/mapa", label: "Mapa" },
   { href: "/admin/pedidos-jindungo", label: "Pedidos Jindungo" },
   { href: "/admin/utilizadores", label: "Utilizadores" },
+  { href: "/admin/ajuda", label: "Ajuda" },
+  { href: "/admin/sobre-nos", label: "Sobre nós" },
 ];

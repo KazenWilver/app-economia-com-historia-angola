@@ -31,6 +31,12 @@
       ],
       "@shared/types/*": [
         "./shared/types/*"
+      ],
+      "@shared/guide": [
+        "./shared/guide/index.ts"
+      ],
+      "@shared/guide/*": [
+        "./shared/guide/*"
       ]
     }
   },
@@ -41,7 +47,8 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts",
-    "../shared/types/**/*.ts"
+    "../shared/types/**/*.ts",
+    "../shared/guide/**/*.ts"
   ],
   "exclude": [
     "node_modules"

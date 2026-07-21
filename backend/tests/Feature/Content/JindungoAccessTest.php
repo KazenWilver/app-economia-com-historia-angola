@@ -126,4 +126,47 @@ class JindungoAccessTest extends TestCase
             'status' => 'approved',
         ])->assertForbidden();
     }
+
+    public function test_admin_can_list_approved_requests_and_revoke_access(): void
+    {
+        $user = User::factory()->create();
+        $admin = User::factory()->admin()->create();
+        $accessRequest = JindungoAccessRequest::factory()->approved()->create([
+            'user_id' => $user->id,
+            'reviewed_by' => $admin->id,
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $this->getJson('/api/admin/jindungo-access-requests?status=approved')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $accessRequest->id)
+            ->assertJsonPath('data.0.status', 'approved');
+
+        $this->patchJson("/api/admin/jindungo-access-requests/{$accessRequest->id}", [
+            'status' => 'rejected',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'rejected')
+            ->assertJsonPath('message', 'Acesso Jindungo revogado com sucesso.');
+
+        Sanctum::actingAs($user);
+        $this->getJson('/api/jindungo/access')
+            ->assertOk()
+            ->assertJsonPath('data.has_access', false);
+    }
+
+    public function test_approved_user_cannot_create_another_request(): void
+    {
+        $user = User::factory()->create();
+        JindungoAccessRequest::factory()->approved()->create([
+            'user_id' => $user->id,
+        ]);
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/jindungo/access-requests')
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'Já tens acesso aprovado à biblioteca Jindungo.');
+    }
 }

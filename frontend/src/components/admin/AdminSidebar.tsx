@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
+  CircleHelp,
   LayoutDashboard,
   Map,
   MessageSquare,
   Puzzle,
   ShieldCheck,
   Users,
+  UsersRound,
 } from "lucide-react";
 import { adminNavItems } from "@/components/admin/admin-nav";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,8 @@ const iconByHref: Record<string, typeof LayoutDashboard> = {
   "/admin/mapa": Map,
   "/admin/pedidos-jindungo": ShieldCheck,
   "/admin/utilizadores": Users,
+  "/admin/ajuda": CircleHelp,
+  "/admin/sobre-nos": UsersRound,
 };
 
 function isActivePath(pathname: string, href: string): boolean {
@@ -79,6 +83,9 @@ export function AdminSidebar() {
       <div className="mt-auto hidden border-t border-border px-5 py-4 md:block dark:border-border-dark">
         <p className="text-xs text-content-tertiary dark:text-content-dark-tertiary">
           Sessão isolada do painel. O site público mantém a sua própria conta.
+        </p>
+        <p className="mt-2 text-[11px] leading-relaxed text-content-tertiary dark:text-content-dark-tertiary">
+          Grupo 6 · Willfredy Vieira Dias · Manuel Sulo · Eduarda · Adelino
         </p>
       </div>
     </aside>
