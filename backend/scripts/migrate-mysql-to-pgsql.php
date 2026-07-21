@@ -137,11 +137,16 @@ foreach ($tables as $table) {
     $seq = $pgsql->query(
         "SELECT pg_get_serial_sequence('public.{$table}', 'id')"
     )->fetchColumn();
-    if ($seq) {
-        $pgsql->exec(
-            "SELECT setval('{$seq}', COALESCE((SELECT MAX(id) FROM \"{$table}\"), 1), true)"
-        );
+    if (! $seq) {
+        continue;
     }
+    $maxId = (int) $pgsql->query("SELECT COALESCE(MAX(id), 0) FROM \"{$table}\"")->fetchColumn();
+    if ($maxId > 0) {
+        $pgsql->exec("SELECT setval(".$pgsql->quote($seq).", {$maxId}, true)");
+    } else {
+        $pgsql->exec("SELECT setval(".$pgsql->quote($seq).", 1, false)");
+    }
+    echo "seq {$table} → {$maxId}\n";
 }
 
 echo "Migração de dados concluída.\n";
